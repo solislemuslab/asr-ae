@@ -79,7 +79,7 @@ for k in seq_dict.keys():
     seq_dict[k] = [seq_dict[k][i] for i in range(len(seq_dict[k])) if idx[i] == False]
 query_seq = seq_dict[query_seq_id] ## without gaps
 
-## remove sequences with too many gaps
+## Step 2. Remove sequences with too many gaps
 len_query_seq = len(query_seq)
 seq_id = list(seq_dict.keys())
 num_gaps = []
@@ -120,19 +120,19 @@ seq_ary = np.array(seq_ary)
 with open("./output/" + f"{msa_name}/keys_list.pkl", 'wb') as file_handle:
     pickle.dump(keys_list, file_handle)
 
-## remove positions where too many sequences have gaps
+## Step 3. remove positions where too many sequences have gaps
 pos_idx = []
 for i in range(seq_ary.shape[1]):
     if np.sum(seq_ary[:,i] == 0) <= seq_ary.shape[0]*0.2:
         pos_idx.append(i)
-with open("./output/" + f"{msa_name}/seq_pos_idx.pkl", 'wb') as file_handle:
-    pickle.dump(pos_idx, file_handle)
-    
+
+
+## Save the processed array
 seq_ary = seq_ary[:, np.array(pos_idx)]
 with open("./output/" + f"{msa_name}/seq_msa.pkl", 'wb') as file_handle:
     pickle.dump(seq_ary, file_handle)
 
-# create a character encoded array representing the processed MSA
+# Save a character encoded array representing the processed MSA
 aa = ["."] + aa
 with open("./output/" + f"{msa_name}/seq_msa_char.txt", "w") as f:
     for seq_id, seq in zip(keys_list, seq_ary.tolist()):
@@ -154,7 +154,7 @@ seq_weight = seq_weight.sum(1) / tot_weight
 with open("./output/" + f"{msa_name}/seq_weight.pkl", 'wb') as file_handle:
     pickle.dump(seq_weight, file_handle)
 
-## change aa numbering into binary
+## Save a binary encoded array representing the processed MSA
 K = 21 ## num of classes of aa
 D = np.identity(K)
 num_seq = seq_ary.shape[0]

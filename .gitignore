@@ -1,2 +1,8 @@
 .idea/
 *.fasta
+.DS_Store
+*.Rhistory
+output_gd/
+__pycache__/
+data/Ding/raw
+data/Ding/processed
