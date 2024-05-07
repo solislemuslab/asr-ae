@@ -4,5 +4,5 @@
 *.Rhistory
 output_gd/
 __pycache__/
-data/Ding/raw
-data/Ding/processed
+data/Ding/raw/
+data/Ding/processed/
