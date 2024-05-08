@@ -1,0 +1,51 @@
+---
+title: "ASR-AE Project ASR Scripts"
+author: "Hailey Bruzzone"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# set wd
+setwd("PATH/TO/MSA/AND/TREE")
+
+# packages
+library(ape)
+library(phytools)
+library(plotrix)
+library(corHMM)
+```
+
+
+```{r asr}
+# read tree from file 
+pf00565.tree <- read.tree("./tree")
+print(pf00565.tree, printlen=2)
+
+# read data
+pf00565.data <- read.csv("./pf00565.embeddings.csv", row.names=1, stringsAsFactors = TRUE)
+head(pf00565.data)
+
+# Ready to perform ASR 
+# Using Maximum Likelihood, we're choosing the values for internal nodes of the tree that maximize the probability of obtaining the data given the values at the tips of the tree 
+
+# Estimate ancestral states of body length using fastAnc
+# Get variances and 95% CIs for each internal node
+fit.pf00565 <- fastAnc(pf00565.tree, # tree from IQ-TREE
+                    pf00565.data, # embeddings
+                    vars=TRUE, # get variances for each internal node 
+                    CI = TRUE # get 95% CIs for each internal node
+                    )
+
+print(fit.pf00565, printlen = 10) # print first 10 rows of results 
+
+# plot eel phylogeny using plotTree 
+plotTree(pf00565.tree, ftype = "i", fsize = 0.5, lwd = 1)
+
+# add node labels for reference 
+labelnodes(1:pf00565.tree$Nnode+Ntip(pf00565.tree),
+           1:pf00565.tree$Nnode+Ntip(pf00565.tree),
+           interactive = FALSE, cex = 0.5)
+```
+
