@@ -72,6 +72,7 @@ with open("./output/" + f"{msa_name}/label_accession_mapping.pkl", 'wb') as file
     pickle.dump(euk_ids, file_handle)
 
 # Now we do some pre-processing of this MSA that contains only eukaryotic species
+
 ## Step 1: Remove all positions that are gaps in the query sequences
 query_seq = seq_dict[query_seq_id] ## with gaps
 idx = [ s == "-" or s == "." for s in query_seq]
@@ -125,10 +126,9 @@ pos_idx = []
 for i in range(seq_ary.shape[1]):
     if np.sum(seq_ary[:,i] == 0) <= seq_ary.shape[0]*0.2:
         pos_idx.append(i)
-
+seq_ary = seq_ary[:, np.array(pos_idx)]
 
 ## Save the processed array
-seq_ary = seq_ary[:, np.array(pos_idx)]
 with open("./output/" + f"{msa_name}/seq_msa.pkl", 'wb') as file_handle:
     pickle.dump(seq_ary, file_handle)
 
