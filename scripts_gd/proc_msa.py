@@ -1,167 +1,259 @@
 # code adapted from PEVAE paper
-
 import argparse
 import pickle
-import sys
-from os import path
+from os import path, makedirs
 import numpy as np
-from sys import exit
-import csv
 import pandas as pd
+from Bio import SeqIO
+from sys import exit
 
-# Parse command line arguments (path to MSA file, reference (aka query) sequence id, and optional path to metadata file)
-parser = argparse.ArgumentParser(description='This script pre-processes an MSA using a specified reference sequence')
-parser.add_argument('MSA', type=str, help='Path to MSA file')
-parser.add_argument('query_seq_id', type=str, help='ID of the sequence used as reference')
-parser.add_argument('outgroup_acc', type = str, help = 'Accession of a non-Eukaryotic sequence that we include for outgroup purposes')
-parser.add_argument('--metadata', type = str, help = 'Path to file with metadata on (only the) eukaryotic sequences in the MSA')
-
-args = parser.parse_args()
-
-msa_file_path = args.MSA
-msa_name = path.splitext(path.basename(msa_file_path))[0]
-pfam_acc = msa_name.split("_")[0]
-query_seq_id = args.query_seq_id
-outgroup_acc = args.outgroup_acc
-if args.metadata:
-    metadata_file_path = args.metadata_file
-else: # infer metadata file name from MSA file name
-    metadata_file_path = f"data/pevae_real/{pfam_acc}_eukaryotes.tsv"
-
-# load metadata 
-mdata = pd.read_csv(metadata_file_path, delimiter='\t', index_col=False)
-euk_accs = list(mdata.accession) # list of all eukaryotic sequence accessions
-euk_accs.append(outgroup_acc) # include one non-Eukaryotic sequence as an out-of-group
-
-
-## the following for loop extracts all sequences from eukaryotic species into a dictionary seq_dicts, maxing out at 50_000 sequences
-## Note that we've edited the raw MSA file to put both the query and the outgroup sequences at the top in order to ensure         they're among the first of the 50,000 sequences
-# We have a list of the accessions for these sequences (euk_accs) and we only want to save a sequence if its accession appears in this list.Unfortunately, in the part of the file where the actual sequences appear, they are labeled with something that's not the same thing as their accession. The code in the block "if line[0:4] == "#=GS":" adds to euk_ids only the labels that correspond to accessions that are in our list of eukaryote sequence accessions so that later in the for loop, we are able to save only the sequences whose labels are in euk_ids.
-euk_ids = {} # sequence label -> sequence accession
-seq_dict = {} # sequence label -> sequence
-count_labels = 0 
-count_sequences = 0
-with open(msa_file_path, 'r') as file_handle:
-    for line in file_handle:
-        if line[0:4] == "#=GS" and count_labels <= 50_000:
-            parts = line.split()
-            acc, label = parts[-1].split(".")[0], parts[1]
-            if acc in euk_accs:
-                euk_ids[label] = acc
-                count_labels += 1
-                print(count_labels)
-            continue
-        if line[0] == "#" or line[0] == "/" or line[0] == "":
-            continue
-        line = line.strip()
-        if len(line) == 0:
-            continue
-        seq_id, seq = line.split()
-        # only include sequences if their accession has been found to belong to the list of accessions of eukaryotic species
-        if seq_id not in euk_ids:
-            continue
-        else:
-            seq_dict[seq_id] = seq.upper()
-            count_sequences += 1
-            print(count_sequences)
-        if count_sequences > 50_000:  
-            break
-
-# Save the mapping between labels and accessions (i.e. what we've called euk_ids) for future reference
-with open("./output/" + f"{msa_name}/label_accession_mapping.pkl", 'wb') as file_handle:
-    pickle.dump(euk_ids, file_handle)
-
-# Now we do some pre-processing of this MSA that contains only eukaryotic species
-
-## Step 1: Remove all positions that are gaps in the query sequences
-query_seq = seq_dict[query_seq_id] ## with gaps
-idx = [ s == "-" or s == "." for s in query_seq]
-for k in seq_dict.keys():
-    seq_dict[k] = [seq_dict[k][i] for i in range(len(seq_dict[k])) if idx[i] == False]
-query_seq = seq_dict[query_seq_id] ## without gaps
-
-## Step 2. Remove sequences with too many gaps
-len_query_seq = len(query_seq)
-seq_id = list(seq_dict.keys())
-num_gaps = []
-for k in seq_id:
-    num_gaps.append(seq_dict[k].count("-") + seq_dict[k].count("."))
-    if seq_dict[k].count("-") + seq_dict[k].count(".") > 10 and euk_ids[k] != outgroup_acc:
-        seq_dict.pop(k)
-        
-## convert aa type into num 0-20
-aa = ['R', 'H', 'K',
+MAX_SEQS = 50_000
+MAX_GAPS_IN_SEQ = 50
+MAX_GAPS_IN_POS = 0.2
+UNKNOWN = ['-', '.', 'X', 'B', 'Z', 'J'] 
+AA = ['R', 'H', 'K',
       'D', 'E',
       'S', 'T', 'N', 'Q',
       'C', 'G', 'P',
       'A', 'V', 'I', 'L', 'M', 'F', 'Y', 'W']
-aa_index = {}
-aa_index['-'] = 0
-aa_index['.'] = 0
-# There are some B's in pf00041_full,
-# Apparently, it respresents either D or N. We will instead treat it as missing for now
-aa_index['B'] = 0 
+AA_INDEX = {} # mapping from characters to index
+for char in UNKNOWN:
+    AA_INDEX[char] = 0
+for i, char in enumerate(AA):
+    AA_INDEX[char] = i + 1
 
-i = 1
-for a in aa:
-    aa_index[a] = i
-    i += 1
-with open("./output/" + f"{msa_name}/aa_index.pkl", 'wb') as file_handle:
-    pickle.dump(aa_index, file_handle)
+
+def parse_commands():
+    """
+    Parse command line arguments 
+    Required: path to MSA file and reference (aka query) sequence id
+    Optional: outgroup sequence id (default is none) and metadata file path (default is inferred from MSA file name)
+    """
+    parser = argparse.ArgumentParser(description='This script pre-processes an MSA using a specified reference sequence')
+    parser.add_argument('MSA', type=str, help='Path to MSA file')
+    parser.add_argument('query_seq_id', type=str, help='ID of the sequence used as reference')
+    parser.add_argument('--filter_euks', action='store_true', help='Filter out non-eukaryotic sequences')
+    parser.add_argument('--metadata', type = str, help = 'Path to file with metadata on (only the) eukaryotic sequences in the MSA')
+    parser.add_argument('--outgroup_acc', type = str, help = 'Accession of a non-Eukaryotic sequence that we include for outgroup purposes')
+    args = parser.parse_args()
+    return args 
     
-seq_ary = [] # Integer encoded array representing the processed MSA
-keys_list = [] # Sequence labels
-for k in seq_dict.keys():
-    if seq_dict[k].count('X') > 0 or seq_dict[k].count('Z') > 0:
-        continue    
-    seq_ary.append([aa_index[s] for s in seq_dict[k]])
-    keys_list.append(k)    
-seq_ary = np.array(seq_ary)
+def get_euk_seqs(msa_file_path, metadata_file_path, outgroup_acc):
+    """
+    This function places eukaryotic sequences from the msa file into a dictionary seq_dicts, maxing out at MAX_SEQS sequences
+    It assumes that the msa file is in stockholm format with #=GS lines that include the accessions of the sequences
 
-with open("./output/" + f"{msa_name}/keys_list.pkl", 'wb') as file_handle:
-    pickle.dump(keys_list, file_handle)
+    The metadata file includes only eukaryotic sequences, so we want to use it to filter the sequences from the MSA that we include in our dictionary.
+    Unfortunately, in the part of the file where the actual sequences appear, they are labeled with something that's not the same thing as their accessions from the metadata file. 
+    The code in the block "if line[0:4] == "#=GS":" adds to euk_ids only the labels that correspond to accessions that are in the metadata file
+    so that later in the for loop, we are able to save only the sequences with these labels
+    """
+    # Load metadata
+    mdata = pd.read_csv(metadata_file_path, delimiter='\t', index_col=False)
+    euk_accs = list(mdata.accession) # list of all eukaryotic sequence accessions
+    if outgroup_acc: # include one non-Eukaryotic sequence as an out-of-group
+        euk_accs.append(outgroup_acc)
+    # Initialize dictionaries that will be returned
+    euk_ids = {} # sequence label -> sequence accession
+    seq_dict = {} # sequence label -> sequence
+    count_labels = 0 # number of labels that correspond to eukaryotic accessions
+    count_sequences = 0 # number of sequences that have been added to the dictionary
+    with open(msa_file_path, 'r') as file_handle:
+        for line in file_handle:
+            if line[0:4] == "#=GS": 
+                if count_labels > MAX_SEQS: # Stop adding sequences to euk_ids once we reach max_seqs
+                    continue
+                parts = line.split()
+                acc, label = parts[-1].split(".")[0], parts[1]
+                if acc in euk_accs:
+                    count_labels += 1
+                    euk_ids[label] = acc
+                continue
+            if line[0] == "#" or line[0] == "/" or line[0] == "":
+                continue
+            line = line.strip()
+            if len(line) == 0:
+                continue
+            seq_id, seq = line.split()
+            # only include sequences if their accession has been found to belong to the list of accessions of eukaryotic species
+            if seq_id not in euk_ids:
+                continue
+            else:
+                seq_dict[seq_id] = seq.upper()
+                count_sequences += 1
+            # we can break if we've reached the maximum number of sequences
+            if count_sequences > MAX_SEQS:
+                break
+    return seq_dict, euk_ids
 
-## Step 3. remove positions where too many sequences have gaps
-pos_idx = []
-for i in range(seq_ary.shape[1]):
-    if np.sum(seq_ary[:,i] == 0) <= seq_ary.shape[0]*0.2:
-        pos_idx.append(i)
-seq_ary = seq_ary[:, np.array(pos_idx)]
+def get_seqs(msa_file_path):
+    """
+    This function simply collects all sequences from the MSA file into a dictionary seq_dict, maxing out at max_seqs sequences,
+    without any filtering based on eukaryotic status. As such, it is simpler than get_euk_seqs
 
-## Save the processed array
-with open("./output/" + f"{msa_name}/seq_msa.pkl", 'wb') as file_handle:
-    pickle.dump(seq_ary, file_handle)
-
-# Save a character encoded array representing the processed MSA
-aa = ["."] + aa
-with open("./output/" + f"{msa_name}/seq_msa_char.txt", "w") as f:
-    for seq_id, seq in zip(keys_list, seq_ary.tolist()):
-        decoded_seq = "".join([aa[i] for i in seq])
-        f.write(f"{seq_id}\t{decoded_seq}\n")
+    It assumes that the msa file is in FASTA format
+    """
     
-## reweighting sequences
-seq_weight = np.zeros(seq_ary.shape)
-for j in range(seq_ary.shape[1]):
-    aa_type, aa_counts = np.unique(seq_ary[:,j], return_counts = True)
-    num_type = len(aa_type)
-    aa_dict = {}
-    for a in aa_type:
-        aa_dict[a] = aa_counts[list(aa_type).index(a)]
-    for i in range(seq_ary.shape[0]):
-        seq_weight[i,j] = (1.0/num_type) * (1.0/aa_dict[seq_ary[i,j]])
-tot_weight = np.sum(seq_weight)
-seq_weight = seq_weight.sum(1) / tot_weight 
-with open("./output/" + f"{msa_name}/seq_weight.pkl", 'wb') as file_handle:
-    pickle.dump(seq_weight, file_handle)
+    # Initialize dictionary that will be returned
+    seq_dict = {} # sequence id -> sequence
+    count_sequences = 0
+    with open(msa_file_path, 'r') as file_handle:
+        for record in SeqIO.parse(file_handle, "fasta"):
+            count_sequences += 1
+            seq_dict[record.id] = str(record.seq).upper()
+            if count_sequences > MAX_SEQS:
+                break
+    return seq_dict
 
-## Save a binary encoded array representing the processed MSA
-K = 21 ## num of classes of aa
-D = np.identity(K)
-num_seq = seq_ary.shape[0]
-len_seq_ary = seq_ary.shape[1]
-seq_ary_binary = np.zeros((num_seq, len_seq_ary, K)) # Binary encoded array representing the processed MSA
-for i in range(num_seq):
-    seq_ary_binary[i,:,:] = D[seq_ary[i]]
+def remove_gaps(seq_dict, query_seq_id):
+    """
+    This does two things at once:
+        - Saves sequences in the dictionary as lists of characters instead of as strings
+        - Removes from all sequences the positions that are gaps in the query sequences, 
+    """
+    query_seq = seq_dict[query_seq_id] ## with gaps
+    seq_len = len(query_seq)
+    is_not_gap = [ s in AA for s in query_seq]
+    for seq_id, seq in seq_dict.items():
+        seq_dict[seq_id] = [seq[i] for i in range(seq_len) if is_not_gap[i]]
 
-with open("./output/" + f"{msa_name}/seq_msa_binary.pkl", 'wb') as file_handle:
-    pickle.dump(seq_ary_binary, file_handle)
+def remove_seqs(seq_dict, outgroup_acc, euk_ids):
+    """
+    Remove sequences with too many remaining gaps (called after removing positions that are gaps in the query sequences)
+    Keep the outgroup sequence even if it has many gaps
+    """
+    for k in list(seq_dict.keys()):
+        if euk_ids and euk_ids[k] == outgroup_acc:
+            continue
+        if len([char for char in seq_dict[k] if char in UNKNOWN]) > MAX_GAPS_IN_SEQ:
+            seq_dict.pop(k)
+
+def to_numpy(seq_dict):
+    """
+    Convert the dictionary of sequences to a numpy array
+    Note that now we have to keep track of the labels separately
+    """
+    seq_ary = [] # Integer encoded array representing the processed MSA
+    seq_names = [] # Sequence labels
+    for k in seq_dict.keys():
+        seq_ary.append([AA_INDEX[s] for s in seq_dict[k]])
+        seq_names.append(k)    
+    seq_ary = np.array(seq_ary)
+    return seq_ary, seq_names
+
+def remove_sparse_positions(seq_ary):
+    """
+    Remove positions where too many sequences have gaps
+    """
+    pos_idx = []
+    for i in range(seq_ary.shape[1]):
+        if np.sum(seq_ary[:,i] == 0) <= seq_ary.shape[0]*MAX_GAPS_IN_POS:
+            pos_idx.append(i)
+    print(len(pos_idx), seq_ary.shape[1])
+    return seq_ary[:, np.array(pos_idx)]
+
+def weight_seqs(seq_ary):
+    """
+    Calculate weights for each sequence (summing to 1)
+    See PEVAE paper Methods section for details
+    """
+    ## reweighting sequences
+    seq_weight = np.zeros(seq_ary.shape)
+    for j in range(seq_ary.shape[1]):
+        aa_type, aa_counts = np.unique(seq_ary[:,j], return_counts = True)
+        num_type = len(aa_type)
+        aa_dict = {}
+        for a in aa_type:
+            aa_dict[a] = aa_counts[list(aa_type).index(a)]
+        for i in range(seq_ary.shape[0]):
+            seq_weight[i,j] = (1.0/num_type) * (1.0/aa_dict[seq_ary[i,j]])
+    tot_weight = np.sum(seq_weight)
+    seq_weight = seq_weight.sum(1) / tot_weight 
+    return seq_weight
+
+def one_hot_encode(seq_ary):
+    """
+    Convert the integer encoded array to a binary (one-hot) encoding
+    """
+    K = len(AA) + 1 ## num of classes of aa
+    D = np.identity(K)
+    num_seq = seq_ary.shape[0]
+    len_seq = seq_ary.shape[1]
+    seq_ary_binary = np.zeros((num_seq, len_seq, K)) # Binary encoded array representing the processed MSA
+    for i in range(num_seq):
+        seq_ary_binary[i,:,:] = D[seq_ary[i]]
+    return seq_ary_binary
+
+def main():
+    
+    #### Preliminary steps and loading in the unprocessed MSA ########
+    args = parse_commands()
+
+    # Get PFAM accession to use as a directory name for file saving/loading
+    msa_file_path = args.MSA
+    msa_name = path.splitext(path.basename(msa_file_path))[0]
+    pfam_acc = msa_name.split("_")[0]
+    processed_directory = f"data/Ding/processed/{pfam_acc}"
+    if not path.exists(processed_directory):
+        makedirs(processed_directory)
+        
+    # Save the mapping between characters and indices
+    with open(f"{processed_directory}/aa_index.pkl", 'wb') as file_handle:
+        pickle.dump(AA_INDEX, file_handle)
+
+    # If we're filtering to eukaryotic sequences, we need a metadata file
+    if args.filter_euks and args.metadata: # use the metadata file provided
+        metadata_file_path = args.metadata_file
+    elif args.filter_euks: # infer metadata file name from MSA file name
+        metadata_file_path = f"data/Ding/metadata/{pfam_acc}_eukaryotes.tsv"
+
+    # Load the sequences from the MSA file
+    if args.filter_euks:
+        seq_dict, euk_ids = get_euk_seqs(msa_file_path, metadata_file_path, args.outgroup_acc)
+        # Save the mapping between labels and accessions
+        with open(f"{processed_directory}/label_accession_mapping.pkl", 'wb') as file_handle:
+            pickle.dump(euk_ids, file_handle)
+    else:
+        seq_dict, euk_ids = get_seqs(msa_file_path), None
+
+    #### Preprocessing #####
+    # Step 1: remove all positions that are gaps in the query sequences
+    remove_gaps(seq_dict, args.query_seq_id) 
+
+    # Step 2: Remove sequences with too many gaps
+    remove_seqs(seq_dict, args.outgroup_acc, euk_ids)
+    
+    # Step 3: Convert to a numpy array and save the sequence labels
+    seq_ary, seq_names = to_numpy(seq_dict)
+    
+    # Step 4: remove positions where too many sequences have gaps and save the processed array
+    seq_ary = remove_sparse_positions(seq_ary)
+    
+    # Step 5: get sequence weights
+    seq_weight = weight_seqs(seq_ary)
+
+    # Step 6: Convert to a binary (one-hot) encoding
+    seq_ary_binary = one_hot_encode(seq_ary)
+
+    #### Saving results ####
+    # save the sequence labels
+    with open(f"{processed_directory}/seq_names.pkl", 'wb') as file_handle:
+        pickle.dump(seq_names, file_handle)
+    # save the sequence weights
+    with open(f"{processed_directory}/seq_weight.pkl", 'wb') as file_handle:
+        pickle.dump(seq_weight, file_handle)
+    # save integer encoded MSA
+    with open(f"{processed_directory}/seq_msa.pkl", 'wb') as file_handle:
+        pickle.dump(seq_ary, file_handle)
+    # save as character encoded MSA
+    aa = ["."] + AA # this is so that aa[0] = "." 
+    with open(f"{processed_directory}/seq_msa_char.txt", "w") as f:
+        for seq_id, seq in zip(seq_names, seq_ary.tolist()):
+            decoded_seq = "".join([aa[i] for i in seq])
+            f.write(f"{seq_id}\t{decoded_seq}\n")
+    # save one-hot encoded MSA
+    with open(f"{processed_directory}/seq_msa_binary.pkl", 'wb') as file_handle:
+        pickle.dump(seq_ary_binary, file_handle)
+
+if __name__ == "__main__":
+    main()
