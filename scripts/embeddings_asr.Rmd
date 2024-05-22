@@ -4,21 +4,6 @@ author: "Hailey Bruzzone"
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = "")
-
-# set wd
-setwd("~/Desktop/asr-ae")
-
-# packages
-library(ape)
-library(phytools)
-library(plotrix)
-library(corHMM)
-library(mvMORPH)
-```
-
 ```{r terminal commands}
 install.packages(ape)
 install.packages(phytools)
@@ -31,19 +16,6 @@ library(plotrix)
 library(corHMM)
 library(mvMORPH)
 
-pf00565.tree <- read.tree("/mnt/ws/home/hlouw/asr-ae-project/seq_msa_char_pf00565.fasta.treefile")
-pf00565.data <- read.csv("/mnt/ws/home/hlouw/asr-ae-project/model_2024-05-06_embeddings.csv", row.names=1, stringsAsFactors = TRUE)
-
-pf00565.matrix <- data.matrix(pf00565.data)
-pf00565.list <- list(pf00565.matrix=pf00565.matrix)
-
-fit.pf00565 <- mvgls(pf00565.matrix~1, data=pf00565.list, pf00565.tree, model="BM", method="LL", REML=FALSE)
-```
-
-
-
-
-```{r asr}
 # read tree from file 
 pf00565.tree <- read.tree("~/Desktop/asr-ae/data/iqtree/tree_files/seq_msa_char_pf00565.fasta.treefile")
 # read data
@@ -56,7 +28,6 @@ pf00565.list <- list(pf00565.matrix=pf00565.matrix)
 # Ready to perform ASR 
 fit.pf00565 <- mvgls(pf00565.matrix~1, data=pf00565.list, pf00565.tree, model="BM", method="LL", REML=FALSE)
 
-
 print(fit.pf00565, printlen = 10) # print first 10 rows of results 
 
 # plot eel phylogeny using plotTree 
@@ -67,4 +38,5 @@ labelnodes(1:pf00565.tree$Nnode+Ntip(pf00565.tree),
            1:pf00565.tree$Nnode+Ntip(pf00565.tree),
            interactive = FALSE, cex = 0.5)
 ```
+
 
