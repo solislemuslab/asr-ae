@@ -1,6 +1,7 @@
 .idea/
 *.fasta
 .DS_Store
+*.DS_Store
 *.Rhistory
 output_gd/
 __pycache__/
