@@ -3,6 +3,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from typing import List, Dict
+
 
 class VAE(nn.Module):
     def __init__(self, nl, nc=21, dim_latent_vars=10, num_hidden_units=[256, 256]):
@@ -230,3 +232,115 @@ class LSTM_VAE(nn.Module):
             weight = torch.exp(log_weight)
             elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
             return elbo
+
+
+class Tokenizer:
+    def __init__(self):
+        # special tokens
+        vocab = ["<cls>", "<pad>", "<eos>", "<unk>"]
+        # 20 anonical amino acids
+        vocab += list("ACDEFGHIKLMNPQRSTVWY")
+        # mapping
+        self.token_to_index = {tok: i for i, tok in enumerate(vocab)}
+        self.index_to_token = {i: tok for i, tok in enumerate(vocab)}
+
+    @property
+    def vocab_size(self):
+        return len(self.token_to_index)
+
+    @property
+    def pad_token_id(self):
+        return self.token_to_index["<pad>"]
+
+    def __call__(
+            self, seqs: List[str], padding: bool = True
+        ) -> Dict[str, List[List[int]]]:
+        """
+        Tokenizes a list of protein sequences and
+        creates input representations with attention masks.
+        """
+
+        input_ids = []
+        attention_mask = []
+
+        if padding:
+            max_len = max(len(seq) for seq in seqs)
+
+        for seq in seqs:
+            # Preprocessing: strip whitespace, convert to uppercase
+            seq = seq.strip().upper()
+
+            # Add special tokens
+            toks = ["<cls>"] + list(seq) + ["<eos>"]
+
+            if padding:
+                # Pad with '<pad>' tokens to reach max_len
+                toks += ["<pad>"] * (max_len - len(seq))
+
+            # Convert tokens to IDs (handling unknown amino acids)
+            unk_id = self.token_to_index["<unk>"]
+            input_ids.append(
+                [self.token_to_index.get(tok, unk_id) for tok in toks]
+            )
+
+            # Create attention mask (1 for real tokens, 0 for padding)
+            attention_mask.append([1 if tok != "<pad>" else 0 for tok in toks])
+
+        return {"input_ids": input_ids, "attention_mask": attention_mask}
+
+
+class PositionalEncoding(nn.Module):
+    """
+    Injects positional information into token embeddings using sine and cosine.
+
+    The positional encoding is added to the token embeddings to provide the
+    model with information about the position of each token in a sequence.
+
+    Args:
+        embedding_dim (int): The dimension of the token embeddings.
+        max_length (int, optional): The maximum sequence length for which positional
+            encodings will be pre-computed. Defaults to 5000.
+
+    Attributes:
+        pe (torch.Tensor): A pre-computed positional encoding tensor of shape
+            (1, max_length, embedding_dim).
+    """
+
+    def __init__(self, embedding_dim: int, max_length: int = 5000) -> None:
+        super().__init__()
+
+        pe = torch.zeros(max_length, embedding_dim)
+
+        # add an addtitional dimention for broadcasting
+        position = torch.arange(max_length).float().unsqueeze(1)
+
+        # div_term is of length embedding_dim//2:
+        div_term = torch.exp(
+            - torch.arange(0, embedding_dim, 2) / embedding_dim * np.log(1e4)
+        )
+
+        # populate even and odd indices
+        # position*div_term: (max_length, embedding_dim//2)
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+
+        # reshape for broadcasting: (max_length, embedding_dim) => (1, max_length, embedding_dim)
+        pe = pe.unsqueeze(0)
+
+        # pe is not a parameter
+        self.register_buffer("pe", pe)
+
+    def forward(self, x: torch.Tensor):
+        """
+        Adds positional encodings to input embeddings.
+
+        Args:
+            x (torch.Tensor): Input tensor of shape (batch_size, seq_length,
+            embedding_dim).
+
+        Returns:
+            torch.Tensor: Input tensor with positional encodings added,
+            of the same shape.
+        """
+
+        return x + self.pe[:, : x.shape[1], :]  # (batch, seq_len, embedding_dim)
