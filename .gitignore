@@ -8,3 +8,4 @@ __pycache__/
 data/Ding/raw/*
 data/Ding/processed/*/*.pkl
 .mypy_cache/
+.vscode/
