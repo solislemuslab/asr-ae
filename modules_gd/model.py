@@ -324,7 +324,8 @@ class PositionalEncoding(nn.Module):
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
 
-        # reshape for broadcasting: (max_length, embedding_dim) => (1, max_length, embedding_dim)
+        # reshape for broadcasting:
+        # (max_length, embedding_dim) => (1, max_length, embedding_dim)
         pe = pe.unsqueeze(0)
 
         # pe is not a parameter
@@ -344,3 +345,118 @@ class PositionalEncoding(nn.Module):
         """
 
         return x + self.pe[:, : x.shape[1], :]  # (batch, seq_len, embedding_dim)
+
+
+class TransformerVAE(nn.Module):
+    def __init__(
+            self,
+            vocab_size,
+            seq_length,
+            embedding_dim,
+            num_layers,
+            dim_latent_vars=10,
+            num_hidden_units=[256, 256]
+        ):
+        """
+        Variational autoencoder with transformer/attention layers.
+        """
+        super(TransformerVAE, self).__init__()
+        self.embedding_dim = embedding_dim
+        self.dim_input = embedding_dim * seq_length
+
+        # embedding layers
+        self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=1)
+        self.positional_encoding = PositionalEncoding(embedding_dim, seq_length)
+
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=embedding_dim,
+            nhead=8,
+            batch_first=True,
+            activation="gelu"
+        )
+        decoder_layer = nn.TransformerDecoderLayer(
+            d_model=embedding_dim,
+            nhead=8,
+            batch_first=True,
+            activation="gelu"
+        )
+
+        # encoder layers
+        self.transformer_encoder = nn.TransformerEncoder(
+            encoder_layer, num_layers=num_layers
+        )
+        self.encoder_linears = nn.ModuleList()
+        self.encoder_linears.append(nn.Linear(self.dim_input, num_hidden_units[0]))
+        for i in range(1, len(num_hidden_units)):
+            self.encoder_linears.append(nn.Linear(num_hidden_units[i-1], num_hidden_units[i]))
+        self.encoder_mu = nn.Linear(num_hidden_units[-1], dim_latent_vars)
+        self.encoder_logsigma = nn.Linear(num_hidden_units[-1], dim_latent_vars)
+
+        self.memory = None
+
+        # decoder layers
+        self.decoder_linears = nn.ModuleList()
+        self.decoder_linears.append(nn.Linear(dim_latent_vars, num_hidden_units[0]))
+        for i in range(1, len(num_hidden_units)):
+            self.decoder_linears.append(nn.Linear(num_hidden_units[i-1], num_hidden_units[i]))
+        self.decoder_linears.append(nn.Linear(num_hidden_units[-1], self.dim_input))
+        self.transformer_decoder = nn.TransformerDecoder(
+            decoder_layer, num_layers=num_layers
+        )
+
+    def embed(self, x):
+        """
+        Embed sequences using token embeddings and positional encodings.
+        """
+        x = self.embedding(x)
+        x = self.positional_encoding(x)
+        return x
+
+    def encoder(self, x):
+        """
+        Encode embeddings into latent space.
+        """
+        x = self.transformer_encoder(x)
+        self.memory = x
+        h = torch.flatten(x, start_dim=-2)  # maintain batch dimension
+        for T in self.encoder_linears:
+            h = T(h)
+            h = F.relu(h)
+        mu = self.encoder_mu(h)
+        sigma = torch.exp(self.encoder_logsigma(h))
+        return mu, sigma
+        
+    def decoder(self, z):
+        """
+        Decode latent space into embeddings.
+        """
+        h = z
+        for i in range(len(self.decoder_linears) - 1):
+            h = self.decoder_linears[i](h)
+            h = F.relu(h)
+        h = self.decoder_linears[-1](h)  # should now have dimension dim_input
+
+        fixed_shape = tuple(h.shape[0:-1])
+        h = torch.unsqueeze(h, -1)
+        h = torch.reshape(h, fixed_shape + (-1, self.embedding_dim))
+        h = self.transformer_decoder(h, self.memory)
+
+        return h
+
+    def loss(self, x):
+        """
+        Compute the loss function.
+        """
+        x = self.embed(x)
+        mu, sigma = self.encoder(x)
+        eps = torch.randn_like(sigma)
+        z = mu + sigma * eps
+        x_hat = self.decoder(z)
+
+        # reconstruction loss
+        loss_recon = F.mse_loss(x_hat, x)
+
+        # KL divergence
+        kl_div = -0.5 * torch.sum(1 + sigma - mu.pow(2) - sigma.exp())
+
+        return loss_recon, kl_div
