@@ -116,7 +116,7 @@ class VAE(nn.Module):
             log_QzGx = torch.sum(-0.5*(eps)**2 -
                                  0.5*torch.log(2*z.new_tensor(np.pi))
                                  - torch.log(sigma), -1)
-            log_weight = (log_Pxz - log_QzGx).detach().data
+            log_weight = log_Pxz - log_QzGx
             log_weight = log_weight.double()
             log_weight_max = torch.max(log_weight, 0)[0]
             log_weight = log_weight - log_weight_max
