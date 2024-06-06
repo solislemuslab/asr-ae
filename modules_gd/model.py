@@ -236,8 +236,8 @@ class LSTM_VAE(nn.Module):
 class TVAE(nn.Module):
     def __init__(
             self,nl,nc=21,
-            embed_dim=64,
-            num_layers=6,
+            embed_dim=8,
+            num_layers=3,
             dim_latent_vars=10,
             num_hidden_units=[256, 256]
         ):
@@ -257,6 +257,7 @@ class TVAE(nn.Module):
         self.num_hidden_units = num_hidden_units
 
         # encoder
+        # transformer layers
         self.linear1 = nn.Linear(nl * nc, nl * embed_dim)
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=self.embed_dim,
@@ -267,6 +268,7 @@ class TVAE(nn.Module):
         self.transformer_encoder = nn.TransformerEncoder(
             encoder_layer, num_layers=num_layers
         )
+        # original layers
         self.encoder_linears = nn.ModuleList()
         self.encoder_linears.append(nn.Linear(self.dim_input, num_hidden_units[0]))
         for i in range(1, len(num_hidden_units)):
@@ -274,22 +276,16 @@ class TVAE(nn.Module):
         self.encoder_mu = nn.Linear(num_hidden_units[-1], dim_latent_vars)
         self.encoder_logsigma = nn.Linear(num_hidden_units[-1], dim_latent_vars)
 
-        self.memory = None
-
         # decoder
+        # original layers
         self.decoder_linears = nn.ModuleList()
         self.decoder_linears.append(nn.Linear(dim_latent_vars, num_hidden_units[0]))
         for i in range(1, len(num_hidden_units)):
             self.decoder_linears.append(nn.Linear(num_hidden_units[i-1], num_hidden_units[i]))
         self.decoder_linears.append(nn.Linear(num_hidden_units[-1], self.dim_input))
-        decoder_layer = nn.TransformerDecoderLayer(
-            d_model=embed_dim,
-            nhead=8,
-            batch_first=True,
-            activation="gelu"
-        )
-        self.transformer_decoder = nn.TransformerDecoder(
-            decoder_layer, num_layers=num_layers
+        # transformer layers
+        self.transformer_decoder = nn.TransformerEncoder(
+            encoder_layer, num_layers=num_layers
         )
         self.linear2 = nn.Linear(nl * embed_dim, nl * nc)
 
@@ -303,9 +299,6 @@ class TVAE(nn.Module):
         h = self.linear1(h)
         h = h.reshape([-1, self.nl, self.embed_dim])
         h = self.transformer_encoder(h)
-
-        if torch.is_grad_enabled():
-            self.memory = h
 
         h = torch.flatten(h, start_dim=-2)
         for T in self.encoder_linears:
@@ -328,10 +321,7 @@ class TVAE(nn.Module):
 
         h = h.reshape([-1, self.nl, self.embed_dim])
 
-        # if self.memory is None:
-        #     self.memory = torch.zeros_like(h)
-
-        h = self.transformer_decoder(h, self.memory)
+        h = self.transformer_decoder(h)
         h = torch.flatten(h, start_dim=-2)
         h = self.linear2(h)
 
