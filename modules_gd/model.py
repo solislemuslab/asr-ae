@@ -212,7 +212,9 @@ class LVAE(nn.Module):
         '''
 
         with torch.no_grad():
-            # x = x.expand(num_samples, x.shape[0], x.shape[1], x.shape[2])
+            x = x.expand(num_samples, x.shape[0], x.shape[1], x.shape[2])
+            # LSTM doesn't take 4D input
+            x = x.reshape(-1, x.shape[2], x.shape[3])
             mu, sigma = self.encoder(x)
             eps = torch.randn_like(mu)
             z = mu + sigma * eps
