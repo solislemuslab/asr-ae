@@ -124,13 +124,13 @@ class VAE(nn.Module):
             return elbo
             
 
-class LSTM_VAE(nn.Module):
+class LVAE(nn.Module):
     def __init__(self, nl, nc=21, dim_latent_vars=10, num_hidden_units=[256, 256]):
         """
         Our default is that the latent embeddings are dimension 10 and there are
         256 neurons in each of the hidden layers of the encoder and decoder
         """
-        super(LSTM_VAE, self).__init__()
+        super(LVAE, self).__init__()
 
         ## num of amino acid types
         self.nc = nc
@@ -218,12 +218,16 @@ class LSTM_VAE(nn.Module):
             z = mu + sigma * eps
             log_Pz = torch.sum(-0.5*z**2 - 0.5*torch.log(2*z.new_tensor(np.pi)), -1)
             log_p = self.decoder(z)
-            log_PxGz = torch.sum(x*log_p, [-1,-2]) # sum over both position and character dimension
+            # log_p = log_p.reshape(x.shape)
+            # sum over both position and character dimension
+            log_PxGz = torch.sum(x*log_p, [-1,-2])
+            # log_Pz = log_Pz.reshape(log_PxGz.shape)
             log_Pxz = log_Pz + log_PxGz
 
             log_QzGx = torch.sum(-0.5*(eps)**2 -
                                  0.5*torch.log(2*z.new_tensor(np.pi))
                                  - torch.log(sigma), -1)
+            # log_QzGx = log_QzGx.reshape(log_Pxz.shape)
             log_weight = (log_Pxz - log_QzGx).detach().data
             log_weight = log_weight.double()
             log_weight_max = torch.max(log_weight, 0)[0]
@@ -365,16 +369,16 @@ class TVAE(nn.Module):
             z = mu + sigma * eps
             log_Pz = torch.sum(-0.5*z**2 - 0.5*torch.log(2*z.new_tensor(np.pi)), -1)
             log_p = self.decoder(z)
-            # log_p = log_p.reshape(x.shape)
+            log_p = log_p.reshape(x.shape)
             # sum over both position and character dimension
             log_PxGz = torch.sum(x*log_p, [-1,-2])
-            # log_Pz = log_Pz.reshape(log_PxGz.shape)
+            log_Pz = log_Pz.reshape(log_PxGz.shape)
             log_Pxz = log_Pz + log_PxGz
 
             log_QzGx = torch.sum(-0.5*(eps)**2 -
                                  0.5*torch.log(2*z.new_tensor(np.pi))
                                  - torch.log(sigma), -1)
-            # log_QzGx = log_QzGx.reshape(log_Pxz.shape)
+            log_QzGx = log_QzGx.reshape(log_Pxz.shape)
             log_weight = log_Pxz - log_QzGx
             log_weight = log_weight.double()
             log_weight_max = torch.max(log_weight, 0)[0]
