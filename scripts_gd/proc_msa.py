@@ -51,8 +51,7 @@ def get_euk_seqs(msa_file_path, metadata_file_path, outgroup_acc):
     # Load metadata
     mdata = pd.read_csv(metadata_file_path, delimiter='\t', index_col=False)
     euk_accs = list(mdata.accession) # list of all eukaryotic sequence accessions
-    if outgroup_acc: # include one non-Eukaryotic sequence as an out-of-group
-        euk_accs.append(outgroup_acc)
+
     # Initialize dictionaries that will be returned
     euk_ids = {} # sequence label -> sequence accession
     seq_dict = {} # sequence label -> sequence
@@ -76,7 +75,8 @@ def get_euk_seqs(msa_file_path, metadata_file_path, outgroup_acc):
                 continue
             seq_id, seq = line.split()
             # only include sequences if their accession has been found to belong to the list of accessions of eukaryotic species
-            if seq_id not in euk_ids:
+            # or if it's the outgroup sequence
+            if seq_id not in euk_ids and seq_id != outgroup_acc:
                 continue
             else:
                 seq_dict[seq_id] = seq.upper()
@@ -117,25 +117,28 @@ def remove_gaps(seq_dict, query_seq_id):
     for seq_id, seq in seq_dict.items():
         seq_dict[seq_id] = [seq[i] for i in range(seq_len) if is_not_gap[i]]
 
-def remove_seqs(seq_dict, outgroup_acc, euk_ids):
+def remove_seqs(seq_dict, outgroup_acc):
     """
     Remove sequences with too many remaining gaps (called after removing positions that are gaps in the query sequences)
-    Keep the outgroup sequence even if it has many gaps
+    We retain the outgroup sequence even if it has many gaps
     """
     for k in list(seq_dict.keys()):
-        if euk_ids and euk_ids[k] == outgroup_acc:
+        if k == outgroup_acc:
             continue
         if len([char for char in seq_dict[k] if char in UNKNOWN]) > MAX_GAPS_IN_SEQ:
             seq_dict.pop(k)
 
-def to_numpy(seq_dict):
+def to_numpy(seq_dict, query_seq_id):
     """
-    Convert the dictionary of sequences to a numpy array
+    Convert the dictionary of sequences to a numpy array with integer encoding
     Note that now we have to keep track of the labels separately
+    We put the query sequence as the top row of the array
     """
-    seq_ary = [] # Integer encoded array representing the processed MSA
-    seq_names = [] # Sequence labels
-    for k in seq_dict.keys():
+    # Inititae list of lists of integers to be converted to np array with first entry the query sequence
+    seq_ary = [[AA_INDEX[s] for s in seq_dict[query_seq_id]]] 
+    seq_names = [query_seq_id] # Labels
+    #iterate through all seq_dict.keys() except the query sequence
+    for k in seq_dict.keys() - {query_seq_id}:
         seq_ary.append([AA_INDEX[s] for s in seq_dict[k]])
         seq_names.append(k)    
     seq_ary = np.array(seq_ary)
@@ -151,6 +154,16 @@ def remove_sparse_positions(seq_ary):
             pos_idx.append(i)
     print(len(pos_idx), seq_ary.shape[1])
     return seq_ary[:, np.array(pos_idx)]
+
+def remove_dupes(seq_ary, seq_names):
+    """
+    Remove duplicate sequences. 
+    Query sequence should always be the first sequence in the array so shouldn't get removed even if it's a duplicate
+    Outgroup sequence should be sufficiently different from eukaryotic sequences so that it doesn't get removed
+    """
+    seq_ary, idx = np.unique(seq_ary, axis = 0, return_index=True)
+    seq_names = [seq_names[i] for i in idx]
+    return seq_ary, seq_names
 
 def weight_seqs(seq_ary):
     """
@@ -216,23 +229,45 @@ def main():
     else:
         seq_dict, euk_ids = get_seqs(msa_file_path), None
 
+    # ensure that the query accession is in the MSA
+    assert args.query_seq_id in seq_dict, f"Query accession {args.query_seq_id} not found in MSA"
+    # ensure that the outgroup accession is in the MSA
+    if args.outgroup_acc:
+        assert args.outgroup_acc in seq_dict, f"Outgroup accession {args.outgroup_acc} not found in MSA"
+
     #### Preprocessing #####
     # Step 1: remove all positions that are gaps in the query sequences
     remove_gaps(seq_dict, args.query_seq_id) 
 
     # Step 2: Remove sequences with too many gaps
-    remove_seqs(seq_dict, args.outgroup_acc, euk_ids)
+    remove_seqs(seq_dict, args.outgroup_acc)
     
-    # Step 3: Convert to a numpy array and save the sequence labels
-    seq_ary, seq_names = to_numpy(seq_dict)
+    # Step 3: Convert to an integer numpy array
+    seq_ary, seq_names = to_numpy(seq_dict, args.query_seq_id)
     
-    # Step 4: remove positions where too many sequences have gaps and save the processed array
+    # Step 4: remove positions where too many sequences have gaps 
     seq_ary = remove_sparse_positions(seq_ary)
     
-    # Step 5: get sequence weights
+    # Step 5: remove duplicate sequences
+    seq_ary, seq_names = remove_dupes(seq_ary, seq_names)
+
+    # At this point, we save to disk a character encoded version of our processed MSA
+    aa = ["."] + AA # this is so that aa[0] = "." 
+    with open(f"{processed_directory}/seq_msa_char.txt", "w") as f:
+        for seq_id, seq in zip(seq_names, seq_ary.tolist()):
+            decoded_seq = "".join([aa[i] for i in seq])
+            f.write(f"{seq_id}\t{decoded_seq}\n")
+    
+    # We now drop the outgroup sequence, since the rest of the saved objects will be used to train VAEs
+    # and we don't want the outgroup sequence to be included in the training data
+    if args.outgroup_acc:
+        seq_ary = np.delete(seq_ary, seq_names.index(args.outgroup_acc), axis = 0)
+        seq_names.remove(args.outgroup_acc)
+
+    # Step 6: get sequence weights
     seq_weight = weight_seqs(seq_ary)
 
-    # Step 6: Convert to a binary (one-hot) encoding
+    # Step 7: Convert to a binary (one-hot) encoding
     seq_ary_binary = one_hot_encode(seq_ary)
 
     #### Saving results ####
@@ -245,12 +280,6 @@ def main():
     # save integer encoded MSA
     with open(f"{processed_directory}/seq_msa.pkl", 'wb') as file_handle:
         pickle.dump(seq_ary, file_handle)
-    # save as character encoded MSA
-    aa = ["."] + AA # this is so that aa[0] = "." 
-    with open(f"{processed_directory}/seq_msa_char.txt", "w") as f:
-        for seq_id, seq in zip(seq_names, seq_ary.tolist()):
-            decoded_seq = "".join([aa[i] for i in seq])
-            f.write(f"{seq_id}\t{decoded_seq}\n")
     # save one-hot encoded MSA
     with open(f"{processed_directory}/seq_msa_binary.pkl", 'wb') as file_handle:
         pickle.dump(seq_ary_binary, file_handle)
