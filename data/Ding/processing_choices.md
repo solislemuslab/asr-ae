@@ -5,5 +5,5 @@ For each PFAM protein family, we downloaded the raw "full" MSA from the Interpro
 | PF00565 | SND1_HUMAN/552-660 | A0A060HE43_9ARCH/86-213 | Type of archaea
 | PF00041 | TENA_HUMAN/804-884 | A0A023BR93_9FLAO/757-833 | Aquimarina atlantica (type of bacteria)
 | PF00067 | A0A8J5V3X2_ZIZPA/310-424 | A0A010Z6J1_9ACTN/277-406 | Type of bacteria
-| PF00144 | 0A010Q9K6_9PEZI/15-292 | |
+| PF00144 | A0A010Q9K6_9PEZI/15-292 | |
 
