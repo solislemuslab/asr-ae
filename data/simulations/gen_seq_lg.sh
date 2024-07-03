@@ -17,8 +17,7 @@ fi
 
 # Read in the exchange parameters and equilibrium frequencies from the output of the Python script
 read -r exchanges freqs < <(python get_lg_params.py)
-exchanges=${exchanges//,/ } # Replace commas separating the exchange parameters with spaces, as this is required for seq-gen to read it as a command line argument for some reason
-#echo -e "Exchange parameters:\n$exchanges"
-#echo -e "Equilibrium frequencies:\n$freqs"
-# Run seq-gen with the specified parameters and the tree file
+# Replace commas separating the exchange parameters with spaces, as this is required for seq-gen to read it as a command line argument for some reason
+exchanges=${exchanges//,/ } 
+# Run seq-gen with the specified parameters and the tree file, including the ancestral sequences
 seq-gen  -mGENERAL -z770 -l100 -wa -on -f $freqs -r $exchanges  < "$1" > "$output_file"
