@@ -1,7 +1,7 @@
 # code adapted from PEVAE paper
 import argparse
 import pickle
-from os import path, makedirs
+from os import path, makedirs, remove
 import numpy as np
 import pandas as pd
 from Bio import SeqIO
@@ -26,12 +26,20 @@ for i, char in enumerate(AA):
 def parse_commands():
     """
     Parse command line arguments 
-    Required: path to MSA file and reference (aka query) sequence id
-    Optional: outgroup sequence id (default is none) and metadata file path (default is inferred from MSA file name)
+    Args:
+        - Path to MSA file (required)
+        - Reference (aka query) sequence id (required)
+        - Whether the MSA is simulated (optional, default is False)
+        - Whether to filter out non-eukaryotic sequences (optional, default is False)
+    Additional optional args if we're filtering out non-eukarytoic sequences:
+        - Metadata file path (default is inferred from MSA file name)
+        - Outgroup sequence id (default is none) 
+    If we're filtering out non-eukaryotic species, the assumed format of the MSA file is stockholm. See details in `get_euk_seqs`
     """
     parser = argparse.ArgumentParser(description='This script pre-processes an MSA using a specified reference sequence')
     parser.add_argument('MSA', type=str, help='Path to MSA file')
     parser.add_argument('query_seq_id', type=str, help='ID of the sequence used as reference')
+    parser.add_argument('--simul', action='store_true', help='Whether the MSA was simulated (i.e. not a PFAM family)')
     parser.add_argument('--filter_euks', action='store_true', help='Filter out non-eukaryotic sequences')
     parser.add_argument('--metadata', type = str, help = 'Path to file with metadata on (only the) eukaryotic sequences in the MSA')
     parser.add_argument('--outgroup_acc', type = str, help = 'Accession of a non-Eukaryotic sequence that we include for outgroup purposes')
@@ -86,23 +94,34 @@ def get_euk_seqs(msa_file_path, metadata_file_path, outgroup_acc):
                 break
     return seq_dict, euk_ids
 
-def get_seqs(msa_file_path):
+def get_seqs(msa_file_path, sim):
     """
-    This function simply collects all sequences from the MSA file into a dictionary seq_dict, maxing out at max_seqs sequences,
-    without any filtering based on eukaryotic status. As such, it is simpler than get_euk_seqs
-
-    It assumes that the msa file is in FASTA format
+    This function processes the sequences from the MSA file of a specified format into a dictionary `seq_dict`
+    without doing any filtering based on eukaryotic status.
+    If the MSA is simulated, the file is in a format that we have to handle by creating a new temporary file. 
+    In addition, the MSA in this case includes ancestral sequences that we want to exclude (those whose names don't begin with N).
     """
-    
+    if sim:
+        with open(msa_file_path, 'r') as file_handle:
+            with open("temp.txt", 'w') as temp_file:
+                for i, line in enumerate(file_handle):
+                    if i >= 17:
+                        temp_file.write(line)
+        msa_file_path = "temp.txt"
+    format = "tab" if sim else "fasta"
     # Initialize dictionary that will be returned
     seq_dict = {} # sequence id -> sequence
     count_sequences = 0
     with open(msa_file_path, 'r') as file_handle:
-        for record in SeqIO.parse(file_handle, "fasta"):
+        for record in SeqIO.parse(file_handle, format):
+            if sim and record.id[0] != "N":
+                continue
             count_sequences += 1
             seq_dict[record.id] = str(record.seq).upper()
             if count_sequences > MAX_SEQS:
                 break
+    if sim:
+        remove("temp.txt")
     return seq_dict
 
 def remove_gaps(seq_dict, query_seq_id):
@@ -201,12 +220,15 @@ def main():
     
     #### Preliminary steps and loading in the unprocessed MSA ########
     args = parse_commands()
-
     # Get PFAM accession to use as a directory name for file saving/loading
     msa_file_path = args.MSA
     msa_name = path.splitext(path.basename(msa_file_path))[0]
-    pfam_acc = msa_name.split("_")[0]
-    processed_directory = f"data/Ding/processed/{pfam_acc}"
+    if args.simul:
+        cog_acc = msa_name.split(".")[0]
+        processed_directory = f"data/simulations/processed/{cog_acc}"
+    else:
+        pfam_acc = msa_name.split("_")[0]
+        processed_directory = f"data/real/processed/{pfam_acc}"
     if not path.exists(processed_directory):
         makedirs(processed_directory)
         
@@ -227,7 +249,7 @@ def main():
         with open(f"{processed_directory}/label_accession_mapping.pkl", 'wb') as file_handle:
             pickle.dump(euk_ids, file_handle)
     else:
-        seq_dict, euk_ids = get_seqs(msa_file_path), None
+        seq_dict, euk_ids = get_seqs(msa_file_path, args.simul), None
 
     # ensure that the query accession is in the MSA
     assert args.query_seq_id in seq_dict, f"Query accession {args.query_seq_id} not found in MSA"
@@ -247,10 +269,8 @@ def main():
     
     # Step 4: remove positions where too many sequences have gaps 
     seq_ary = remove_sparse_positions(seq_ary)
-    
     # Step 5: remove duplicate sequences
     seq_ary, seq_names = remove_dupes(seq_ary, seq_names)
-
     # At this point, we save to disk a character encoded version of our processed MSA
     aa = ["."] + AA # this is so that aa[0] = "." 
     with open(f"{processed_directory}/seq_msa_char.txt", "w") as f:
