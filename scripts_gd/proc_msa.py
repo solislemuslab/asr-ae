@@ -223,12 +223,11 @@ def main():
     # Get PFAM accession to use as a directory name for file saving/loading
     msa_file_path = args.MSA
     msa_name = path.splitext(path.basename(msa_file_path))[0]
+    acc = msa_name.split("_")[0]
     if args.simul:
-        cog_acc = msa_name.split(".")[0]
-        processed_directory = f"data/simulations/processed/{cog_acc}"
+        processed_directory = f"data/simulations/processed/{acc}"
     else:
-        pfam_acc = msa_name.split("_")[0]
-        processed_directory = f"data/real/processed/{pfam_acc}"
+        processed_directory = f"data/real/processed/{acc}"
     if not path.exists(processed_directory):
         makedirs(processed_directory)
         
@@ -240,7 +239,7 @@ def main():
     if args.filter_euks and args.metadata: # use the metadata file provided
         metadata_file_path = args.metadata_file
     elif args.filter_euks: # infer metadata file name from MSA file name
-        metadata_file_path = f"data/Ding/metadata/{pfam_acc}_eukaryotes.tsv"
+        metadata_file_path = f"data/Ding/metadata/{acc}_eukaryotes.tsv"
 
     # Load the sequences from the MSA file
     if args.filter_euks:

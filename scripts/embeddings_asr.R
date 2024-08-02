@@ -1,140 +1,124 @@
-library(ape) # reads tree
-library(mvMORPH) # has multivariate trait evolutionary models
-library(stringr) # string manipulating
-library(castor) # for subsetting trees
+library(tidyverse)
+library(Rphylopars) #automatically loads ape
+library(phytools)
 library(network) # for plotting the tree as a network in embedding space
-library(scales) # for plotting transparency
 
-# read in inferred tree
-# check that tip labels are in format "X_Y_Z"
-# replace second underscore with slash to match embedding names
-pf00565.tree <- read.tree("data/iqtree/tree_files/pf00565_rerooted.tree")
-local({
-  tip_name_pieces = str_split(pf00565.tree$tip.label, "_")
-  num_pieces = sapply(tip_name_pieces, length)
-  stopifnot(all(num_pieces == 3))
-})
-pf00565.tree$tip.label <- str_replace(pf00565.tree$tip.label,
-                                     "_([^_]*)_",
-                                     "_\\1/")
+# Reconstructing for a real or simulated protein family?
+REAL = FALSE
+dir_name = if (REAL) "data/real/iqtree/tree_files" else "data/simulations/fast_trees"
+N_str = "1250"
+N = 1250
+family = "COG154"
+# Read in cluster categories
+cluster_path = paste0(dir_name, "/", N_str, "/clusters/", family, "_clusters.txt")
+cats <- read.table(cluster_path, header = TRUE) |>
+  mutate(ClusterNumber = as.factor(ClusterNumber))
+num_cats = length(levels(cats$ClusterNumber))
 
-# read in embedding
-pf00565.data <- read.csv("embeddings/PF00565/model_2024-05-06_embeddings.csv",
-                         row.names=1, stringsAsFactors = TRUE)
-# get rid of identical sequences or equivalently identical embeddings
-pf00565.subdata = dplyr::distinct(pf00565.data)
-subtree_extract = get_subtree_with_tips(pf00565.tree,
-                                        only_tips = rownames(pf00565.subdata))
-pf00565.subtree = subtree_extract$subtree |> reorder()
-pf00565.subdata <- pf00565.subdata[pf00565.subtree$tip.label,]
-
-# fit gls model
-pf00565.matrix <- data.matrix(pf00565.subdata)
-pf00565.list <- list(pf00565.matrix=pf00565.matrix)
-fit.pf00565 <- mvgls(pf00565.matrix~1,
-                     data=pf00565.list,
-                     pf00565.subtree,
-                     model = "BM",
-                     method = "LL")
-
-# show estimates of diffusion matrix
-fit.pf00565$sigma
-fit.pf00565$logLik
-
-# can also try to use mvBM(), followed by estim(tree, data, fit, asr = TRUE)
-# However, the following code takes forever to run??
-#fit.bm.pf00565 <- mvBM(pf00565.subtree, pf00565.subdata, model = "BM1")
-
-# get ancestral states
-anc <- ancestral(fit.pf00565)
-all_embeddings = rbind(pf00565.subdata, anc)
-vertex_names = rownames(all_embeddings)
-vertex_type = ifelse(str_detect(vertex_names,"node"), "internal", "tip")
-vertex_type[pf00565.subtree$root] = "root"
-
-# Plot as a network
-net = as.network(pf00565.subtree)
-colors = c(root = "green",
-           internal = alpha("blue",.4),
-           tip = alpha("orange", .4))
-p <- plot.network(net,
-             coord = all_embeddings,
-             vertex.cex = 1.5,
-             usearrows = FALSE,
-             vertex.col = colors[vertex_type],
-             xlab = "Dimension 1",
-             ylab = "Dimension 2",
-             #label.cex = .3,
-             #boxed.labels = T,
-             #displaylabels = T,
-             #label.pos = 5,
-             suppress.axes = FALSE
-             )
-legend("bottomleft", inset = c(.01,.01),
-       pch = 16,
-       cex = 1,
-       border = "black",
-       bty = "n",
-       col = colors,
-       legend = names(colors))
-legend("bottomleft", inset = c(.01,.01),
-       pch = 1,
-       cex = 1,
-       col = "black",
-       bty = "n",
-       legend = names(colors) )
-grid()
-# weirdly, the root is not being inferred to be in the center of the space
+# Read in family tree
+if (!REAL) {
+  tree_file = paste0(family, ".sim.trim.tree_cleaned")
+  tree_path = paste(dir_name, N_str, tree_file, sep = "/")
+  tree <- read.tree(tree_path)
+  stopifnot(
+    # check that tip labels are what they should be
+    all(sort(paste0("N", 1:N)) == sort(tree$tip.label))
+  )
+  tree <- makeNodeLabel(tree)
+}
+sim.tree = tree
+for (k in levels(cats$ClusterNumber)) {
+  tips = filter(cats, ClusterNumber == k) |>
+    pull(SequenceName)
+  sim.tree = paintBranches(sim.tree, edge=match(tips, sim.tree$tip.label),
+                       state = k, anc.state = "0")
+}
+cols = c(rainbow(num_cats), "black")
+names(cols) = as.character(c(1:(num_cats-1), -1, 0 ))
+plot(sim.tree,
+     colors = cols,
+     ftype = "off",
+     lwd = .7
+     )
 
 
-#######################
-# Next, try out castor
+# Read in embeddings
+model = "model_ld2_wd0_epoch30_2024-08-01_embeddings.csv"
+msa = paste0(family, "-l150-s0.5")
+embed_path = paste("embeddings", msa, model, sep="/")
+embeds <- read.csv(embed_path) |>
+  dplyr::rename(species = id)
+stopifnot(
+  # There should be no exact duplicates of embeddings
+  all.equal(dplyr::distinct(embeds, dim0, dim1, .keep_all = TRUE), embeds)
+)
+# join with cluster categories
+embeds <- dplyr::left_join(embeds, cats, dplyr::join_by(species == SequenceName))
+ggplot(embeds, aes(dim0, dim1, col = ClusterNumber)) +
+  geom_point() +
+  scale_color_manual(values = cols) +
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black"))
 
-castor <- fit_bm_model(pf00565.subtree, pf00565.matrix, Nbootstraps = 100)
-castor$diffusivity # same estimated rate matrix up to a scaling as mvMORPH
-castor$loglikelihood # same log-likelihood
 
-asr_scp1 <- asr_squared_change_parsimony(pf00565.tree, pf00565.matrix[,1])
-asr_scp1
+# Might have to subset embeds to get Brownian motion model to fit
+# set.seed(10)
+# embeds <- embeds |>
+#   dplyr::slice_sample(n = 1000)
 
-anc <- ancestral(fit.pf00565)
-all_embeddings = rbind(pf00565.subdata, anc)
-vertex_names = rownames(all_embeddings)
-vertex_type = ifelse(str_detect(vertex_names,"node"), "internal", "tip")
-vertex_type[pf00565.subtree$root] = "root"
+
+# Because we dropped duplicate sequences prior to obtaining embeddings,
+# we don't have embeddings for every tip in our tree
+# We subset the tree to only include the tips that we have embeddings for.
+# We then enforce that order of rows in the embeddings dataframe matches the order in the tree
+subtree = keep.tip(tree, embeds$species)
+embeds <- embeds[match(subtree$tip.label,embeds$species),]
+ntips = nrow(embeds)
+
+# Fit model and get predicted reconstructed ancestral embeddings
+p_BM <- phylopars(trait_data = select(embeds, -ClusterNumber),tree = subtree)
+all_embeds = p_BM$anc_recon
+
+# assign rownames that correspond to the ones in the original MSA
+anc_rownames = as.integer(str_extract(subtree$node.label, "\\d+")) + 1250
+rownames(all_embeds)[(ntips+1):nrow(all_embeds)] = anc_rownames
+
+# save reconstructed ancestral embeddings
+anc_embed_path = str_match(embed_path, "^(.*)embeddings.csv")[2] |>
+  str_c("anc-embeddings.csv")
+anc_embeds = all_embeds[(ntips+1):nrow(all_embeds),]
+write.csv(anc_embeds, anc_embed_path)
+
 
 # Plot as a network
-net = as.network(pf00565.subtree)
-colors = c(root = "green",
-           internal = alpha("blue",.4),
-           tip = alpha("orange", .4))
+net = as.network(subtree)
+vertex_type = rep(c("tip", "internal"),
+                  c(ntips, nrow(all_embeds)-ntips))
+colors = c(#root = "green",
+  internal = scales::alpha("blue", 1),
+  tip = scales::alpha("red", 1))
 p <- plot.network(net,
-                  coord = all_embeddings,
-                  vertex.cex = 1.5,
+                  coord = all_embeds,
+                  vertex.border = NA,
                   usearrows = FALSE,
                   vertex.col = colors[vertex_type],
                   xlab = "Dimension 1",
                   ylab = "Dimension 2",
-                  xlim = c(-.5, .5),
                   #label.cex = .3,
                   #boxed.labels = T,
                   #displaylabels = T,
                   #label.pos = 5,
-                  suppress.axes = FALSE,
+                  suppress.axes = FALSE
 )
-legend("bottomleft", inset = c(.1,.1),
+legend("bottomleft", inset = c(.01,.01),
        pch = 16,
        cex = 1,
        border = "black",
        bty = "n",
        col = colors,
        legend = names(colors))
-legend("bottomleft", inset = c(.1,.1),
-       pch = 1,
-       cex = 1,
-       col = "black",
-       bty = "n",
-       legend = names(colors) )
 
 
 
