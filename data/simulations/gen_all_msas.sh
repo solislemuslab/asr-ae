@@ -10,5 +10,3 @@ for tree_file in "$tree_files_dir"/*/*.tree; do
     sed -E 's/-[0-9]\.[0-9]*/0\.0/g; s/(\))[0-9]\.[0-9]*(:)/\1\2/g' "$tree_file" > "$tree_file"_cleaned 
     ./gen_seq_lg.sh "$tree_file"_cleaned
 done
-
-echo "All files processed."
