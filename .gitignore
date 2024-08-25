@@ -1,12 +1,4 @@
-.idea/
-*.fasta
-.DS_Store
 *.DS_Store
 *.Rhistory
-output_gd/
-__pycache__/
-data/Ding/raw/*
-data/Ding/processed/*/*.pkl
-.mypy_cache/
 .vscode/
 exploration.ipynb
