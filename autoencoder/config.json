@@ -1,0 +1,12 @@
+{
+    "MSA_id": "COG28",
+    "data_path": "data/simulations/processed/COG28",
+    "use_transformer": false,
+    "num_epochs": 30,
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "latent_dim": 2,
+    "verbose": false,
+    "save_model": false,
+    "plot_results": true
+}

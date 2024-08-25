@@ -1,0 +1,8 @@
+coupling_sims/ccm
+independent_sims/processed/1250/*
+independent_sims/processed/5000/*
+independent_sims/raw/1250/*
+independent_sims/raw/5000/*
+real/metadata/*
+real/raw/*
+real/processed/PF*
