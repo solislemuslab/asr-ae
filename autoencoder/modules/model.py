@@ -387,3 +387,13 @@ class TVAE(nn.Module):
             weight = torch.exp(log_weight)
             elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
             return elbo
+
+
+def load_model(model_path, nl, nc, nlatent=2):
+    """
+    Load the model from the model path.
+    """
+    model = VAE(nl = nl, nc = nc, dim_latent_vars=nlatent) # initiate to have the right architecture for loading
+    model_state_dict = torch.load(model_path)
+    model.load_state_dict(model_state_dict)
+    return model
