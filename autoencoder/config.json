@@ -1,12 +1,13 @@
 {
-    "MSA_id": "COG28",
-    "data_path": "data/simulations/processed/COG28",
+    "MSA_id": "COG28-l100-s1-aNone",
+    "data_path": "msas/independent_sims/processed/1250/COG28-l100-s1-aNone",
     "use_transformer": false,
     "num_epochs": 30,
     "batch_size": 32,
     "learning_rate": 0.001,
+    "weight_decay": 0,
     "latent_dim": 2,
     "verbose": false,
-    "save_model": false,
+    "save_model": true,
     "plot_results": true
 }

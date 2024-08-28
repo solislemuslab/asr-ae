@@ -1,0 +1,7 @@
+{
+    "MSA_id": "COG28-l100-s1-aNone",
+    "msa_path" : "msas/independent_sims/raw/1250/COG28-l100-s1-aNone_msa.dat",
+    "data_path": "msas/independent_sims/processed/1250/COG28-l100-s1-aNone",
+    "model_name": "model_ld2_wd0_epoch30_2024-08-26.pt",
+    "plot": true
+}

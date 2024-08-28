@@ -10,9 +10,10 @@ import torch
 from torch.utils.data import DataLoader
 import torch.optim as optim
 
-from modules_gd.model import VAE, TVAE
-from modules_gd.data import MSA_Dataset
-
+from modules.model import VAE, TVAE
+from modules.data import MSA_Dataset
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+from utilities.utils import get_directory
 
 def load_data(data_path):
     """
@@ -100,6 +101,7 @@ def main():
     num_epochs = data_json["num_epochs"]
     batch_size = data_json["batch_size"]
     # learning_rate = data_json["learning_rate"]
+    wd = data_json["weight_decay"]
     latent_dim = data_json["latent_dim"]
     verbose = data_json["verbose"]
     save_model = data_json["save_model"]
@@ -112,6 +114,7 @@ def main():
     print("num_epochs: ", num_epochs)
     print("batch_size: ", batch_size)
     # print("learning_rate: ", learning_rate)
+    print("weight_decay: ", wd)
     print("latent_dim: ", latent_dim)
     print("verbose: ", verbose)
     print("save_model: ", save_model)
@@ -131,7 +134,7 @@ def main():
     else:
         model = VAE(nl=nl, nc=nc, dim_latent_vars=latent_dim).to(device)
 
-    optimizer = optim.Adam(model.parameters())
+    optimizer = optim.Adam(model.parameters(), weight_decay=wd)
     train_idx, test_idx = train_test_split(range(len(data)), test_size=0.1, random_state=42)
     train_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(train_idx))
     test_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(test_idx))
@@ -153,16 +156,19 @@ def main():
         print(f"Training elbo for epoch {epoch}: {epoch_train_elbo}")
 
     # save the model
+    today = date.today()
+    model_name = f"model_ld{latent_dim}_wd{wd}_epoch{num_epochs}_{today}.pt"
     if save_model:
-        os.makedirs(f"saved_models/{MSA_id}", exist_ok=True)
         model.cpu()
-        today = date.today()
-        torch.save(model.state_dict(), f"saved_models/{MSA_id}/model_{today}.pt")
+        model_dir = get_directory(data_path, MSA_id, "saved_models")
+        os.makedirs(model_dir, exist_ok=True)
+        torch.save(model.state_dict(), f"{model_dir}/{model_name}")
 
     # plot learning curve
     if plot_results:
+        plot_name = os.path.splitext(model_name)[0] + ".png"
+        
         fig, axs = plt.subplots(1, 2)
-
         axs[0].plot(test_recon_accs[1:], color='r')
         axs[0].set_xlabel('epoch')
         axs[0].set_ylabel(f"Amino acid reconstruction accuracy")
@@ -176,7 +182,11 @@ def main():
         # add title
         plt.suptitle(f"Learning curve for VAE trained on {MSA_id}")
         plt.tight_layout()
-        plt.show()
+        #save figure
+        plot_dir = get_directory(data_path, MSA_id, "plots")
+        os.makedirs(plot_dir, exist_ok=True)
+        plt.savefig(f"{plot_dir}/{plot_name}", bbox_inches='tight')
+        
 
 
 if __name__ == '__main__':

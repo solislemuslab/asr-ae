@@ -225,9 +225,10 @@ def main():
     msa_name = path.splitext(path.basename(msa_file_path))[0]
     acc = msa_name.split("_")[0]
     if args.simul:
-        processed_directory = f"data/simulations/processed/{acc}"
+        num_seqs = path.dirname(msa_file_path).split("/")[-1]
+        processed_directory = f"independent_sims/processed/{num_seqs}/{acc}"
     else:
-        processed_directory = f"data/real/processed/{acc}"
+        processed_directory = f"real/processed/{acc}"
     if not path.exists(processed_directory):
         makedirs(processed_directory)
         
@@ -239,7 +240,7 @@ def main():
     if args.filter_euks and args.metadata: # use the metadata file provided
         metadata_file_path = args.metadata_file
     elif args.filter_euks: # infer metadata file name from MSA file name
-        metadata_file_path = f"data/Ding/metadata/{acc}_eukaryotes.tsv"
+        metadata_file_path = f"real/metadata/{acc}_eukaryotes.tsv"
 
     # Load the sequences from the MSA file
     if args.filter_euks:
