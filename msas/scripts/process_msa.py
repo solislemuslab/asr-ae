@@ -1,11 +1,14 @@
 # code adapted from PEVAE paper
 import argparse
 import pickle
+import os
 from os import path, makedirs, remove
 import numpy as np
 import pandas as pd
 from Bio import SeqIO
-from sys import exit
+import sys
+sys.path.insert(1, os.path.join(sys.path[0], '../..'))
+from utilities.utils import to_fasta
 
 MAX_SEQS = 50_000
 MAX_GAPS_IN_SEQ = 50
@@ -222,12 +225,18 @@ def main():
     args = parse_commands()
     # Get PFAM accession to use as a directory name for file saving/loading
     msa_file_path = args.MSA
-    msa_name = path.splitext(path.basename(msa_file_path))[0]
-    acc = msa_name.split("_")[0]
-    if args.simul:
-        num_seqs = path.dirname(msa_file_path).split("/")[-1]
-        processed_directory = f"independent_sims/processed/{num_seqs}/{acc}"
-    else:
+    acc, ext = path.splitext(path.basename(msa_file_path))
+    if ext in ["dat", "txt"]: # Non Psicov data
+        acc = acc.split("_")[0]
+        if args.simul:
+            num_seqs = path.dirname(msa_file_path).split("/")[-1]
+            processed_directory = f"independent_sims/processed/{num_seqs}/{acc}"
+        else:
+            processed_directory = f"real/processed/{acc}"
+    else: #Psicov data
+        msa_file_path_new = msa_file_path.replace("aln", "fasta")
+        to_fasta(msa_file_path, msa_file_path_new, ids_included = False)
+        msa_file_path = msa_file_path_new 
         processed_directory = f"real/processed/{acc}"
     if not path.exists(processed_directory):
         makedirs(processed_directory)

@@ -21,20 +21,16 @@ def idx_to_aa(aa_index):
         idx_to_aa_dict[v] = k
     return idx_to_aa_dict
 
-def to_fasta(f_in, f_out, keep = None):
-    if keep:
-        def process_line(line):
-            id, seq = line.split()
-            if id in keep:
-                return f">{id}\n{seq}\n"
-            else: 
-                return ""
-    else:
-        def process_line(line):
-            id, seq = line.split()
-            return f">{id}\n{seq}\n"
+def to_fasta(f_in, f_out, ids_included = True, keep = False):
     with open(f_in) as in_file, open(f_out, "w") as out_file:
-        for line in in_file:
-            processed_line = process_line(line)
-            out_file.write(processed_line)
+        for idx, line in enumerate(in_file):
+            if ids_included:
+                id, seq = line.split()
+                if keep and id not in keep:
+                    continue
+                out_file.write(f">{id}\n{seq}\n")
+            else:
+                out_file.write(f">Seq{idx}\n{line.strip()}\n")
+    
+            
 
