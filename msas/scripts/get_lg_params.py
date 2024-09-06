@@ -27,7 +27,7 @@ def flatten_lower_triangular_column_major(matrix):
     return flattened
 
 def main():
-    file_path = './lg_LG.PAML.txt'
+    file_path = './independent_sims/lg_LG.PAML.txt'
     mat_exchanges, freqs = read_from_file(file_path)
     flat_exchanges = flatten_lower_triangular_column_major(mat_exchanges)
     flat_exchanges = ','.join(map(str, flat_exchanges))
