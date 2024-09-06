@@ -1,0 +1,2494 @@
+IQ-TREE multicore version 1.6.12 for Linux 64-bit built Aug 15 2019
+Developed by Bui Quang Minh, Nguyen Lam Tung, Olga Chernomor,
+Heiko Schmidt, Dominik Schrempf, Michael Woodhams.
+
+Host:    solislemus-001.discovery.wisc.edu (AVX512, FMA3, 1007 GB RAM)
+Command: ./iqtree-1.6.12-Linux/bin/iqtree -s /mnt/ws/home/hlouw/iqtree-project/seq_msa_char_pf02033.fasta -m MFP -bb 1000
+Seed:    469552 (Using SPRNG - Scalable Parallel Random Number Generator)
+Time:    Thu Aug 29 14:34:34 2024
+Kernel:  AVX+FMA - 1 threads (72 CPU cores detected)
+
+HINT: Use -nt option to specify number of threads because your CPU has 72 cores!
+HINT: -nt AUTO will automatically determine the best number of threads to use.
+
+Reading alignment file /mnt/ws/home/hlouw/iqtree-project/seq_msa_char_pf02033.fasta ... Fasta format detected
+Alignment most likely contains protein sequences
+Alignment has 1727 sequences with 94 columns, 94 distinct patterns
+93 parsimony-informative, 0 singleton sites, 1 constant sites
+         Gap/Ambiguity  Composition  p-value
+   1  Seq1712   50.00%    passed     97.71%
+   2  Seq1739   43.62%    passed     59.53%
+   3  Seq168    39.36%    failed      0.07%
+   4  Seq96     36.17%    passed     70.40%
+   5  Seq1713   32.98%    failed      0.01%
+   6  Seq169    29.79%    passed     97.96%
+   7  Seq26     30.85%    failed      0.02%
+   8  Seq80     29.79%    failed      0.53%
+   9  Seq170    28.72%    passed     95.52%
+  10  Seq171    28.72%    passed     98.90%
+  11  Seq172    28.72%    passed     67.00%
+  12  Seq160    28.72%    passed     79.35%
+  13  Seq1190   32.98%    passed     17.26%
+  14  Seq97     32.98%    passed     16.46%
+  15  Seq98     32.98%    passed     15.72%
+  16  Seq158    26.60%    passed     77.44%
+  17  Seq1740   28.72%    passed     27.92%
+  18  Seq28     23.40%    failed      1.20%
+  19  Seq27     23.40%    passed     18.31%
+  20  Seq95     27.66%    failed      1.06%
+  21  Seq177    26.60%    failed      0.02%
+  22  Seq555    20.21%    passed     16.39%
+  23  Seq90     18.09%    passed      6.19%
+  24  Seq89     18.09%    failed      3.57%
+  25  Seq165    15.96%    passed     86.20%
+  26  Seq30     14.89%    passed     48.70%
+  27  Seq1729   21.28%    failed      0.00%
+  28  Seq64     14.89%    passed     84.91%
+  29  Seq254    13.83%    passed      6.57%
+  30  Seq253    14.89%    passed     18.91%
+  31  Seq643    13.83%    passed     45.86%
+  32  Seq104    14.89%    passed     18.95%
+  33  Seq252    15.96%    passed     18.79%
+  34  Seq86     13.83%    passed     11.31%
+  35  Seq1741    9.57%    passed     89.87%
+  36  Seq1724   12.77%    passed      6.93%
+  37  Seq1725   12.77%    failed      4.44%
+  38  Seq92      8.51%    passed     92.97%
+  39  Seq135    11.70%    passed     16.89%
+  40  Seq159    10.64%    passed      6.69%
+  41  Seq167     8.51%    passed     19.02%
+  42  Seq166     9.57%    passed     98.67%
+  43  Seq161     8.51%    passed     57.70%
+  44  Seq65      7.45%    passed     93.15%
+  45  Seq134    12.77%    failed      2.18%
+  46  Seq115     6.38%    failed      0.27%
+  47  Seq114     8.51%    passed     25.00%
+  48  Seq1701   10.64%    failed      3.05%
+  49  Seq76      8.51%    passed     31.42%
+  50  Seq77      9.57%    passed      7.71%
+  51  Seq1727    9.57%    passed     54.46%
+  52  Seq1699    5.32%    failed      4.19%
+  53  Seq1700    6.38%    passed     94.16%
+  54  Seq1702    6.38%    passed     44.00%
+  55  Seq180     8.51%    passed     50.16%
+  56  Seq181     8.51%    passed     24.24%
+  57  Seq175     7.45%    passed     10.72%
+  58  Seq176     8.51%    failed      3.28%
+  59  Seq23     10.64%    passed     39.89%
+  60  Seq68      5.32%    passed     81.20%
+  61  Seq67      6.38%    passed     79.65%
+  62  Seq66      5.32%    passed     49.62%
+  63  Seq8       5.32%    passed     92.15%
+  64  Seq5      10.64%    failed      0.00%
+  65  Seq6      10.64%    passed     40.14%
+  66  Seq0       5.32%    failed      0.96%
+  67  Seq21      5.32%    passed     98.62%
+  68  Seq16      6.38%    passed     80.24%
+  69  Seq63      8.51%    passed     23.80%
+  70  Seq7       6.38%    failed      1.11%
+  71  Seq91      5.32%    passed     67.99%
+  72  Seq133     7.45%    passed     22.98%
+  73  Seq157     5.32%    passed     14.24%
+  74  Seq140     6.38%    passed     85.62%
+  75  Seq141     6.38%    passed      9.45%
+  76  Seq139     6.38%    failed      3.90%
+  77  Seq138     6.38%    failed      4.30%
+  78  Seq137     6.38%    failed      1.47%
+  79  Seq136     6.38%    failed      3.75%
+  80  Seq674     5.32%    failed      2.52%
+  81  Seq668     3.19%    passed      7.81%
+  82  Seq1411    4.26%    failed      0.00%
+  83  Seq1410    4.26%    failed      0.00%
+  84  Seq1178    8.51%    passed     18.01%
+  85  Seq1695    3.19%    passed      5.97%
+  86  Seq1638    3.19%    passed     22.66%
+  87  Seq1604    4.26%    passed     15.15%
+  88  Seq1606    3.19%    passed     90.39%
+  89  Seq1605    4.26%    passed     80.19%
+  90  Seq1696    4.26%    passed     16.09%
+  91  Seq728    11.70%    failed      3.85%
+  92  Seq709     4.26%    passed     77.27%
+  93  Seq708     4.26%    passed     67.39%
+  94  Seq706     4.26%    passed     79.44%
+  95  Seq707     4.26%    passed     80.83%
+  96  Seq84     12.77%    failed      0.12%
+  97  Seq83     12.77%    failed      2.39%
+  98  Seq85      9.57%    passed     10.76%
+  99  Seq82     12.77%    failed      0.60%
+ 100  Seq105     5.32%    failed      0.00%
+ 101  Seq113     3.19%    passed     25.12%
+ 102  Seq112     3.19%    passed      8.07%
+ 103  Seq111     3.19%    passed     19.64%
+ 104  Seq110     3.19%    passed     11.37%
+ 105  Seq108     3.19%    passed      8.31%
+ 106  Seq107     3.19%    passed      5.24%
+ 107  Seq109     3.19%    passed     15.79%
+ 108  Seq268     9.57%    passed     33.28%
+ 109  Seq267     9.57%    passed     31.38%
+ 110  Seq240     4.26%    failed      0.57%
+ 111  Seq251    11.70%    failed      3.57%
+ 112  Seq15      5.32%    passed      5.32%
+ 113  Seq10      6.38%    failed      1.33%
+ 114  Seq11      3.19%    failed      0.01%
+ 115  Seq12      6.38%    failed      4.93%
+ 116  Seq13      6.38%    passed      6.13%
+ 117  Seq14      5.32%    passed      8.42%
+ 118  Seq9       6.38%    failed      2.19%
+ 119  Seq1728    3.19%    failed      1.61%
+ 120  Seq162     9.57%    passed     22.77%
+ 121  Seq163    23.40%    passed     28.85%
+ 122  Seq164    10.64%    passed     22.94%
+ 123  Seq1206    3.19%    passed     36.09%
+ 124  Seq1205    3.19%    failed      2.53%
+ 125  Seq1204    3.19%    passed      9.16%
+ 126  Seq1207    2.13%    passed     37.35%
+ 127  Seq1194    3.19%    passed     27.94%
+ 128  Seq1193    3.19%    passed     18.61%
+ 129  Seq1192    3.19%    passed     45.84%
+ 130  Seq1191    3.19%    passed     37.94%
+ 131  Seq691     3.19%    passed     15.46%
+ 132  Seq692     3.19%    passed     22.25%
+ 133  Seq694     7.45%    passed     42.91%
+ 134  Seq693     3.19%    passed     62.88%
+ 135  Seq695     3.19%    failed      0.21%
+ 136  Seq977    10.64%    failed      0.02%
+ 137  Seq402     2.13%    failed      0.10%
+ 138  Seq403     5.32%    failed      1.76%
+ 139  Seq88      3.19%    passed     51.95%
+ 140  Seq87      9.57%    passed     28.58%
+ 141  Seq126     4.26%    failed      0.14%
+ 142  Seq132     3.19%    passed     34.84%
+ 143  Seq131     3.19%    failed      0.53%
+ 144  Seq130     3.19%    passed     45.18%
+ 145  Seq129     3.19%    failed      1.84%
+ 146  Seq128     3.19%    passed     16.16%
+ 147  Seq127     3.19%    failed      0.25%
+ 148  Seq123     7.45%    passed      9.79%
+ 149  Seq125     2.13%    passed      7.82%
+ 150  Seq124     2.13%    passed      6.23%
+ 151  Seq122     2.13%    failed      0.04%
+ 152  Seq121     2.13%    failed      0.18%
+ 153  Seq106     3.19%    failed      0.10%
+ 154  Seq119    11.70%    passed     94.18%
+ 155  Seq120    10.64%    failed      0.11%
+ 156  Seq118     3.19%    passed     19.98%
+ 157  Seq29      2.13%    passed      9.34%
+ 158  Seq25      4.26%    failed      0.10%
+ 159  Seq24      2.13%    passed     90.85%
+ 160  Seq57      3.19%    passed     43.04%
+ 161  Seq59      3.19%    failed      0.07%
+ 162  Seq58      3.19%    failed      0.12%
+ 163  Seq60      2.13%    passed     67.40%
+ 164  Seq61      2.13%    passed     37.81%
+ 165  Seq50      7.45%    failed      0.10%
+ 166  Seq44      7.45%    failed      0.03%
+ 167  Seq43      7.45%    failed      0.05%
+ 168  Seq49      7.45%    failed      0.04%
+ 169  Seq48      7.45%    failed      0.03%
+ 170  Seq47      7.45%    failed      0.05%
+ 171  Seq46      7.45%    failed      0.07%
+ 172  Seq45      7.45%    failed      0.10%
+ 173  Seq41      7.45%    failed      0.07%
+ 174  Seq42      7.45%    failed      0.11%
+ 175  Seq39      7.45%    failed      0.03%
+ 176  Seq40      7.45%    failed      0.11%
+ 177  Seq38      7.45%    failed      0.07%
+ 178  Seq37      7.45%    failed      0.10%
+ 179  Seq51      7.45%    failed      0.02%
+ 180  Seq52      7.45%    failed      0.03%
+ 181  Seq55      3.19%    passed     19.31%
+ 182  Seq54      3.19%    passed     21.20%
+ 183  Seq53      2.13%    failed      2.86%
+ 184  Seq56      3.19%    passed     23.92%
+ 185  Seq62      2.13%    failed      3.02%
+ 186  Seq32      4.26%    failed      1.65%
+ 187  Seq33      2.13%    passed     97.58%
+ 188  Seq35     10.64%    passed     54.73%
+ 189  Seq36      9.57%    passed     15.56%
+ 190  Seq1703    4.26%    passed     22.68%
+ 191  Seq1704    8.51%    failed      1.91%
+ 192  Seq1708    3.19%    passed     12.92%
+ 193  Seq1707    5.32%    passed     27.16%
+ 194  Seq1706    5.32%    passed     25.11%
+ 195  Seq1705    5.32%    passed     21.24%
+ 196  Seq1720    2.13%    passed     44.16%
+ 197  Seq1721    6.38%    passed     39.01%
+ 198  Seq1719    2.13%    passed     83.90%
+ 199  Seq1718    2.13%    passed     69.22%
+ 200  Seq188     4.26%    failed      1.95%
+ 201  Seq192     4.26%    passed     61.90%
+ 202  Seq193     2.13%    passed     23.98%
+ 203  Seq190     7.45%    passed     18.18%
+ 204  Seq191     7.45%    passed     14.10%
+ 205  Seq189     3.19%    passed     31.68%
+ 206  Seq235     4.26%    passed     31.79%
+ 207  Seq262     2.13%    passed     83.79%
+ 208  Seq259     7.45%    failed      0.45%
+ 209  Seq261     4.26%    failed      2.12%
+ 210  Seq263     3.19%    failed      4.76%
+ 211  Seq264     3.19%    failed      0.01%
+ 212  Seq265     3.19%    failed      0.95%
+ 213  Seq266     3.19%    failed      0.02%
+ 214  Seq260     2.13%    passed     53.41%
+ 215  Seq241     2.13%    passed     32.44%
+ 216  Seq255     7.45%    failed      0.77%
+ 217  Seq79      3.19%    failed      2.47%
+ 218  Seq78      3.19%    failed      4.07%
+ 219  Seq20      2.13%    failed      0.00%
+ 220  Seq18      2.13%    passed     86.13%
+ 221  Seq17      9.57%    failed      0.40%
+ 222  Seq22      3.19%    passed     17.79%
+ 223  Seq1732    2.13%    passed     98.33%
+ 224  Seq93      2.13%    passed     43.55%
+ 225  Seq94      2.13%    passed     99.17%
+ 226  Seq145     4.26%    passed     17.99%
+ 227  Seq143     4.26%    failed      4.07%
+ 228  Seq142     4.26%    passed      6.17%
+ 229  Seq146     3.19%    failed      0.00%
+ 230  Seq153     3.19%    failed      0.24%
+ 231  Seq147     3.19%    failed      0.00%
+ 232  Seq148     3.19%    failed      0.01%
+ 233  Seq151     3.19%    failed      0.00%
+ 234  Seq150     3.19%    failed      0.00%
+ 235  Seq149     3.19%    failed      0.00%
+ 236  Seq152     3.19%    failed      0.00%
+ 237  Seq154     3.19%    failed      0.93%
+ 238  Seq156     8.51%    passed     21.69%
+ 239  Seq155     3.19%    passed     50.42%
+ 240  Seq81      1.06%    passed     88.53%
+ 241  Seq101     1.06%    passed     59.97%
+ 242  Seq102     2.13%    failed      4.65%
+ 243  Seq103     4.26%    passed     25.37%
+ 244  Seq100     1.06%    passed     97.92%
+ 245  Seq99      2.13%    passed     21.51%
+ 246  Seq117    20.21%    passed     65.09%
+ 247  Seq116    20.21%    passed     71.27%
+ 248  Seq31      2.13%    passed     22.70%
+ 249  Seq34      2.13%    passed     11.07%
+ 250  Seq1698    2.13%    passed     85.11%
+ 251  Seq1711    1.06%    passed     23.27%
+ 252  Seq1710    1.06%    passed     55.82%
+ 253  Seq1709    2.13%    passed     70.77%
+ 254  Seq1717    1.06%    passed     25.22%
+ 255  Seq1714    1.06%    passed     11.21%
+ 256  Seq1715    1.06%    passed      6.26%
+ 257  Seq182     1.06%    failed      0.00%
+ 258  Seq183     2.13%    passed     13.86%
+ 259  Seq179     1.06%    failed      0.00%
+ 260  Seq178     4.26%    failed      0.00%
+ 261  Seq174     1.06%    passed     48.66%
+ 262  Seq173     1.06%    failed      0.02%
+ 263  Seq194     2.13%    passed     40.46%
+ 264  Seq234     1.06%    passed     76.38%
+ 265  Seq229     1.06%    passed     85.43%
+ 266  Seq232     1.06%    passed     65.54%
+ 267  Seq231     1.06%    passed     71.83%
+ 268  Seq230     1.06%    passed     26.22%
+ 269  Seq225     1.06%    passed     91.75%
+ 270  Seq224     1.06%    passed     97.42%
+ 271  Seq223     1.06%    passed     99.79%
+ 272  Seq222     1.06%    passed     94.09%
+ 273  Seq221     1.06%    passed     93.40%
+ 274  Seq220     1.06%    passed     87.83%
+ 275  Seq219     1.06%    passed      6.80%
+ 276  Seq233     1.06%    passed      8.22%
+ 277  Seq228     1.06%    passed     97.11%
+ 278  Seq227     1.06%    passed     98.94%
+ 279  Seq226     1.06%    passed     87.52%
+ 280  Seq198     1.06%    passed     77.65%
+ 281  Seq197     1.06%    passed     56.56%
+ 282  Seq216     1.06%    passed     85.56%
+ 283  Seq215     1.06%    passed     88.30%
+ 284  Seq214     1.06%    passed     85.62%
+ 285  Seq217     1.06%    passed     85.72%
+ 286  Seq218     1.06%    passed     80.22%
+ 287  Seq213     1.06%    passed     86.09%
+ 288  Seq207     1.06%    passed     89.33%
+ 289  Seq208     1.06%    passed     68.25%
+ 290  Seq206     1.06%    passed     77.81%
+ 291  Seq205     1.06%    passed     67.16%
+ 292  Seq201     1.06%    passed     99.65%
+ 293  Seq202     1.06%    passed     36.06%
+ 294  Seq204     1.06%    passed     32.89%
+ 295  Seq203     1.06%    passed     31.84%
+ 296  Seq200     1.06%    passed     44.39%
+ 297  Seq199     1.06%    passed     70.91%
+ 298  Seq196     1.06%    passed     43.75%
+ 299  Seq195     1.06%    passed     82.87%
+ 300  Seq209     1.06%    passed     91.56%
+ 301  Seq211     1.06%    passed     96.59%
+ 302  Seq210     1.06%    passed     85.67%
+ 303  Seq212     1.06%    passed     85.27%
+ 304  Seq184     1.06%    passed     74.16%
+ 305  Seq186     1.06%    passed     81.62%
+ 306  Seq185     1.06%    passed     66.11%
+ 307  Seq187     1.06%    failed      0.26%
+ 308  Seq245     1.06%    passed     15.54%
+ 309  Seq248     1.06%    passed     16.44%
+ 310  Seq247     1.06%    passed      8.23%
+ 311  Seq244     1.06%    passed     98.60%
+ 312  Seq243     1.06%    passed     56.82%
+ 313  Seq249     1.06%    passed     98.67%
+ 314  Seq250     1.06%    passed     95.97%
+ 315  Seq242     1.06%    passed     75.26%
+ 316  Seq237     3.19%    passed     34.52%
+ 317  Seq239     1.06%    passed     90.26%
+ 318  Seq238     1.06%    failed      0.66%
+ 319  Seq258     2.13%    failed      2.73%
+ 320  Seq257     2.13%    passed      7.56%
+ 321  Seq256     3.19%    failed      0.57%
+ 322  Seq236     2.13%    failed      0.44%
+ 323  Seq75      2.13%    passed     78.70%
+ 324  Seq74      2.13%    passed     48.62%
+ 325  Seq71      3.19%    passed     75.15%
+ 326  Seq70      3.19%    passed     83.82%
+ 327  Seq72      3.19%    passed     39.50%
+ 328  Seq73      3.19%    passed     42.82%
+ 329  Seq69      3.19%    passed     60.23%
+ 330  Seq19      3.19%    passed     14.17%
+ 331  Seq4       2.13%    passed     43.05%
+ 332  Seq3       1.06%    passed     78.16%
+ 333  Seq1       1.06%    passed     65.67%
+ 334  Seq2       1.06%    passed     45.98%
+ 335  Seq1737    1.06%    passed     49.97%
+ 336  Seq1736    1.06%    passed     48.22%
+ 337  Seq1735    1.06%    passed     27.63%
+ 338  Seq1734    1.06%    passed     76.56%
+ 339  Seq1733    1.06%    passed     49.25%
+ 340  Seq1738    2.13%    passed     21.69%
+ 341  Seq1726    2.13%    passed     39.11%
+ 342  Seq1723    2.13%    passed     16.09%
+ 343  Seq1730    2.13%    passed     12.32%
+ 344  Seq1731    2.13%    passed     26.80%
+ 345  Seq1722    2.13%    passed     74.08%
+ 346  Seq1202    1.06%    passed     60.21%
+ 347  Seq1201    1.06%    passed     51.44%
+ 348  Seq1203    1.06%    passed     74.66%
+ 349  Seq1182    0.00%    passed     44.72%
+ 350  Seq1181    0.00%    passed     65.75%
+ 351  Seq1189    1.06%    failed      0.69%
+ 352  Seq1188    6.38%    passed     83.40%
+ 353  Seq1187    6.38%    passed     46.52%
+ 354  Seq1184    2.13%    passed     46.91%
+ 355  Seq1185    3.19%    passed     26.03%
+ 356  Seq1183    2.13%    passed     59.27%
+ 357  Seq1186    2.13%    passed     20.56%
+ 358  Seq1199    0.00%    passed     34.10%
+ 359  Seq1200    4.26%    passed     43.20%
+ 360  Seq1198    0.00%    passed     33.93%
+ 361  Seq1197    0.00%    passed     35.84%
+ 362  Seq1209    6.38%    failed      0.80%
+ 363  Seq1208    6.38%    failed      1.01%
+ 364  Seq1210    6.38%    failed      1.36%
+ 365  Seq1196    1.06%    failed      0.00%
+ 366  Seq1195    6.38%    passed     43.30%
+ 367  Seq575     0.00%    passed     95.43%
+ 368  Seq577     1.06%    passed      7.94%
+ 369  Seq578     0.00%    passed     38.19%
+ 370  Seq576     5.32%    passed     17.68%
+ 371  Seq687     0.00%    passed     48.03%
+ 372  Seq686    23.40%    passed      5.45%
+ 373  Seq682     0.00%    passed     18.65%
+ 374  Seq680     0.00%    passed      6.08%
+ 375  Seq681     0.00%    passed     45.02%
+ 376  Seq667     0.00%    passed     39.53%
+ 377  Seq666     0.00%    passed     30.67%
+ 378  Seq673     0.00%    passed     23.44%
+ 379  Seq672     0.00%    passed     84.45%
+ 380  Seq669     0.00%    passed     65.80%
+ 381  Seq670     0.00%    passed     46.49%
+ 382  Seq671     0.00%    passed     49.62%
+ 383  Seq690     0.00%    passed     11.81%
+ 384  Seq689     0.00%    passed      7.20%
+ 385  Seq688     0.00%    passed     34.92%
+ 386  Seq685     1.06%    passed     25.57%
+ 387  Seq677     0.00%    passed     99.19%
+ 388  Seq665     0.00%    passed     27.16%
+ 389  Seq664     1.06%    passed     71.32%
+ 390  Seq663     1.06%    passed     79.61%
+ 391  Seq662     1.06%    passed     79.31%
+ 392  Seq661     1.06%    passed     68.20%
+ 393  Seq678     6.38%    failed      0.05%
+ 394  Seq679     1.06%    passed     93.05%
+ 395  Seq684     1.06%    passed     54.74%
+ 396  Seq683     1.06%    passed     59.42%
+ 397  Seq675     0.00%    failed      0.18%
+ 398  Seq676     6.38%    passed      9.23%
+ 399  Seq547     0.00%    passed     63.20%
+ 400  Seq546     0.00%    passed     86.11%
+ 401  Seq548     0.00%    passed     25.51%
+ 402  Seq550     0.00%    passed     98.14%
+ 403  Seq551     0.00%    passed     98.86%
+ 404  Seq549     0.00%    passed     99.19%
+ 405  Seq553     0.00%    passed     28.89%
+ 406  Seq552     0.00%    passed     36.15%
+ 407  Seq543     0.00%    passed     82.50%
+ 408  Seq544     0.00%    passed     40.32%
+ 409  Seq545     0.00%    passed     28.22%
+ 410  Seq542     0.00%    passed     24.38%
+ 411  Seq541     0.00%    passed     41.81%
+ 412  Seq540     0.00%    passed     96.50%
+ 413  Seq554     1.06%    passed     48.63%
+ 414  Seq1314    0.00%    passed     96.38%
+ 415  Seq1313    0.00%    passed     54.81%
+ 416  Seq1280    2.13%    passed     61.51%
+ 417  Seq1281    2.13%    passed     69.97%
+ 418  Seq1279    0.00%    failed      1.06%
+ 419  Seq1282    1.06%    failed      0.31%
+ 420  Seq1255    0.00%    passed     94.12%
+ 421  Seq1256    0.00%    passed     23.52%
+ 422  Seq1257    0.00%    passed     36.61%
+ 423  Seq1259    0.00%    passed     29.71%
+ 424  Seq1258    0.00%    passed     25.22%
+ 425  Seq1254    0.00%    passed     51.94%
+ 426  Seq1253    0.00%    passed     48.31%
+ 427  Seq1228    0.00%    passed     64.34%
+ 428  Seq1229    0.00%    passed     73.43%
+ 429  Seq1233    0.00%    passed     77.17%
+ 430  Seq1230    2.13%    passed     87.34%
+ 431  Seq1231    0.00%    passed     68.25%
+ 432  Seq1232    2.13%    passed     90.76%
+ 433  Seq1242    0.00%    passed     87.62%
+ 434  Seq1241    0.00%    passed     97.31%
+ 435  Seq1234    0.00%    passed     96.15%
+ 436  Seq1235    0.00%    passed     79.32%
+ 437  Seq1239    0.00%    passed     92.44%
+ 438  Seq1236    0.00%    passed     97.83%
+ 439  Seq1237    0.00%    passed     95.38%
+ 440  Seq1238    0.00%    passed     96.79%
+ 441  Seq1251    0.00%    passed     97.15%
+ 442  Seq1250    0.00%    passed     99.36%
+ 443  Seq1249    0.00%    passed     98.64%
+ 444  Seq1244    0.00%    passed     98.50%
+ 445  Seq1246    0.00%    passed     98.17%
+ 446  Seq1245    0.00%    passed     99.36%
+ 447  Seq1248    0.00%    passed     98.95%
+ 448  Seq1243    0.00%    passed     95.90%
+ 449  Seq1252    0.00%    passed     94.98%
+ 450  Seq1226    2.13%    passed     87.84%
+ 451  Seq1220    0.00%    passed     74.80%
+ 452  Seq1221    2.13%    passed     96.23%
+ 453  Seq1223    0.00%    passed     82.94%
+ 454  Seq1224    0.00%    passed      8.98%
+ 455  Seq1225    0.00%    passed     14.20%
+ 456  Seq1227    0.00%    passed     61.68%
+ 457  Seq1218    0.00%    passed     88.01%
+ 458  Seq1217    0.00%    passed     86.50%
+ 459  Seq1219    0.00%    passed     90.15%
+ 460  Seq1216    0.00%    passed     86.18%
+ 461  Seq1215    0.00%    passed     78.32%
+ 462  Seq1268    0.00%    passed     46.85%
+ 463  Seq1267    0.00%    passed     97.76%
+ 464  Seq1266    0.00%    passed     93.29%
+ 465  Seq1265    0.00%    passed     90.11%
+ 466  Seq1264    0.00%    passed     91.68%
+ 467  Seq1263    0.00%    passed     96.83%
+ 468  Seq1261    0.00%    passed     32.52%
+ 469  Seq1260    0.00%    passed     97.11%
+ 470  Seq1262    0.00%    passed     93.78%
+ 471  Seq1315    0.00%    failed      2.70%
+ 472  Seq1317    0.00%    passed     72.89%
+ 473  Seq1316    0.00%    passed     37.56%
+ 474  Seq1298    0.00%    passed     68.80%
+ 475  Seq1297    0.00%    passed     91.44%
+ 476  Seq1294    0.00%    passed     93.16%
+ 477  Seq1295    0.00%    passed     77.99%
+ 478  Seq1296    0.00%    passed     85.09%
+ 479  Seq1292    0.00%    passed     66.80%
+ 480  Seq1293    0.00%    passed     99.83%
+ 481  Seq1291    2.13%    passed     18.54%
+ 482  Seq1308    0.00%    passed     98.62%
+ 483  Seq1309    0.00%    passed     98.93%
+ 484  Seq1310    0.00%    passed     99.66%
+ 485  Seq1307    0.00%    passed     34.59%
+ 486  Seq1300    0.00%    passed     64.19%
+ 487  Seq1306    0.00%    passed     74.62%
+ 488  Seq1304    0.00%    passed     99.23%
+ 489  Seq1301    0.00%    passed     99.33%
+ 490  Seq1302    0.00%    passed     95.75%
+ 491  Seq1303    0.00%    passed     98.18%
+ 492  Seq1305    0.00%    passed     44.54%
+ 493  Seq1311    0.00%    passed     47.18%
+ 494  Seq1312    0.00%    passed     60.76%
+ 495  Seq1299    0.00%    passed     71.79%
+ 496  Seq1277    0.00%    passed     43.66%
+ 497  Seq1276    0.00%    passed     21.42%
+ 498  Seq1275    0.00%    passed     40.37%
+ 499  Seq1278    0.00%    passed      7.91%
+ 500  Seq1214    0.00%    passed     85.15%
+ 501  Seq1212    0.00%    passed     42.45%
+ 502  Seq1211    1.06%    passed     39.11%
+ 503  Seq1213    0.00%    passed     54.91%
+ 504  Seq1322    1.06%    passed     66.26%
+ 505  Seq1321    0.00%    passed     35.53%
+ 506  Seq1320    0.00%    passed     45.99%
+ 507  Seq1319    0.00%    passed     72.73%
+ 508  Seq1318    0.00%    passed      6.65%
+ 509  Seq1289    1.06%    passed     32.85%
+ 510  Seq1288    1.06%    passed     38.78%
+ 511  Seq1287    0.00%    passed     93.02%
+ 512  Seq1286    0.00%    passed     70.67%
+ 513  Seq1285    1.06%    passed     12.01%
+ 514  Seq1284    1.06%    passed     57.77%
+ 515  Seq1283    1.06%    passed     56.63%
+ 516  Seq1290    0.00%    failed      1.49%
+ 517  Seq1274    2.13%    passed     88.31%
+ 518  Seq1273    0.00%    passed     12.43%
+ 519  Seq1271    1.06%    passed     87.24%
+ 520  Seq1270    1.06%    passed     93.82%
+ 521  Seq1269    0.00%    failed      0.00%
+ 522  Seq1272    1.06%    passed     48.51%
+ 523  Seq1323    1.06%    passed     99.10%
+ 524  Seq1521    0.00%    passed     78.14%
+ 525  Seq1522    1.06%    passed     17.37%
+ 526  Seq1524    0.00%    passed     97.17%
+ 527  Seq1523    0.00%    passed     74.83%
+ 528  Seq1525    0.00%    passed     12.30%
+ 529  Seq1520    1.06%    passed     23.67%
+ 530  Seq1519    1.06%    passed     58.94%
+ 531  Seq1518    1.06%    passed     63.98%
+ 532  Seq1509    1.06%    passed      8.93%
+ 533  Seq1511    0.00%    passed     41.17%
+ 534  Seq1512    0.00%    passed     30.34%
+ 535  Seq1510    0.00%    passed     59.06%
+ 536  Seq1514    0.00%    passed     96.21%
+ 537  Seq1515    0.00%    passed     96.32%
+ 538  Seq1516    0.00%    passed     91.34%
+ 539  Seq1513    0.00%    passed     90.62%
+ 540  Seq1497    1.06%    passed     41.59%
+ 541  Seq1496    1.06%    passed     31.93%
+ 542  Seq1499    0.00%    passed     86.29%
+ 543  Seq1500    0.00%    passed     87.01%
+ 544  Seq1502    0.00%    passed     84.42%
+ 545  Seq1501    0.00%    passed     90.70%
+ 546  Seq1503    0.00%    passed     88.14%
+ 547  Seq1504    0.00%    passed     66.74%
+ 548  Seq1505    0.00%    passed     70.76%
+ 549  Seq1508    0.00%    passed     89.23%
+ 550  Seq1507    0.00%    passed     78.69%
+ 551  Seq1506    0.00%    passed     81.42%
+ 552  Seq1498    0.00%    passed     45.04%
+ 553  Seq1495    2.13%    passed     69.59%
+ 554  Seq1526    1.06%    passed     10.25%
+ 555  Seq1419    0.00%    failed      3.42%
+ 556  Seq1374    1.06%    passed     93.57%
+ 557  Seq1376    0.00%    passed     80.56%
+ 558  Seq1375    0.00%    passed     99.24%
+ 559  Seq1373    0.00%    passed     37.54%
+ 560  Seq1371    0.00%    passed     10.84%
+ 561  Seq1369    0.00%    passed     11.32%
+ 562  Seq1370    0.00%    passed     15.82%
+ 563  Seq1372    0.00%    passed     44.24%
+ 564  Seq1367    0.00%    passed      6.59%
+ 565  Seq1368    0.00%    passed     10.46%
+ 566  Seq1362    0.00%    passed     96.72%
+ 567  Seq1361    0.00%    passed     97.56%
+ 568  Seq1363    0.00%    passed     99.72%
+ 569  Seq1364    0.00%    passed     97.27%
+ 570  Seq1365    0.00%    passed     99.60%
+ 571  Seq1366    1.06%    passed     97.01%
+ 572  Seq1360    0.00%    passed     72.47%
+ 573  Seq1359    0.00%    passed     69.04%
+ 574  Seq1358    0.00%    passed     65.48%
+ 575  Seq1347    0.00%    passed     83.30%
+ 576  Seq1352    0.00%    passed     82.94%
+ 577  Seq1357    0.00%    passed     93.00%
+ 578  Seq1355    0.00%    passed     86.10%
+ 579  Seq1354    0.00%    passed     86.40%
+ 580  Seq1353    0.00%    passed     90.43%
+ 581  Seq1356    0.00%    passed     80.03%
+ 582  Seq1349    0.00%    passed     82.38%
+ 583  Seq1348    0.00%    passed     68.22%
+ 584  Seq1351    0.00%    passed     54.29%
+ 585  Seq1350    0.00%    passed     58.32%
+ 586  Seq1346    0.00%    passed     86.08%
+ 587  Seq1337    0.00%    passed     89.06%
+ 588  Seq1338    0.00%    passed     98.02%
+ 589  Seq1339    0.00%    passed     98.32%
+ 590  Seq1340    1.06%    passed     99.01%
+ 591  Seq1344    0.00%    passed     86.24%
+ 592  Seq1345    0.00%    passed     89.09%
+ 593  Seq1343    0.00%    passed     99.66%
+ 594  Seq1342    0.00%    passed     98.79%
+ 595  Seq1341    0.00%    passed     98.56%
+ 596  Seq1336    0.00%    passed     11.13%
+ 597  Seq1329    0.00%    passed     98.89%
+ 598  Seq1328    0.00%    passed     94.93%
+ 599  Seq1332    1.06%    passed     95.56%
+ 600  Seq1331    1.06%    passed     64.73%
+ 601  Seq1330    1.06%    passed     98.08%
+ 602  Seq1335    0.00%    passed     90.80%
+ 603  Seq1334    0.00%    passed     88.18%
+ 604  Seq1333    0.00%    passed     93.25%
+ 605  Seq1327    2.13%    passed     84.90%
+ 606  Seq1326    1.06%    passed     71.92%
+ 607  Seq1408    0.00%    passed     97.62%
+ 608  Seq1407    0.00%    passed     98.02%
+ 609  Seq1409    0.00%    passed     17.15%
+ 610  Seq1406    0.00%    passed     90.84%
+ 611  Seq1402    0.00%    passed     21.98%
+ 612  Seq1401    0.00%    passed     70.41%
+ 613  Seq1404    0.00%    passed     66.38%
+ 614  Seq1403    0.00%    passed     75.27%
+ 615  Seq1405    1.06%    passed     88.40%
+ 616  Seq1398    2.13%    passed     98.64%
+ 617  Seq1399    2.13%    passed     63.52%
+ 618  Seq1400    2.13%    passed     80.34%
+ 619  Seq1397    5.32%    failed      3.52%
+ 620  Seq1394    0.00%    passed     56.86%
+ 621  Seq1392    0.00%    passed     62.33%
+ 622  Seq1393    0.00%    passed     85.60%
+ 623  Seq1395    0.00%    passed     25.47%
+ 624  Seq1396    0.00%    passed     29.83%
+ 625  Seq1391    0.00%    passed     95.84%
+ 626  Seq1390    0.00%    passed     55.20%
+ 627  Seq1388    0.00%    passed     99.99%
+ 628  Seq1389   43.62%    passed     20.40%
+ 629  Seq1384    1.06%    passed     30.16%
+ 630  Seq1383    2.13%    passed     58.14%
+ 631  Seq1377    2.13%    passed     95.04%
+ 632  Seq1379    2.13%    passed     90.41%
+ 633  Seq1380    2.13%    passed     61.77%
+ 634  Seq1378    2.13%    passed     78.75%
+ 635  Seq1381    2.13%    passed     97.70%
+ 636  Seq1382    2.13%    passed     82.54%
+ 637  Seq1387    0.00%    passed     59.32%
+ 638  Seq1386    0.00%    passed     67.51%
+ 639  Seq1385    0.00%    passed     85.39%
+ 640  Seq1532    0.00%    passed     99.70%
+ 641  Seq1531    0.00%    passed     99.08%
+ 642  Seq1527    0.00%    passed     99.43%
+ 643  Seq1530    0.00%    passed     92.84%
+ 644  Seq1529    0.00%    passed     97.38%
+ 645  Seq1528    0.00%    passed     92.60%
+ 646  Seq1427    0.00%    passed     88.88%
+ 647  Seq1426    0.00%    passed     91.85%
+ 648  Seq1484    0.00%    passed     99.88%
+ 649  Seq1483    0.00%    passed     98.94%
+ 650  Seq1485    0.00%    passed     95.48%
+ 651  Seq1493    0.00%    passed     96.41%
+ 652  Seq1494    0.00%    passed     94.88%
+ 653  Seq1487    0.00%    passed     89.74%
+ 654  Seq1486    0.00%    passed     92.95%
+ 655  Seq1488    0.00%    passed     57.50%
+ 656  Seq1489    0.00%    passed     69.02%
+ 657  Seq1492    0.00%    passed     65.11%
+ 658  Seq1491    0.00%    passed     56.80%
+ 659  Seq1490    0.00%    passed     64.78%
+ 660  Seq1453    0.00%    passed     90.54%
+ 661  Seq1454    0.00%    passed     26.03%
+ 662  Seq1459    0.00%    passed     93.54%
+ 663  Seq1457    0.00%    passed     98.14%
+ 664  Seq1456    0.00%    passed     82.01%
+ 665  Seq1458    0.00%    passed     94.87%
+ 666  Seq1455    0.00%    passed     98.38%
+ 667  Seq1467    0.00%    passed     88.65%
+ 668  Seq1466    0.00%    passed     89.10%
+ 669  Seq1465    0.00%    passed     92.43%
+ 670  Seq1463    0.00%    passed     99.97%
+ 671  Seq1462    0.00%    passed     99.94%
+ 672  Seq1464    0.00%    passed     99.35%
+ 673  Seq1461    0.00%    passed     98.86%
+ 674  Seq1460    0.00%    passed     99.96%
+ 675  Seq1480    0.00%    passed     95.70%
+ 676  Seq1481    0.00%    passed     91.29%
+ 677  Seq1482    0.00%    passed     87.48%
+ 678  Seq1470    0.00%    passed     93.30%
+ 679  Seq1469    0.00%    passed     59.14%
+ 680  Seq1468    0.00%    passed     88.95%
+ 681  Seq1478    0.00%    passed     47.23%
+ 682  Seq1479    0.00%    passed     63.44%
+ 683  Seq1476    0.00%    passed     60.84%
+ 684  Seq1477    0.00%    passed     64.43%
+ 685  Seq1475    0.00%    passed     61.99%
+ 686  Seq1471    0.00%    passed     70.88%
+ 687  Seq1474    0.00%    passed     58.66%
+ 688  Seq1472    0.00%    passed     66.36%
+ 689  Seq1473    0.00%    passed     53.71%
+ 690  Seq1449    0.00%    passed     38.00%
+ 691  Seq1448    0.00%    passed     91.58%
+ 692  Seq1430    0.00%    passed     70.46%
+ 693  Seq1431    0.00%    passed     53.21%
+ 694  Seq1444    0.00%    passed     77.07%
+ 695  Seq1443    0.00%    passed     75.29%
+ 696  Seq1442    0.00%    passed     80.98%
+ 697  Seq1441    0.00%    passed     77.29%
+ 698  Seq1445    0.00%    passed     86.04%
+ 699  Seq1440    0.00%    passed     60.63%
+ 700  Seq1439    0.00%    passed     60.37%
+ 701  Seq1437    0.00%    passed     56.01%
+ 702  Seq1436    0.00%    passed     62.61%
+ 703  Seq1435    0.00%    passed     55.89%
+ 704  Seq1433    0.00%    passed     79.44%
+ 705  Seq1434    0.00%    passed     77.03%
+ 706  Seq1446    0.00%    passed     95.51%
+ 707  Seq1447    0.00%    passed     95.05%
+ 708  Seq1432    0.00%    passed     43.38%
+ 709  Seq1450    1.06%    passed     76.58%
+ 710  Seq1428    1.06%    passed     17.10%
+ 711  Seq1429    0.00%    passed      9.01%
+ 712  Seq1451    1.06%    passed     99.01%
+ 713  Seq1452    0.00%    passed     37.46%
+ 714  Seq1416    0.00%    passed     93.99%
+ 715  Seq1415    0.00%    passed     83.76%
+ 716  Seq1417    0.00%    passed     96.61%
+ 717  Seq1418    0.00%    passed     85.54%
+ 718  Seq1414    0.00%    passed     93.44%
+ 719  Seq1413    2.13%    passed     64.49%
+ 720  Seq1325    0.00%    passed     32.35%
+ 721  Seq1324    0.00%    passed     96.17%
+ 722  Seq1537    0.00%    passed     72.85%
+ 723  Seq1533    0.00%    passed     99.31%
+ 724  Seq1535    7.45%    passed      5.67%
+ 725  Seq1536    7.45%    passed      5.00%
+ 726  Seq1534    7.45%    passed      6.40%
+ 727  Seq1425    2.13%    passed     21.27%
+ 728  Seq1424    1.06%    passed     56.57%
+ 729  Seq1423    0.00%    passed     88.90%
+ 730  Seq1422    0.00%    passed     71.42%
+ 731  Seq1420    0.00%    passed     57.63%
+ 732  Seq1421    0.00%    passed     61.35%
+ 733  Seq1412    2.13%    passed     86.85%
+ 734  Seq1538    0.00%    passed     99.59%
+ 735  Seq825     1.06%    passed     18.41%
+ 736  Seq824     1.06%    passed     11.68%
+ 737  Seq820     0.00%    passed     85.12%
+ 738  Seq823     0.00%    passed     74.93%
+ 739  Seq822     0.00%    passed     30.09%
+ 740  Seq821     7.45%    failed      0.03%
+ 741  Seq851     1.06%    passed     52.16%
+ 742  Seq850     0.00%    failed      1.88%
+ 743  Seq852     1.06%    passed      9.91%
+ 744  Seq845     0.00%    failed      1.36%
+ 745  Seq849     0.00%    passed     92.91%
+ 746  Seq848    10.64%    failed      0.07%
+ 747  Seq846     1.06%    passed     13.09%
+ 748  Seq847     1.06%    failed      3.92%
+ 749  Seq819     0.00%    passed     72.50%
+ 750  Seq876     1.06%    passed      8.02%
+ 751  Seq874     1.06%    passed     32.69%
+ 752  Seq873     1.06%    passed     33.18%
+ 753  Seq875     1.06%    passed     48.98%
+ 754  Seq854     2.13%    failed      0.22%
+ 755  Seq869     2.13%    failed      0.05%
+ 756  Seq855     1.06%    failed      0.71%
+ 757  Seq868     1.06%    failed      0.69%
+ 758  Seq867     1.06%    failed      0.92%
+ 759  Seq860     1.06%    failed      2.17%
+ 760  Seq861     1.06%    failed      2.55%
+ 761  Seq858     1.06%    failed      2.35%
+ 762  Seq859     1.06%    failed      2.87%
+ 763  Seq863     1.06%    failed      2.59%
+ 764  Seq862     1.06%    failed      0.65%
+ 765  Seq866     1.06%    failed      0.91%
+ 766  Seq864     1.06%    failed      0.76%
+ 767  Seq865     1.06%    failed      0.99%
+ 768  Seq857     1.06%    failed      0.49%
+ 769  Seq856     1.06%    failed      1.57%
+ 770  Seq871     2.13%    failed      0.24%
+ 771  Seq870     2.13%    failed      0.22%
+ 772  Seq872     2.13%    failed      0.26%
+ 773  Seq853     2.13%    failed      2.36%
+ 774  Seq836     1.06%    passed     18.57%
+ 775  Seq835     1.06%    passed     69.68%
+ 776  Seq837     1.06%    passed     22.02%
+ 777  Seq833     1.06%    passed     26.78%
+ 778  Seq834     1.06%    passed     26.16%
+ 779  Seq844     1.06%    passed     18.18%
+ 780  Seq838     1.06%    failed      0.68%
+ 781  Seq841     1.06%    passed     14.59%
+ 782  Seq840     1.06%    passed     20.95%
+ 783  Seq839     1.06%    passed     17.28%
+ 784  Seq842     1.06%    failed      4.73%
+ 785  Seq843     1.06%    passed     22.76%
+ 786  Seq828     3.19%    passed      7.39%
+ 787  Seq831     0.00%    failed      0.99%
+ 788  Seq832     0.00%    failed      0.78%
+ 789  Seq830     3.19%    failed      0.35%
+ 790  Seq829     0.00%    failed      0.02%
+ 791  Seq827     4.26%    failed      2.58%
+ 792  Seq826     4.26%    passed      6.71%
+ 793  Seq1176    0.00%    failed      2.68%
+ 794  Seq1173    2.13%    passed     92.76%
+ 795  Seq1174    0.00%    passed     45.11%
+ 796  Seq1175    0.00%    passed     67.90%
+ 797  Seq1172    0.00%    passed     36.79%
+ 798  Seq1171    0.00%    passed     87.94%
+ 799  Seq1170    0.00%    passed     99.61%
+ 800  Seq1177    3.19%    passed     38.59%
+ 801  Seq973     1.06%    passed     94.49%
+ 802  Seq971     0.00%    passed     92.33%
+ 803  Seq972     1.06%    passed     91.78%
+ 804  Seq970     1.06%    passed     98.56%
+ 805  Seq969     1.06%    passed     25.94%
+ 806  Seq967     0.00%    passed     47.55%
+ 807  Seq968     0.00%    passed     99.16%
+ 808  Seq963     1.06%    passed     93.77%
+ 809  Seq962     0.00%    passed     86.71%
+ 810  Seq964     0.00%    passed     72.80%
+ 811  Seq965     1.06%    passed     63.89%
+ 812  Seq966     0.00%    passed     66.99%
+ 813  Seq961     0.00%    passed     89.84%
+ 814  Seq960     1.06%    passed      7.75%
+ 815  Seq956     0.00%    passed     96.93%
+ 816  Seq959     0.00%    passed     60.89%
+ 817  Seq958     1.06%    passed     85.65%
+ 818  Seq957     1.06%    passed     91.91%
+ 819  Seq950     0.00%    passed     78.89%
+ 820  Seq949     0.00%    passed     82.30%
+ 821  Seq948     0.00%    passed     82.18%
+ 822  Seq951     0.00%    passed     72.89%
+ 823  Seq952     0.00%    passed     90.27%
+ 824  Seq953     1.06%    passed     99.73%
+ 825  Seq955     0.00%    passed     83.77%
+ 826  Seq954     0.00%    passed     74.77%
+ 827  Seq974     1.06%    passed     79.64%
+ 828  Seq976     0.00%    passed     77.71%
+ 829  Seq975     0.00%    passed     83.09%
+ 830  Seq940     0.00%    passed     76.92%
+ 831  Seq923     0.00%    passed     97.75%
+ 832  Seq938     0.00%    passed     78.17%
+ 833  Seq936     0.00%    passed     80.08%
+ 834  Seq935     0.00%    passed     78.34%
+ 835  Seq934     0.00%    passed     84.35%
+ 836  Seq932     0.00%    passed     80.99%
+ 837  Seq931     0.00%    passed     85.22%
+ 838  Seq925     0.00%    passed     80.18%
+ 839  Seq929     0.00%    passed     81.64%
+ 840  Seq928     0.00%    passed     81.05%
+ 841  Seq927     0.00%    passed     81.07%
+ 842  Seq926     0.00%    passed     85.22%
+ 843  Seq924     0.00%    passed     79.65%
+ 844  Seq937     0.00%    passed     85.24%
+ 845  Seq939     0.00%    passed     94.25%
+ 846  Seq922     0.00%    passed     38.21%
+ 847  Seq946     5.32%    passed     17.71%
+ 848  Seq943     0.00%    passed     62.88%
+ 849  Seq944     0.00%    passed     81.19%
+ 850  Seq942     0.00%    passed     96.34%
+ 851  Seq945     0.00%    passed     35.67%
+ 852  Seq941     0.00%    passed     75.02%
+ 853  Seq1179    3.19%    passed      8.38%
+ 854  Seq1119    0.00%    passed     89.61%
+ 855  Seq1127    1.06%    passed     84.09%
+ 856  Seq1128    1.06%    passed     86.92%
+ 857  Seq1122    0.00%    passed     67.13%
+ 858  Seq1123    0.00%    passed     82.37%
+ 859  Seq1124    1.06%    passed     95.11%
+ 860  Seq1125    1.06%    passed     96.86%
+ 861  Seq1126    0.00%    passed     74.40%
+ 862  Seq1121    1.06%    passed     91.80%
+ 863  Seq1120    1.06%    passed     94.18%
+ 864  Seq1117    1.06%    passed     92.84%
+ 865  Seq1116    1.06%    passed     88.88%
+ 866  Seq1115    1.06%    passed     88.59%
+ 867  Seq1114    0.00%    passed     68.23%
+ 868  Seq1118    1.06%    passed     43.35%
+ 869  Seq1111    0.00%    passed     90.63%
+ 870  Seq1113    1.06%    passed     98.62%
+ 871  Seq1112    1.06%    passed     98.62%
+ 872  Seq1110    1.06%    passed     84.68%
+ 873  Seq1109    1.06%    passed     96.90%
+ 874  Seq1129    3.19%    failed      1.37%
+ 875  Seq1108    1.06%    passed     88.78%
+ 876  Seq1107    0.00%    passed     79.02%
+ 877  Seq1106    1.06%    passed     65.60%
+ 878  Seq1097    0.00%    passed     31.72%
+ 879  Seq1098    0.00%    passed     50.38%
+ 880  Seq1100    0.00%    passed     25.01%
+ 881  Seq1099    0.00%    passed     31.51%
+ 882  Seq1105    1.06%    passed     38.74%
+ 883  Seq1101    1.06%    passed     84.53%
+ 884  Seq1104    1.06%    passed     87.74%
+ 885  Seq1103    0.00%    passed     31.61%
+ 886  Seq1102    1.06%    passed     43.26%
+ 887  Seq1096    1.06%    passed     63.99%
+ 888  Seq1084    0.00%    passed     63.01%
+ 889  Seq1085    0.00%    passed     33.82%
+ 890  Seq1083    0.00%    passed     76.36%
+ 891  Seq1091    0.00%    passed     40.29%
+ 892  Seq1090    1.06%    passed     75.91%
+ 893  Seq1089    1.06%    passed     71.02%
+ 894  Seq1088    0.00%    passed     59.97%
+ 895  Seq1087    0.00%    passed     59.30%
+ 896  Seq1086    0.00%    passed     50.33%
+ 897  Seq1093    0.00%    passed     52.79%
+ 898  Seq1092    1.06%    passed     67.37%
+ 899  Seq1094    1.06%    passed     86.41%
+ 900  Seq1095    1.06%    passed     78.58%
+ 901  Seq1164    1.06%    passed     35.00%
+ 902  Seq1166    1.06%    passed     48.40%
+ 903  Seq1167    1.06%    passed     36.53%
+ 904  Seq1169    1.06%    passed     33.97%
+ 905  Seq1168    1.06%    passed     14.51%
+ 906  Seq1165    1.06%    passed     42.13%
+ 907  Seq1163    0.00%    passed     46.53%
+ 908  Seq1162    1.06%    passed     49.72%
+ 909  Seq1161    1.06%    passed     53.63%
+ 910  Seq1159    0.00%    passed     58.24%
+ 911  Seq1158    0.00%    passed     79.43%
+ 912  Seq1157    0.00%    passed     46.91%
+ 913  Seq1155    3.19%    passed     86.41%
+ 914  Seq1156    0.00%    failed      2.94%
+ 915  Seq1140    1.06%    passed     72.21%
+ 916  Seq1141    0.00%    passed     38.90%
+ 917  Seq1142    0.00%    passed     94.81%
+ 918  Seq1139    1.06%    passed     71.32%
+ 919  Seq1138    1.06%    passed     32.66%
+ 920  Seq1137    0.00%    passed     36.98%
+ 921  Seq1136    0.00%    passed     69.44%
+ 922  Seq1135    0.00%    passed     43.77%
+ 923  Seq1147    0.00%    failed      1.00%
+ 924  Seq1148    0.00%    failed      0.29%
+ 925  Seq1146    0.00%    failed      1.61%
+ 926  Seq1143    0.00%    failed      0.19%
+ 927  Seq1144    0.00%    failed      0.33%
+ 928  Seq1145    0.00%    failed      0.28%
+ 929  Seq1149    0.00%    failed      0.03%
+ 930  Seq1150    0.00%    failed      0.22%
+ 931  Seq1154    0.00%    failed      0.36%
+ 932  Seq1153    0.00%    failed      0.10%
+ 933  Seq1152    0.00%    failed      0.15%
+ 934  Seq1151    0.00%    failed      0.23%
+ 935  Seq1134    0.00%    passed     85.92%
+ 936  Seq1133    0.00%    passed     49.04%
+ 937  Seq1130    0.00%    passed     65.98%
+ 938  Seq1131    1.06%    passed     80.95%
+ 939  Seq1132    0.00%    passed     53.91%
+ 940  Seq1160    1.06%    passed     82.56%
+ 941  Seq921     6.38%    passed     13.03%
+ 942  Seq920     1.06%    passed     84.40%
+ 943  Seq919     0.00%    passed      8.86%
+ 944  Seq1180    0.00%    passed     72.31%
+ 945  Seq947     2.13%    passed     25.49%
+ 946  Seq993     0.00%    passed     52.28%
+ 947  Seq981     0.00%    passed     78.27%
+ 948  Seq992     0.00%    passed     49.05%
+ 949  Seq988     0.00%    passed     79.58%
+ 950  Seq990     1.06%    passed     46.56%
+ 951  Seq989     1.06%    failed      3.37%
+ 952  Seq991     0.00%    passed     49.76%
+ 953  Seq986     1.06%    passed     66.88%
+ 954  Seq982     0.00%    passed     63.32%
+ 955  Seq983     0.00%    passed     90.99%
+ 956  Seq984     0.00%    passed     88.14%
+ 957  Seq985     0.00%    passed     97.24%
+ 958  Seq987     1.06%    passed     20.92%
+ 959  Seq1014    0.00%    failed      1.75%
+ 960  Seq1013    0.00%    failed      1.49%
+ 961  Seq1012    0.00%    passed     22.42%
+ 962  Seq1007    1.06%    failed      3.63%
+ 963  Seq1008    0.00%    passed     28.82%
+ 964  Seq1009    0.00%    passed     39.39%
+ 965  Seq1010    0.00%    passed     56.53%
+ 966  Seq1011    0.00%    passed     86.22%
+ 967  Seq1069    0.00%    passed     87.13%
+ 968  Seq1077    0.00%    passed     90.31%
+ 969  Seq1076    1.06%    passed     47.82%
+ 970  Seq1075    1.06%    passed     76.00%
+ 971  Seq1071    0.00%    passed     82.53%
+ 972  Seq1072    0.00%    passed     80.13%
+ 973  Seq1070    0.00%    passed     85.01%
+ 974  Seq1073    0.00%    passed     60.56%
+ 975  Seq1074    0.00%    passed     80.65%
+ 976  Seq1055    1.06%    passed     69.81%
+ 977  Seq1067    1.06%    passed     89.34%
+ 978  Seq1065    0.00%    passed     52.46%
+ 979  Seq1066    0.00%    passed     94.09%
+ 980  Seq1056    0.00%    passed     40.17%
+ 981  Seq1058    0.00%    passed     44.85%
+ 982  Seq1057    0.00%    passed     46.84%
+ 983  Seq1059    0.00%    passed     73.29%
+ 984  Seq1063    1.06%    passed     82.12%
+ 985  Seq1062    1.06%    passed     68.90%
+ 986  Seq1060    0.00%    passed     73.13%
+ 987  Seq1061    0.00%    passed     78.97%
+ 988  Seq1064    0.00%    passed     82.10%
+ 989  Seq1068    0.00%    passed     22.60%
+ 990  Seq1080    0.00%    passed     80.59%
+ 991  Seq1079    0.00%    passed     97.57%
+ 992  Seq1078    0.00%    passed     96.99%
+ 993  Seq1015    0.00%    passed     65.19%
+ 994  Seq1048    0.00%    passed     40.42%
+ 995  Seq1045    0.00%    passed     55.08%
+ 996  Seq1046    0.00%    passed     25.92%
+ 997  Seq1047    0.00%    passed     21.25%
+ 998  Seq1025    0.00%    passed     83.93%
+ 999  Seq1031    0.00%    passed     92.65%
+1000  Seq1027    0.00%    passed     78.35%
+1001  Seq1028    0.00%    passed     48.74%
+1002  Seq1029    1.06%    passed     70.39%
+1003  Seq1030    0.00%    passed     93.14%
+1004  Seq1026    0.00%    passed     91.95%
+1005  Seq1039    0.00%    passed     12.73%
+1006  Seq1040    0.00%    passed     92.87%
+1007  Seq1032    0.00%    passed     82.91%
+1008  Seq1033    0.00%    passed     79.16%
+1009  Seq1034    0.00%    passed     89.37%
+1010  Seq1035    0.00%    passed     94.93%
+1011  Seq1036    0.00%    passed     93.95%
+1012  Seq1037    0.00%    passed     88.29%
+1013  Seq1038    0.00%    passed     58.09%
+1014  Seq1041    0.00%    passed     91.58%
+1015  Seq1042    1.06%    passed     95.89%
+1016  Seq1043    0.00%    passed     98.63%
+1017  Seq1021    0.00%    passed     65.52%
+1018  Seq1023    0.00%    passed     68.60%
+1019  Seq1022    0.00%    passed     67.90%
+1020  Seq1024    0.00%    passed     68.82%
+1021  Seq1044    1.06%    passed     85.63%
+1022  Seq1020    0.00%    passed     87.10%
+1023  Seq1019    0.00%    passed     92.48%
+1024  Seq1018    0.00%    passed     88.29%
+1025  Seq1016    0.00%    passed     76.51%
+1026  Seq1017    0.00%    passed     43.64%
+1027  Seq1050    0.00%    passed     35.79%
+1028  Seq1051    0.00%    passed     35.77%
+1029  Seq1049    1.06%    passed     55.98%
+1030  Seq1054    1.06%    passed     83.59%
+1031  Seq1052    1.06%    passed     69.03%
+1032  Seq1053    1.06%    passed     57.86%
+1033  Seq998     0.00%    passed      5.76%
+1034  Seq999     0.00%    passed     13.78%
+1035  Seq997     0.00%    passed     30.61%
+1036  Seq996     0.00%    passed     70.94%
+1037  Seq1002    0.00%    passed     77.31%
+1038  Seq1005    0.00%    passed     91.23%
+1039  Seq1006    0.00%    passed     91.15%
+1040  Seq1003    0.00%    passed     52.21%
+1041  Seq1004    0.00%    passed     61.44%
+1042  Seq1001    0.00%    passed     82.20%
+1043  Seq1000    0.00%    passed     68.47%
+1044  Seq994     0.00%    passed     27.07%
+1045  Seq995     0.00%    passed     60.62%
+1046  Seq978     0.00%    passed     13.24%
+1047  Seq979     0.00%    passed     26.03%
+1048  Seq980     1.06%    passed     74.56%
+1049  Seq1082    0.00%    passed     91.69%
+1050  Seq1081    0.00%    passed     75.72%
+1051  Seq563     1.06%    passed     66.78%
+1052  Seq567     0.00%    passed     83.45%
+1053  Seq566     0.00%    passed     71.51%
+1054  Seq574     0.00%    passed     97.03%
+1055  Seq573     0.00%    passed     92.27%
+1056  Seq572     0.00%    passed     96.10%
+1057  Seq562     0.00%    passed     73.84%
+1058  Seq559     0.00%    passed     25.69%
+1059  Seq558     0.00%    passed     18.96%
+1060  Seq561     0.00%    passed     13.58%
+1061  Seq560     0.00%    passed     32.23%
+1062  Seq557     0.00%    passed      6.84%
+1063  Seq556     0.00%    failed      2.32%
+1064  Seq564     0.00%    passed     77.97%
+1065  Seq565     1.06%    passed     94.39%
+1066  Seq571     2.13%    passed     88.33%
+1067  Seq569     0.00%    passed     98.30%
+1068  Seq568     0.00%    passed     90.73%
+1069  Seq570     0.00%    passed     75.17%
+1070  Seq916     0.00%    passed     93.75%
+1071  Seq893     0.00%    passed     65.29%
+1072  Seq894     0.00%    passed     63.56%
+1073  Seq882     0.00%    passed     38.77%
+1074  Seq881     0.00%    failed      4.79%
+1075  Seq891     0.00%    passed     88.45%
+1076  Seq892     0.00%    passed     52.13%
+1077  Seq889     1.06%    passed     33.59%
+1078  Seq890     0.00%    passed     98.81%
+1079  Seq883     0.00%    passed     98.67%
+1080  Seq886     0.00%    passed     71.84%
+1081  Seq884     0.00%    passed     94.25%
+1082  Seq887     1.06%    passed     99.54%
+1083  Seq885     0.00%    passed     80.87%
+1084  Seq888     0.00%    passed     81.82%
+1085  Seq917     0.00%    passed     94.54%
+1086  Seq918     0.00%    passed     87.79%
+1087  Seq915     0.00%    passed     98.74%
+1088  Seq911     0.00%    passed     99.54%
+1089  Seq910     0.00%    passed     99.85%
+1090  Seq912     0.00%    passed     99.96%
+1091  Seq914     0.00%    passed     99.88%
+1092  Seq913     0.00%    passed     99.97%
+1093  Seq898     0.00%    passed     99.78%
+1094  Seq906     0.00%    passed     99.77%
+1095  Seq900     0.00%    passed     99.35%
+1096  Seq901     0.00%    passed     98.73%
+1097  Seq903     0.00%    passed     99.48%
+1098  Seq904     0.00%    passed     99.43%
+1099  Seq909     0.00%    passed     98.61%
+1100  Seq907     0.00%    passed     99.40%
+1101  Seq880     0.00%    passed     94.58%
+1102  Seq877     0.00%    passed     87.85%
+1103  Seq878     0.00%    passed     82.30%
+1104  Seq879     0.00%    passed     49.48%
+1105  Seq896     1.06%    passed     99.85%
+1106  Seq897     0.00%    passed     99.91%
+1107  Seq895     0.00%    passed     66.98%
+1108  Seq519     0.00%    passed     19.41%
+1109  Seq518     0.00%    passed     50.60%
+1110  Seq517     0.00%    passed     50.91%
+1111  Seq516     1.06%    failed      0.78%
+1112  Seq515     0.00%    passed     75.68%
+1113  Seq514     2.13%    passed     41.74%
+1114  Seq513     0.00%    passed     56.38%
+1115  Seq507     2.13%    passed     11.54%
+1116  Seq506     2.13%    passed     31.39%
+1117  Seq498     1.06%    passed      9.98%
+1118  Seq500     2.13%    failed      1.46%
+1119  Seq501     1.06%    failed      3.14%
+1120  Seq499     0.00%    passed      6.60%
+1121  Seq502     0.00%    failed      0.00%
+1122  Seq503     1.06%    failed      0.04%
+1123  Seq504     1.06%    failed      0.03%
+1124  Seq497     0.00%    failed      0.18%
+1125  Seq496     0.00%    failed      0.05%
+1126  Seq495     0.00%    failed      0.25%
+1127  Seq492     0.00%    failed      0.84%
+1128  Seq493     0.00%    failed      0.46%
+1129  Seq491     2.13%    failed      1.60%
+1130  Seq490     2.13%    passed     23.26%
+1131  Seq488    45.74%    passed     15.25%
+1132  Seq489     2.13%    failed      0.04%
+1133  Seq505     2.13%    passed      5.62%
+1134  Seq494     2.13%    passed     17.16%
+1135  Seq486     3.19%    passed     25.62%
+1136  Seq487     0.00%    passed     77.31%
+1137  Seq512     2.13%    passed     21.50%
+1138  Seq511     2.13%    passed      8.50%
+1139  Seq510     2.13%    passed     30.82%
+1140  Seq509     2.13%    passed     22.90%
+1141  Seq508     1.06%    passed      8.58%
+1142  Seq485     3.19%    passed     68.86%
+1143  Seq481     3.19%    passed     88.16%
+1144  Seq480     3.19%    passed     79.85%
+1145  Seq482     3.19%    passed     18.95%
+1146  Seq483     3.19%    passed     79.68%
+1147  Seq484     2.13%    passed     86.28%
+1148  Seq454     2.13%    passed     49.35%
+1149  Seq450     3.19%    passed     74.64%
+1150  Seq451     2.13%    passed     70.85%
+1151  Seq453     0.00%    passed     52.42%
+1152  Seq452     3.19%    passed     62.71%
+1153  Seq449     0.00%    passed     86.10%
+1154  Seq473     0.00%    passed     28.62%
+1155  Seq474     2.13%    failed      2.06%
+1156  Seq475     0.00%    passed     12.74%
+1157  Seq476     0.00%    passed     22.93%
+1158  Seq472     1.06%    failed      0.15%
+1159  Seq471     1.06%    failed      3.16%
+1160  Seq470     1.06%    failed      1.12%
+1161  Seq466     0.00%    passed     16.85%
+1162  Seq467     3.19%    passed     12.69%
+1163  Seq465     3.19%    passed     36.42%
+1164  Seq455     0.00%    passed     79.41%
+1165  Seq458     2.13%    failed      1.50%
+1166  Seq456     0.00%    passed     70.22%
+1167  Seq457     0.00%    passed     16.42%
+1168  Seq459     0.00%    passed     58.95%
+1169  Seq461     3.19%    passed     11.54%
+1170  Seq462     2.13%    passed     13.64%
+1171  Seq463     2.13%    passed     34.13%
+1172  Seq464     3.19%    passed     20.88%
+1173  Seq460     2.13%    passed     90.35%
+1174  Seq468     0.00%    passed     85.32%
+1175  Seq469     0.00%    passed     91.11%
+1176  Seq477     2.13%    passed     12.12%
+1177  Seq478     1.06%    passed     29.57%
+1178  Seq479     0.00%    passed     88.93%
+1179  Seq375     0.00%    passed     55.42%
+1180  Seq376     0.00%    passed     66.64%
+1181  Seq372     0.00%    passed     95.49%
+1182  Seq373     0.00%    passed     51.44%
+1183  Seq374     2.13%    passed     86.74%
+1184  Seq401     0.00%    passed     90.44%
+1185  Seq400     1.06%    passed      8.47%
+1186  Seq397     2.13%    failed      3.73%
+1187  Seq398     2.13%    passed     15.07%
+1188  Seq399     1.06%    passed     16.23%
+1189  Seq396     0.00%    passed     87.59%
+1190  Seq392     3.19%    passed     40.95%
+1191  Seq391     3.19%    passed     41.02%
+1192  Seq393     3.19%    passed     25.46%
+1193  Seq390     3.19%    passed     29.74%
+1194  Seq394     3.19%    passed     26.61%
+1195  Seq395     3.19%    failed      2.45%
+1196  Seq388     3.19%    passed     21.52%
+1197  Seq389     3.19%    failed      1.53%
+1198  Seq386     0.00%    passed      9.61%
+1199  Seq385     0.00%    passed     25.84%
+1200  Seq383     0.00%    passed      9.61%
+1201  Seq384     0.00%    passed     11.98%
+1202  Seq382     0.00%    passed      6.64%
+1203  Seq381     2.13%    passed      6.46%
+1204  Seq387     0.00%    passed     41.88%
+1205  Seq322     6.38%    passed     44.24%
+1206  Seq323     5.32%    passed     45.89%
+1207  Seq321     0.00%    passed     13.49%
+1208  Seq316     2.13%    passed     84.46%
+1209  Seq315     0.00%    passed     79.57%
+1210  Seq314     0.00%    passed     90.10%
+1211  Seq313     0.00%    passed     83.91%
+1212  Seq317     0.00%    passed     10.84%
+1213  Seq320     2.13%    passed     83.36%
+1214  Seq318     0.00%    passed     99.27%
+1215  Seq319     0.00%    passed     91.57%
+1216  Seq311     0.00%    passed     47.16%
+1217  Seq310     0.00%    failed      4.78%
+1218  Seq312     0.00%    passed     82.12%
+1219  Seq348     0.00%    passed     96.54%
+1220  Seq349     0.00%    passed     91.24%
+1221  Seq347     2.13%    passed     78.39%
+1222  Seq330     0.00%    passed     65.50%
+1223  Seq339     0.00%    passed     62.18%
+1224  Seq331     0.00%    passed     64.15%
+1225  Seq332     0.00%    passed     89.23%
+1226  Seq333     0.00%    passed     81.38%
+1227  Seq334     0.00%    passed     78.19%
+1228  Seq337     0.00%    passed     66.39%
+1229  Seq338     0.00%    passed     59.72%
+1230  Seq336     0.00%    passed     97.41%
+1231  Seq335     0.00%    passed     90.57%
+1232  Seq340     0.00%    passed     84.89%
+1233  Seq345     0.00%    passed     94.23%
+1234  Seq341     0.00%    passed     97.34%
+1235  Seq342     0.00%    passed     93.49%
+1236  Seq343     0.00%    passed     96.98%
+1237  Seq344     0.00%    passed     96.95%
+1238  Seq346     0.00%    passed     36.19%
+1239  Seq326     0.00%    failed      4.07%
+1240  Seq328     3.19%    failed      0.03%
+1241  Seq327     3.19%    failed      0.04%
+1242  Seq329     0.00%    passed     20.03%
+1243  Seq324     0.00%    passed     64.74%
+1244  Seq325     0.00%    passed     90.73%
+1245  Seq521     1.06%    passed     16.29%
+1246  Seq522     0.00%    passed     97.67%
+1247  Seq520     0.00%    passed     60.09%
+1248  Seq533     0.00%    passed     85.57%
+1249  Seq534     0.00%    passed     90.73%
+1250  Seq532     0.00%    passed     64.71%
+1251  Seq531     0.00%    passed     66.51%
+1252  Seq530     0.00%    passed     74.08%
+1253  Seq529     0.00%    passed     45.92%
+1254  Seq526     0.00%    passed     71.97%
+1255  Seq527     0.00%    passed     79.91%
+1256  Seq528     0.00%    passed     75.02%
+1257  Seq535     0.00%    passed     87.21%
+1258  Seq525     4.26%    passed     22.32%
+1259  Seq523     0.00%    passed     33.51%
+1260  Seq524     1.06%    passed     55.24%
+1261  Seq432     0.00%    passed     96.12%
+1262  Seq431     0.00%    passed     97.21%
+1263  Seq412     0.00%    passed     65.88%
+1264  Seq413     0.00%    passed     83.97%
+1265  Seq430     0.00%    passed     57.51%
+1266  Seq429     0.00%    passed     97.18%
+1267  Seq417     0.00%    passed     66.42%
+1268  Seq422     0.00%    passed     84.27%
+1269  Seq418     0.00%    passed     59.62%
+1270  Seq419     0.00%    passed     68.68%
+1271  Seq421     0.00%    passed     66.89%
+1272  Seq420     0.00%    passed     73.54%
+1273  Seq416    19.15%    passed     20.70%
+1274  Seq415     0.00%    passed     57.65%
+1275  Seq414     0.00%    passed     73.98%
+1276  Seq424     0.00%    passed     51.75%
+1277  Seq423     0.00%    passed     63.43%
+1278  Seq425     0.00%    passed     32.40%
+1279  Seq426     0.00%    passed     55.88%
+1280  Seq428     0.00%    passed     70.06%
+1281  Seq427     0.00%    passed     58.65%
+1282  Seq411     2.13%    passed     37.45%
+1283  Seq410     0.00%    passed     98.92%
+1284  Seq408     1.06%    passed     70.16%
+1285  Seq407     1.06%    passed     62.23%
+1286  Seq409     0.00%    passed     94.47%
+1287  Seq445     0.00%    passed     99.05%
+1288  Seq446     0.00%    passed     82.47%
+1289  Seq447     0.00%    passed     98.59%
+1290  Seq448     0.00%    passed     70.66%
+1291  Seq442     0.00%    passed     94.49%
+1292  Seq443     0.00%    passed     99.75%
+1293  Seq444     0.00%    passed     97.61%
+1294  Seq435     0.00%    passed     97.00%
+1295  Seq436     1.06%    passed     25.24%
+1296  Seq440     0.00%    passed     57.19%
+1297  Seq439     2.13%    failed      4.43%
+1298  Seq438     0.00%    passed     38.84%
+1299  Seq437     0.00%    passed     58.82%
+1300  Seq441     0.00%    passed     48.39%
+1301  Seq434     0.00%    passed     93.39%
+1302  Seq433     0.00%    passed     89.18%
+1303  Seq361     0.00%    passed     24.48%
+1304  Seq362     0.00%    passed     14.45%
+1305  Seq358     0.00%    passed     18.10%
+1306  Seq359     0.00%    failed      4.16%
+1307  Seq360     0.00%    passed      8.15%
+1308  Seq357     0.00%    passed     46.93%
+1309  Seq356     0.00%    passed     37.85%
+1310  Seq370     0.00%    passed     67.62%
+1311  Seq369     2.13%    passed     13.03%
+1312  Seq368     0.00%    passed     14.29%
+1313  Seq364     0.00%    passed     91.30%
+1314  Seq366     0.00%    passed     63.37%
+1315  Seq365     0.00%    passed     52.75%
+1316  Seq367     0.00%    passed     77.53%
+1317  Seq363     0.00%    passed     79.64%
+1318  Seq371     0.00%    failed      1.67%
+1319  Seq309     1.06%    passed     36.75%
+1320  Seq289     6.38%    passed      7.57%
+1321  Seq288     6.38%    passed      5.70%
+1322  Seq277     1.06%    passed      6.77%
+1323  Seq287     2.13%    passed     22.92%
+1324  Seq286     2.13%    passed     17.16%
+1325  Seq284     2.13%    passed     41.52%
+1326  Seq285     1.06%    passed     48.27%
+1327  Seq283     2.13%    passed     23.00%
+1328  Seq282     2.13%    passed     28.40%
+1329  Seq281     2.13%    passed     16.75%
+1330  Seq278     1.06%    passed      5.95%
+1331  Seq280     2.13%    passed     54.69%
+1332  Seq279     2.13%    passed     19.87%
+1333  Seq297     2.13%    passed     74.44%
+1334  Seq296     2.13%    failed      0.27%
+1335  Seq293     0.00%    passed     87.61%
+1336  Seq295     0.00%    passed     17.07%
+1337  Seq294     0.00%    passed     41.99%
+1338  Seq290     0.00%    passed     39.09%
+1339  Seq291     2.13%    passed     18.53%
+1340  Seq292     2.13%    passed     84.00%
+1341  Seq298     0.00%    passed     78.01%
+1342  Seq299     0.00%    passed     72.83%
+1343  Seq305     0.00%    passed     65.96%
+1344  Seq306     0.00%    passed     42.51%
+1345  Seq307     0.00%    passed     60.52%
+1346  Seq308     0.00%    passed     60.34%
+1347  Seq304     0.00%    passed      8.36%
+1348  Seq301     0.00%    passed     44.99%
+1349  Seq302     0.00%    passed      9.37%
+1350  Seq303     0.00%    passed     89.95%
+1351  Seq300     0.00%    passed     47.90%
+1352  Seq276     1.06%    passed     65.80%
+1353  Seq270     1.06%    passed      7.70%
+1354  Seq269     3.19%    passed     24.16%
+1355  Seq274     3.19%    passed     30.13%
+1356  Seq273     3.19%    passed     21.42%
+1357  Seq272     3.19%    passed     31.85%
+1358  Seq271     3.19%    passed     32.09%
+1359  Seq275     2.13%    passed     81.25%
+1360  Seq539     0.00%    passed     84.57%
+1361  Seq538     0.00%    passed     84.13%
+1362  Seq537     0.00%    passed     55.85%
+1363  Seq536     0.00%    passed     69.46%
+1364  Seq380     1.06%    failed      0.87%
+1365  Seq379     0.00%    passed     99.51%
+1366  Seq378     0.00%    passed     76.90%
+1367  Seq377     0.00%    passed     90.57%
+1368  Seq406     0.00%    passed      6.80%
+1369  Seq405     0.00%    passed     26.83%
+1370  Seq404     0.00%    passed      7.22%
+1371  Seq351     1.06%    passed     32.83%
+1372  Seq353     1.06%    passed     52.65%
+1373  Seq352     1.06%    passed     45.02%
+1374  Seq350     1.06%    passed     51.52%
+1375  Seq354     1.06%    passed     57.18%
+1376  Seq355     2.13%    passed     15.47%
+1377  Seq1671    0.00%    passed     39.75%
+1378  Seq1672    0.00%    passed     41.26%
+1379  Seq1670    2.13%    passed     69.09%
+1380  Seq1665    0.00%    passed     61.49%
+1381  Seq1663    0.00%    passed     97.32%
+1382  Seq1664    0.00%    passed     89.60%
+1383  Seq1655    0.00%    passed     95.95%
+1384  Seq1654    0.00%    passed     95.05%
+1385  Seq1653    0.00%    passed     24.65%
+1386  Seq1660    0.00%    passed     72.73%
+1387  Seq1661    0.00%    passed     62.06%
+1388  Seq1659   42.55%    passed     98.29%
+1389  Seq1657    0.00%    passed     73.46%
+1390  Seq1658    0.00%    passed     69.50%
+1391  Seq1656    0.00%    passed     18.45%
+1392  Seq1662    0.00%    passed     47.08%
+1393  Seq1652    2.13%    passed     16.54%
+1394  Seq1667    3.19%    passed     94.53%
+1395  Seq1666    3.19%    passed     92.99%
+1396  Seq1668    3.19%    passed     96.70%
+1397  Seq1669    3.19%    passed     48.03%
+1398  Seq1625    1.06%    passed     19.29%
+1399  Seq1633    0.00%    passed     48.74%
+1400  Seq1626    0.00%    passed     77.42%
+1401  Seq1632    3.19%    passed     54.24%
+1402  Seq1631    3.19%    passed     64.83%
+1403  Seq1630    0.00%    passed     84.11%
+1404  Seq1629    0.00%    passed     81.52%
+1405  Seq1628    3.19%    passed     47.87%
+1406  Seq1627    3.19%    passed     54.32%
+1407  Seq1568    1.06%    passed     85.04%
+1408  Seq1561    0.00%    passed     87.93%
+1409  Seq1563    0.00%    passed     94.14%
+1410  Seq1562    0.00%    passed     82.46%
+1411  Seq1564    0.00%    passed     84.61%
+1412  Seq1567    0.00%    passed     91.37%
+1413  Seq1566    0.00%    passed     61.53%
+1414  Seq1565    0.00%    passed     54.63%
+1415  Seq1556    1.06%    passed     81.37%
+1416  Seq1558    0.00%    passed     95.62%
+1417  Seq1557    0.00%    passed     94.15%
+1418  Seq1559    0.00%    passed     85.29%
+1419  Seq1560    0.00%    passed     91.05%
+1420  Seq1602    0.00%    passed     65.41%
+1421  Seq1601    0.00%    passed     81.75%
+1422  Seq1599    0.00%    passed     57.39%
+1423  Seq1600    0.00%    passed     24.97%
+1424  Seq1594    0.00%    passed     65.47%
+1425  Seq1595    0.00%    passed      5.81%
+1426  Seq1596    0.00%    passed     23.58%
+1427  Seq1593    0.00%    passed     44.79%
+1428  Seq1598    0.00%    passed     88.74%
+1429  Seq1597    0.00%    passed     76.77%
+1430  Seq1585    0.00%    passed     69.86%
+1431  Seq1586    0.00%    passed     32.55%
+1432  Seq1588    0.00%    passed     57.94%
+1433  Seq1589    0.00%    passed     68.19%
+1434  Seq1587    0.00%    passed     82.74%
+1435  Seq1590    0.00%    passed     52.11%
+1436  Seq1591    0.00%    passed     22.54%
+1437  Seq1592    0.00%    passed     22.54%
+1438  Seq1582    1.06%    passed     43.85%
+1439  Seq1580    1.06%    passed     50.56%
+1440  Seq1581    1.06%    passed     82.82%
+1441  Seq1584    6.38%    failed      0.06%
+1442  Seq1583    0.00%    passed     95.97%
+1443  Seq1578    0.00%    passed     60.44%
+1444  Seq1574    0.00%    passed     83.16%
+1445  Seq1577    0.00%    passed     95.59%
+1446  Seq1575    0.00%    passed     99.99%
+1447  Seq1576    0.00%    passed     28.60%
+1448  Seq1573    0.00%    passed     79.18%
+1449  Seq1569    0.00%    passed     54.84%
+1450  Seq1572    0.00%    passed     99.53%
+1451  Seq1571    0.00%    passed     84.83%
+1452  Seq1570    0.00%    passed     88.78%
+1453  Seq1579    0.00%    passed     99.73%
+1454  Seq1686    0.00%    failed      3.20%
+1455  Seq1687    0.00%    passed     36.95%
+1456  Seq1688    0.00%    passed     65.59%
+1457  Seq1690    0.00%    passed     91.80%
+1458  Seq1689    0.00%    passed     85.80%
+1459  Seq1685    0.00%    passed     79.75%
+1460  Seq1684    0.00%    passed     72.48%
+1461  Seq1691    0.00%    passed     68.71%
+1462  Seq1683    0.00%    passed     83.28%
+1463  Seq1692    0.00%    passed     54.39%
+1464  Seq1676    0.00%    passed     77.95%
+1465  Seq1677    0.00%    passed     89.23%
+1466  Seq1679    0.00%    passed     90.91%
+1467  Seq1678    0.00%    passed     87.71%
+1468  Seq1680    0.00%    passed     92.71%
+1469  Seq1681    0.00%    passed     82.94%
+1470  Seq1682    0.00%    passed     62.80%
+1471  Seq1675    0.00%    passed     96.51%
+1472  Seq1674    0.00%    passed     81.65%
+1473  Seq1673    0.00%    passed     38.19%
+1474  Seq1694    1.06%    failed      0.34%
+1475  Seq1693    4.26%    passed     64.98%
+1476  Seq1639    0.00%    passed     71.71%
+1477  Seq1642    0.00%    failed      0.76%
+1478  Seq1641    0.00%    failed      1.79%
+1479  Seq1640    0.00%    failed      2.38%
+1480  Seq1651    0.00%    passed     41.38%
+1481  Seq1650    1.06%    passed     20.20%
+1482  Seq1649    1.06%    passed     15.91%
+1483  Seq1648    0.00%    passed     16.20%
+1484  Seq1647    0.00%    passed     14.15%
+1485  Seq1646    1.06%    passed     14.95%
+1486  Seq1645    0.00%    passed     51.43%
+1487  Seq1644    0.00%    failed      0.50%
+1488  Seq1643    0.00%    passed     53.25%
+1489  Seq1621    0.00%    passed     95.01%
+1490  Seq1622    0.00%    passed     96.83%
+1491  Seq1617    0.00%    passed     88.51%
+1492  Seq1616    0.00%    passed     92.37%
+1493  Seq1623    0.00%    passed     77.47%
+1494  Seq1624    0.00%    passed     86.12%
+1495  Seq1620    0.00%    passed     87.64%
+1496  Seq1618    0.00%    passed     98.82%
+1497  Seq1619    0.00%    passed     83.66%
+1498  Seq1608    0.00%    passed     76.64%
+1499  Seq1607    0.00%    passed     85.50%
+1500  Seq1612    0.00%    passed     66.19%
+1501  Seq1611    0.00%    passed     51.75%
+1502  Seq1610    0.00%    passed     94.69%
+1503  Seq1609    0.00%    passed     63.49%
+1504  Seq1614    0.00%    passed     91.10%
+1505  Seq1613    0.00%    passed     93.81%
+1506  Seq1615    0.00%    passed     90.90%
+1507  Seq1552    0.00%    passed     91.64%
+1508  Seq1551    0.00%    passed     76.29%
+1509  Seq1553    0.00%    passed     59.41%
+1510  Seq1550    0.00%    passed     83.88%
+1511  Seq1547    0.00%    passed     47.87%
+1512  Seq1549    0.00%    passed     11.34%
+1513  Seq1548    0.00%    passed      8.41%
+1514  Seq1545    0.00%    passed     28.89%
+1515  Seq1546    0.00%    passed     15.88%
+1516  Seq1543    0.00%    passed     93.79%
+1517  Seq1544    0.00%    passed     62.69%
+1518  Seq1540    0.00%    passed      9.03%
+1519  Seq1542    0.00%    passed      5.87%
+1520  Seq1541    0.00%    passed      6.49%
+1521  Seq1539    0.00%    passed      6.92%
+1522  Seq1555    3.19%    passed     89.03%
+1523  Seq1554    3.19%    passed     89.13%
+1524  Seq1637    1.06%    passed     57.67%
+1525  Seq1636    1.06%    passed     67.86%
+1526  Seq1634    1.06%    passed     83.62%
+1527  Seq1635    0.00%    passed     52.81%
+1528  Seq1603    0.00%    passed     82.78%
+1529  Seq654     1.06%    passed     38.21%
+1530  Seq653     0.00%    passed     91.39%
+1531  Seq652     1.06%    passed     98.10%
+1532  Seq651     3.19%    passed     17.60%
+1533  Seq639     1.06%    passed     17.06%
+1534  Seq637     1.06%    passed     54.43%
+1535  Seq638     0.00%    passed     48.73%
+1536  Seq635     1.06%    passed     15.54%
+1537  Seq634     1.06%    passed     14.12%
+1538  Seq633     0.00%    passed     79.07%
+1539  Seq632     0.00%    passed     67.45%
+1540  Seq636     0.00%    passed     40.93%
+1541  Seq588     1.06%    passed     99.90%
+1542  Seq599     1.06%    passed     95.75%
+1543  Seq598     1.06%    passed     98.60%
+1544  Seq591     0.00%    passed     58.11%
+1545  Seq590     0.00%    passed     82.60%
+1546  Seq597     0.00%    passed     93.91%
+1547  Seq596     0.00%    passed     94.61%
+1548  Seq592     0.00%    passed     79.91%
+1549  Seq593     0.00%    passed     84.01%
+1550  Seq594     0.00%    passed     95.20%
+1551  Seq595     0.00%    passed     86.08%
+1552  Seq589     0.00%    passed     81.74%
+1553  Seq586     1.06%    passed     90.59%
+1554  Seq585     3.19%    passed     96.15%
+1555  Seq584     2.13%    passed     99.78%
+1556  Seq587     0.00%    passed     69.05%
+1557  Seq607     1.06%    passed     87.18%
+1558  Seq610     0.00%    passed     76.36%
+1559  Seq611     0.00%    passed     58.05%
+1560  Seq609     0.00%    passed      5.96%
+1561  Seq608     0.00%    passed     55.95%
+1562  Seq605     0.00%    passed     51.12%
+1563  Seq604     0.00%    passed     41.05%
+1564  Seq606     0.00%    passed     76.70%
+1565  Seq602     0.00%    passed     63.61%
+1566  Seq603     0.00%    passed     55.59%
+1567  Seq601     0.00%    passed     91.78%
+1568  Seq600     0.00%    passed     97.03%
+1569  Seq659     1.06%    passed     76.88%
+1570  Seq658     0.00%    passed     74.17%
+1571  Seq657     0.00%    passed     59.10%
+1572  Seq656     0.00%    passed     62.30%
+1573  Seq655     1.06%    passed     89.78%
+1574  Seq645     0.00%    passed     72.15%
+1575  Seq644     0.00%    passed     74.69%
+1576  Seq650     0.00%    failed      1.49%
+1577  Seq647     1.06%    passed     36.37%
+1578  Seq648     1.06%    passed     70.87%
+1579  Seq649     1.06%    passed     26.60%
+1580  Seq627     0.00%    passed     79.66%
+1581  Seq615     0.00%    passed     88.69%
+1582  Seq616     0.00%    passed     79.55%
+1583  Seq624     0.00%    passed     83.21%
+1584  Seq623     0.00%    passed     84.72%
+1585  Seq625     0.00%    passed     83.88%
+1586  Seq626     0.00%    passed     75.21%
+1587  Seq617     0.00%    passed     72.33%
+1588  Seq620     0.00%    passed     91.38%
+1589  Seq619     0.00%    passed     76.33%
+1590  Seq621     0.00%    passed     90.20%
+1591  Seq618     0.00%    passed     87.58%
+1592  Seq622     0.00%    passed     91.50%
+1593  Seq630     0.00%    passed     95.32%
+1594  Seq629     0.00%    passed     94.22%
+1595  Seq628     0.00%    passed     46.00%
+1596  Seq613     2.13%    passed     95.81%
+1597  Seq612     1.06%    passed     99.75%
+1598  Seq614     0.00%    passed      5.30%
+1599  Seq646     0.00%    passed     16.65%
+1600  Seq583     0.00%    passed     94.26%
+1601  Seq582     0.00%    passed     68.09%
+1602  Seq581     0.00%    passed     32.52%
+1603  Seq580     0.00%    passed     51.40%
+1604  Seq579     0.00%    passed     89.51%
+1605  Seq660     0.00%    passed     78.46%
+1606  Seq631     0.00%    passed     68.08%
+1607  Seq642     1.06%    failed      2.26%
+1608  Seq641     0.00%    passed     31.57%
+1609  Seq640     0.00%    passed     78.26%
+1610  Seq768     0.00%    passed     97.84%
+1611  Seq737     0.00%    passed     23.99%
+1612  Seq745     0.00%    passed     99.21%
+1613  Seq738     0.00%    passed     99.62%
+1614  Seq742     0.00%    passed     99.73%
+1615  Seq739     0.00%    passed     99.74%
+1616  Seq740     0.00%    passed     99.82%
+1617  Seq741     0.00%    passed     99.61%
+1618  Seq743     0.00%    passed     99.87%
+1619  Seq744     0.00%    passed     99.55%
+1620  Seq718     0.00%    passed     90.64%
+1621  Seq717     2.13%    passed     86.28%
+1622  Seq716     0.00%    passed     92.87%
+1623  Seq730     1.06%    passed     40.46%
+1624  Seq729     0.00%    passed     64.57%
+1625  Seq727     0.00%    passed     46.00%
+1626  Seq726     0.00%    passed     90.50%
+1627  Seq719     0.00%    passed     20.13%
+1628  Seq720     0.00%    passed     30.46%
+1629  Seq722     0.00%    passed     19.92%
+1630  Seq723     0.00%    passed     12.13%
+1631  Seq724     0.00%    failed      2.75%
+1632  Seq725     0.00%    passed      5.14%
+1633  Seq769     0.00%    passed     89.14%
+1634  Seq770     0.00%    passed     91.47%
+1635  Seq771     0.00%    passed     40.59%
+1636  Seq776     0.00%    passed     80.02%
+1637  Seq773     0.00%    passed     75.01%
+1638  Seq775     0.00%    passed     62.90%
+1639  Seq774     0.00%    passed     71.16%
+1640  Seq772     0.00%    passed     78.18%
+1641  Seq767     0.00%    passed     81.92%
+1642  Seq761     0.00%    passed     22.45%
+1643  Seq766     0.00%    passed     98.44%
+1644  Seq762     0.00%    passed     96.89%
+1645  Seq764     0.00%    passed     99.11%
+1646  Seq763     0.00%    passed     99.38%
+1647  Seq765     0.00%    passed     85.27%
+1648  Seq757     0.00%    passed     62.82%
+1649  Seq760     0.00%    passed     40.77%
+1650  Seq759     0.00%    passed     77.64%
+1651  Seq758     0.00%    passed     25.37%
+1652  Seq731     0.00%    passed     23.20%
+1653  Seq735     0.00%    passed     58.91%
+1654  Seq734     0.00%    passed     62.05%
+1655  Seq733     0.00%    passed     82.39%
+1656  Seq732     0.00%    passed     80.25%
+1657  Seq714     1.06%    passed     88.91%
+1658  Seq715     0.00%    passed     84.95%
+1659  Seq710     0.00%    passed     56.67%
+1660  Seq711     0.00%    passed     52.10%
+1661  Seq712     0.00%    passed     96.09%
+1662  Seq713     0.00%    passed     73.50%
+1663  Seq701     0.00%    passed     34.87%
+1664  Seq703     0.00%    passed     15.81%
+1665  Seq702     0.00%    passed     41.51%
+1666  Seq704     0.00%    passed     51.76%
+1667  Seq705     0.00%    passed     21.85%
+1668  Seq697     1.06%    passed     57.40%
+1669  Seq696     0.00%    passed     47.68%
+1670  Seq700     0.00%    passed     39.31%
+1671  Seq699     0.00%    passed     74.04%
+1672  Seq698     0.00%    passed     67.15%
+1673  Seq736     0.00%    passed     76.58%
+1674  Seq751     0.00%    passed     58.28%
+1675  Seq752     1.06%    passed     93.25%
+1676  Seq755     1.06%    passed     71.25%
+1677  Seq756     1.06%    passed     73.31%
+1678  Seq753     1.06%    passed     84.85%
+1679  Seq754     1.06%    passed     85.01%
+1680  Seq746     0.00%    passed     90.83%
+1681  Seq747     0.00%    passed     98.12%
+1682  Seq750     1.06%    passed     92.18%
+1683  Seq749     1.06%    passed     94.61%
+1684  Seq748     1.06%    passed     71.20%
+1685  Seq818     0.00%    failed      0.00%
+1686  Seq790     1.06%    passed     55.95%
+1687  Seq789     1.06%    passed     58.25%
+1688  Seq788     1.06%    passed     57.71%
+1689  Seq787     0.00%    passed      7.95%
+1690  Seq780     1.06%    passed     87.95%
+1691  Seq781     0.00%    passed     97.58%
+1692  Seq785     6.38%    passed     47.68%
+1693  Seq784     6.38%    passed     53.81%
+1694  Seq783     7.45%    passed     33.51%
+1695  Seq782     6.38%    failed      4.99%
+1696  Seq817     1.06%    passed     76.46%
+1697  Seq786     0.00%    passed     38.44%
+1698  Seq777     0.00%    passed     87.93%
+1699  Seq778     1.06%    failed      4.17%
+1700  Seq779     6.38%    passed     49.96%
+1701  Seq815     1.06%    passed     96.28%
+1702  Seq804     0.00%    passed     91.31%
+1703  Seq803     0.00%    passed     80.63%
+1704  Seq811     0.00%    passed     79.16%
+1705  Seq809     0.00%    passed     94.02%
+1706  Seq810     0.00%    passed     93.16%
+1707  Seq806     0.00%    passed     94.05%
+1708  Seq808     0.00%    passed     91.57%
+1709  Seq807     0.00%    passed     88.67%
+1710  Seq812     0.00%    passed     93.57%
+1711  Seq805     0.00%    passed     95.64%
+1712  Seq813     0.00%    passed     88.16%
+1713  Seq814     0.00%    passed     85.97%
+1714  Seq816     0.00%    passed     60.64%
+1715  Seq800     0.00%    passed     78.03%
+1716  Seq801     0.00%    passed     70.90%
+1717  Seq799     0.00%    passed     81.91%
+1718  Seq802     0.00%    passed     65.28%
+1719  Seq793     0.00%    failed      4.87%
+1720  Seq798     0.00%    passed     70.59%
+1721  Seq797     0.00%    passed     73.47%
+1722  Seq796     0.00%    passed     43.00%
+1723  Seq795     1.06%    passed     88.40%
+1724  Seq794     0.00%    passed     74.96%
+1725  Seq791     0.00%    passed     85.93%
+1726  Seq792     0.00%    passed     96.58%
+1727  Seq1697    5.32%    passed     12.03%
+****  TOTAL      1.85%  216 sequences failed composition chi2 test (p-value<5%; df=19)
+
+
+Create initial parsimony tree by phylogenetic likelihood library (PLL)... 0.986 seconds
+NOTE: ModelFinder requires 309 MB RAM!
+ModelFinder will test 546 protein models (sample size: 94) ...
+ No. Model         -LnL         df  AIC          AICc         BIC
+  1  Dayhoff       136493.979   3451 279889.959   24105593.959 288666.869
+  2  Dayhoff+I     136249.991   3452 279403.981   24118915.981 288183.435
+  3  Dayhoff+G4    132481.891   3452 271867.782   24111379.782 280647.236
+  4  Dayhoff+I+G4  132400.112   3453 271706.224   24125030.224 280488.221
+  5  Dayhoff+R2    133587.314   3453 274080.627   24127404.627 282862.624
+  6  Dayhoff+R3    132708.933   3455 272327.866   24153287.866 281114.949
+  7  Dayhoff+R4    132412.523   3457 271739.045   24180351.045 280531.215
+  8  Dayhoff+R5    132134.520   3459 271187.040   24207467.040 279984.297
+  9  Dayhoff+R6    132020.635   3461 270963.269   24234927.269 279765.613
+ 10  Dayhoff+R7    131983.221   3463 270892.443   24262556.443 279699.873
+ 11  Dayhoff+R8    131964.808   3465 270859.615   24290239.615 279672.132
+ 12  Dayhoff+R9    131943.701   3467 270821.402   24317933.402 279639.005
+ 13  Dayhoff+R10   131936.800   3469 270811.600   24345671.600 279634.289
+ 14  Dayhoff+F     136054.979   3470 279049.958   24367789.958 287875.191
+ 15  Dayhoff+F+I   135859.682   3471 278661.364   24381285.364 287489.140
+ 16  Dayhoff+F+G4  131937.462   3471 270816.924   24373440.924 279644.700
+ 17  Dayhoff+F+I+G4 131886.724   3472 270717.448   24387229.448 279547.767
+ 18  Dayhoff+F+R2  133019.348   3472 272982.696   24389494.696 281813.015
+ 19  Dayhoff+F+R3  132281.539   3474 271511.078   24415811.078 280346.484
+ 20  Dayhoff+F+R4  131838.547   3476 270629.094   24442733.094 279469.587
+ 21  Dayhoff+F+R5  131636.001   3478 270228.001   24470152.001 279073.580
+ 22  Dayhoff+F+R6  131538.811   3480 270037.622   24497797.622 278888.288
+ 23  Dayhoff+F+R7  131491.968   3482 269947.937   24525559.937 278803.689
+ 24  Dayhoff+F+R8  131456.558   3484 269881.117   24553361.117 278741.956
+ 25  Dayhoff+F+R9  131437.311   3486 269846.622   24581210.622 278712.548
+ 26  Dayhoff+F+R10 131417.616   3488 269811.231   24609075.231 278682.243
+ 27  mtMAM         153060.690   3451 313023.381   24138727.381 321800.291
+ 28  mtMAM+I       152982.793   3452 312869.587   24152381.587 321649.040
+ 29  mtMAM+G4      141897.370   3452 290698.739   24130210.739 299478.193
+ 30  mtMAM+I+G4    141879.832   3453 290665.664   24143989.664 299447.661
+ 31  mtMAM+R2      144908.555   3453 296723.111   24150047.111 305505.107
+ 32  mtMAM+R3      142751.148   3455 292412.295   24173372.295 301199.379
+ 33  mtMAM+R4      141971.206   3457 290856.412   24199468.412 299648.582
+ 34  mtMAM+R5      141676.369   3459 290270.737   24226550.737 299067.994
+ 35  mtMAM+R6      141548.248   3461 290018.497   24253982.497 298820.840
+ 36  mtMAM+R7      141472.818   3463 289871.635   24281535.635 298679.065
+ 37  mtMAM+R8      141426.547   3465 289783.095   24309163.095 298595.611
+ 38  mtMAM+R9      141364.311   3467 289662.622   24336774.622 298480.225
+ 39  mtMAM+R10     141336.735   3469 289611.470   24364471.470 298434.160
+ 40  mtMAM+F       145087.245   3470 297114.490   24385854.490 305939.723
+ 41  mtMAM+F+I     144997.124   3471 296936.248   24399560.248 305764.025
+ 42  mtMAM+F+G4    137468.467   3471 281878.935   24384502.935 290706.711
+ 43  mtMAM+F+I+G4  137450.947   3472 281845.894   24398357.894 290676.213
+ 44  mtMAM+F+R2    139145.293   3472 285234.585   24401746.585 294064.905
+ 45  mtMAM+F+R3    137847.627   3474 282643.255   24426943.255 291478.661
+ 46  mtMAM+F+R4    137403.998   3476 281759.997   24453863.997 290600.489
+ 47  mtMAM+F+R5    137137.561   3478 281231.122   24481155.122 290076.702
+ 48  mtMAM+F+R6    137071.803   3480 281103.606   24508863.606 289954.271
+ 49  mtMAM+F+R7    136964.318   3482 280892.637   24536504.637 289748.389
+ 50  mtMAM+F+R8    136805.318   3484 280578.637   24564058.637 289439.476
+ 51  mtMAM+F+R9    136798.420   3486 280568.840   24591932.840 289434.766
+ 52  mtMAM+F+R10   136756.748   3488 280489.497   24619753.497 289360.509
+ 53  JTT           135888.724   3451 278679.448   24104383.448 287456.358
+ 54  JTT+I         135598.853   3452 278101.706   24117613.706 286881.159
+ 55  JTT+G4        131567.677   3452 270039.354   24109551.354 278818.807
+ 56  JTT+I+G4      131473.943   3453 269853.885   24123177.885 278635.882
+ 57  JTT+R2        132792.286   3453 272490.571   24125814.571 281272.568
+ 58  JTT+R3        131937.409   3455 270784.819   24151744.819 279571.902
+ 59  JTT+R4        131524.843   3457 269963.685   24178575.685 278755.855
+ 60  JTT+R5        131378.590   3459 269675.180   24205955.180 278472.436
+ 61  JTT+R6        131267.142   3461 269456.284   24233420.284 278258.628
+ 62  JTT+R7        131216.194   3463 269358.388   24261022.388 278165.818
+ 63  JTT+R8        131118.170   3465 269166.340   24288546.340 277978.856
+ 64  JTT+R9        131071.756   3467 269077.511   24316189.511 277895.114
+ 65  JTT+R10       131071.706   3469 269081.413   24343941.413 277904.102
+ 66  JTT+F         135925.900   3470 278791.799   24367531.799 287617.032
+ 67  JTT+F+I       135662.467   3471 278266.934   24380890.934 287094.710
+ 68  JTT+F+G4      131614.339   3471 270170.677   24372794.677 278998.453
+ 69  JTT+F+I+G4    131550.750   3472 270045.500   24386557.500 278875.819
+ 70  JTT+F+R2      132811.520   3472 272567.039   24389079.039 281397.359
+ 71  JTT+F+R3      132016.003   3474 270980.006   24415280.006 279815.412
+ 72  JTT+F+R4      131590.130   3476 270132.260   24442236.260 278972.752
+ 73  JTT+F+R5      131430.872   3478 269817.744   24469741.744 278663.323
+ 74  JTT+F+R6      131341.255   3480 269642.509   24497402.509 278493.175
+ 75  JTT+F+R7      131293.237   3482 269550.474   24525162.474 278406.226
+ 76  JTT+F+R8      131210.167   3484 269388.335   24552868.335 278249.174
+ 77  JTT+F+R9      131152.435   3486 269276.870   24580640.870 278142.795
+ 78  JTT+F+R10     131152.424   3488 269280.848   24608544.848 278151.860
+ 79  WAG           134212.951   3451 275327.903   24101031.903 284104.813
+ 80  WAG+I         133947.993   3452 274799.986   24114311.986 283579.439
+ 81  WAG+G4        130686.388   3452 268276.776   24107788.776 277056.229
+ 82  WAG+I+G4      130605.598   3453 268117.196   24121441.196 276899.193
+ 83  WAG+R2        131661.502   3453 270229.003   24123553.003 279011.000
+ 84  WAG+R3        130945.291   3455 268800.581   24149760.581 277587.665
+ 85  WAG+R4        130602.186   3457 268118.372   24176730.372 276910.542
+ 86  WAG+R5        130511.356   3459 267940.711   24204220.711 276737.968
+ 87  WAG+R6        130402.979   3461 267727.959   24231691.959 276530.302
+ 88  WAG+R7        130401.572   3463 267729.144   24259393.144 276536.574
+ 92  WAG+F         134386.251   3470 275712.503   24364452.503 284537.736
+ 93  WAG+F+I       134145.519   3471 275233.038   24377857.038 284060.814
+ 94  WAG+F+G4      130755.901   3471 268453.803   24371077.803 277281.579
+ 95  WAG+F+I+G4    130689.923   3472 268323.846   24384835.846 277154.165
+ 96  WAG+F+R2      131721.857   3472 270387.714   24386899.714 279218.033
+ 97  WAG+F+R3      131055.407   3474 269058.813   24413358.813 277894.219
+ 98  WAG+F+R4      130684.437   3476 268320.874   24440424.874 277161.367
+ 99  WAG+F+R5      130598.832   3478 268153.664   24468077.664 276999.243
+100  WAG+F+R6      130512.553   3480 267985.106   24495745.106 276835.772
+101  WAG+F+R7      130512.526   3482 267989.051   24523601.051 276844.803
+105  cpREV         135392.827   3451 277687.653   24103391.653 286464.564
+106  cpREV+I       135153.240   3452 277210.479   24116722.479 285989.933
+107  cpREV+G4      131671.691   3452 270247.383   24109759.383 279026.836
+108  cpREV+I+G4    131601.095   3453 270108.189   24123432.189 278890.186
+109  cpREV+R2      132583.997   3453 272073.993   24125397.993 280855.990
+110  cpREV+R3      131919.345   3455 270748.689   24151708.689 279535.773
+111  cpREV+R4      131588.841   3457 270091.682   24178703.682 278883.852
+112  cpREV+R5      131489.822   3459 269897.643   24206177.643 278694.900
+113  cpREV+R6      131365.053   3461 269652.106   24233616.106 278454.449
+114  cpREV+R7      131364.862   3463 269655.723   24261319.723 278463.153
+118  cpREV+F       136187.524   3470 279315.048   24368055.048 288140.281
+119  cpREV+F+I     135938.984   3471 278819.969   24381443.969 287647.745
+120  cpREV+F+G4    132521.267   3471 271984.534   24374608.534 280812.310
+121  cpREV+F+I+G4  132449.508   3472 271843.016   24388355.016 280673.335
+122  cpREV+F+R2    133461.788   3472 273867.575   24390379.575 282697.895
+123  cpREV+F+R3    132829.767   3474 272607.534   24416907.534 281442.940
+124  cpREV+F+R4    132448.842   3476 271849.684   24443953.684 280690.176
+125  cpREV+F+R5    132352.275   3478 271660.551   24471584.551 280506.130
+126  cpREV+F+R6    132245.961   3480 271451.923   24499211.923 280302.589
+127  cpREV+F+R7    132245.784   3482 271455.567   24527067.567 280311.320
+131  mtREV         144947.914   3451 296797.828   24122501.828 305574.738
+132  mtREV+I       144875.049   3452 296654.098   24136166.098 305433.552
+133  mtREV+G4      138008.954   3452 282921.909   24122433.909 291701.362
+134  mtREV+I+G4    138044.971   3453 282995.941   24136319.941 291777.938
+135  mtREV+R2      139360.363   3453 285626.725   24138950.725 294408.722
+136  mtREV+R3      138304.100   3455 283518.200   24164478.200 292305.284
+137  mtREV+R4      138002.585   3457 282919.170   24191531.170 291711.340
+138  mtREV+R5      137864.055   3459 282646.110   24218926.110 291443.366
+139  mtREV+R6      137593.542   3461 282109.084   24246073.084 290911.427
+140  mtREV+R7      137593.507   3463 282113.013   24273777.013 290920.443
+144  mtREV+F       138549.492   3470 284038.984   24372778.984 292864.217
+145  mtREV+F+I     138456.091   3471 283854.181   24386478.181 292681.957
+146  mtREV+F+G4    133485.638   3471 273913.277   24376537.277 282741.053
+147  mtREV+F+I+G4  133425.556   3472 273795.111   24390307.111 282625.431
+148  mtREV+F+R2    134606.612   3472 276157.224   24392669.224 284987.544
+149  mtREV+F+R3    133886.532   3474 274721.063   24419021.063 283556.469
+150  mtREV+F+R4    133497.605   3476 273947.210   24446051.210 282787.703
+151  mtREV+F+R5    133339.122   3478 273634.245   24473558.245 282479.824
+152  mtREV+F+R6    133130.702   3480 273221.404   24500981.404 282072.069
+153  mtREV+F+R7    133129.205   3482 273222.411   24528834.411 282078.163
+157  rtREV         135388.762   3451 277679.524   24103383.524 286456.434
+158  rtREV+I       135121.306   3452 277146.611   24116658.611 285926.065
+159  rtREV+G4      131044.053   3452 268992.106   24108504.106 277771.560
+160  rtREV+I+G4    130965.371   3453 268836.743   24122160.743 277618.740
+161  rtREV+R2      132195.373   3453 271296.747   24124620.747 280078.743
+162  rtREV+R3      131461.807   3455 269833.614   24150793.614 278620.697
+163  rtREV+R4      131036.622   3457 268987.243   24177599.243 277779.414
+164  rtREV+R5      130929.542   3459 268777.085   24205057.085 277574.341
+165  rtREV+R6      130784.493   3461 268490.986   24232454.986 277293.329
+166  rtREV+R7      130784.158   3463 268494.317   24260158.317 277301.747
+170  rtREV+F       134903.330   3470 276746.661   24365486.661 285571.893
+171  rtREV+F+I     134678.763   3471 276299.527   24378923.527 285127.303
+172  rtREV+F+G4    130558.619   3471 268059.238   24370683.238 276887.015
+173  rtREV+F+I+G4  130487.995   3472 267919.989   24384431.989 276750.309
+174  rtREV+F+R2    131613.544   3472 270171.088   24386683.088 279001.407
+175  rtREV+F+R3    130998.174   3474 268944.349   24413244.349 277779.755
+176  rtREV+F+R4    130543.591   3476 268039.182   24440143.182 276879.675
+177  rtREV+F+R5    130429.722   3478 267815.445   24467739.445 276661.024
+178  rtREV+F+R6    130281.538   3480 267523.077   24495283.077 276373.742
+179  rtREV+F+R7    130280.760   3482 267525.520   24523137.520 276381.272
+183  mtART         149608.872   3451 306119.744   24131823.744 314896.654
+184  mtART+I       149575.705   3452 306055.411   24145567.411 314834.864
+185  mtART+G4      139359.490   3452 285622.979   24125134.979 294402.433
+186  mtART+I+G4    139352.405   3453 285610.811   24138934.811 294392.807
+187  mtART+R2      141537.164   3453 289980.327   24143304.327 298762.324
+188  mtART+R3      139960.933   3455 286831.865   24167791.865 295618.949
+189  mtART+R4      139587.987   3457 286089.973   24194701.973 294882.144
+190  mtART+R5      139418.426   3459 285754.852   24222034.852 294552.109
+191  mtART+R6      138978.398   3461 284878.796   24248842.796 293681.139
+192  mtART+R7      138975.950   3463 284877.900   24276541.900 293685.329
+196  mtART+F       142393.537   3470 291727.074   24380467.074 300552.307
+197  mtART+F+I     142317.926   3471 291577.852   24394201.852 300405.628
+198  mtART+F+G4    135040.594   3471 277023.188   24379647.188 285850.964
+199  mtART+F+I+G4  134858.304   3472 276660.607   24393172.607 285490.927
+200  mtART+F+R2    136456.108   3472 279856.216   24396368.216 288686.535
+201  mtART+F+R3    135398.198   3474 277744.396   24422044.396 286579.802
+202  mtART+F+R4    135007.854   3476 276967.707   24449071.707 285808.200
+203  mtART+F+R5    134870.457   3478 276696.913   24476620.913 285542.492
+204  mtART+F+R6    134633.947   3480 276227.894   24503987.894 285078.560
+205  mtART+F+R7    134631.819   3482 276227.639   24531839.639 285083.391
+209  mtZOA         143815.955   3451 294533.911   24120237.911 303310.821
+210  mtZOA+I       143759.224   3452 294422.448   24133934.448 303201.901
+211  mtZOA+G4      135417.656   3452 277739.313   24117251.313 286518.766
+212  mtZOA+I+G4    135387.277   3453 277680.554   24131004.554 286462.551
+213  mtZOA+R2      136948.935   3453 280803.871   24134127.871 289585.868
+214  mtZOA+R3      135771.732   3455 278453.463   24159413.463 287240.547
+215  mtZOA+R4      135465.320   3457 277844.640   24186456.640 286636.810
+216  mtZOA+R5      135311.217   3459 277540.434   24213820.434 286337.690
+217  mtZOA+R6      135084.070   3461 277090.141   24241054.141 285892.484
+218  mtZOA+R7      135080.151   3463 277086.303   24268750.303 285893.732
+222  mtZOA+F       138914.503   3470 284769.006   24373509.006 293594.239
+223  mtZOA+F+I     138806.059   3471 284554.118   24387178.118 293381.894
+224  mtZOA+F+G4    132961.592   3471 272865.184   24375489.184 281692.960
+225  mtZOA+F+I+G4  132937.171   3472 272818.341   24389330.341 281648.661
+226  mtZOA+F+R2    134101.871   3472 275147.742   24391659.742 283978.061
+227  mtZOA+F+R3    133307.621   3474 273563.243   24417863.243 282398.649
+228  mtZOA+F+R4    132938.125   3476 272828.250   24444932.250 281668.743
+229  mtZOA+F+R5    132810.935   3478 272577.870   24472501.870 281423.449
+230  mtZOA+F+R6    132580.315   3480 272120.630   24499880.630 280971.296
+231  mtZOA+F+R7    132580.113   3482 272124.225   24527736.225 280979.978
+235  VT            134649.156   3451 276200.311   24101904.311 284977.222
+236  VT+I          134395.825   3452 275695.650   24115207.650 284475.104
+237  VT+G4         130987.700   3452 268879.399   24108391.399 277658.853
+238  VT+I+G4       130916.261   3453 268738.522   24122062.522 277520.519
+239  VT+R2         132018.439   3453 270942.878   24124266.878 279724.875
+240  VT+R3         131265.126   3455 269440.252   24150400.252 278227.336
+241  VT+R4         130927.973   3457 268769.946   24177381.946 277562.116
+242  VT+R5         130837.472   3459 268592.945   24204872.945 277390.202
+243  VT+R6         130726.090   3461 268374.179   24232338.179 277176.523
+244  VT+R7         130726.029   3463 268378.059   24260042.059 277185.488
+248  VT+F          134831.210   3470 276602.420   24365342.420 285427.653
+249  VT+F+I        134591.311   3471 276124.622   24378748.622 284952.399
+250  VT+F+G4       131150.079   3471 269242.158   24371866.158 278069.934
+251  VT+F+I+G4     131083.856   3472 269111.712   24385623.712 277942.032
+252  VT+F+R2       132154.284   3472 271252.568   24387764.568 280082.887
+253  VT+F+R3       131458.705   3474 269865.411   24414165.411 278700.817
+254  VT+F+R4       131090.373   3476 269132.746   24441236.746 277973.239
+255  VT+F+R5       131000.999   3478 268957.999   24468881.999 277803.578
+256  VT+F+R6       130917.512   3480 268795.024   24496555.024 277645.690
+257  VT+F+R7       130917.501   3482 268799.001   24524411.001 277654.754
+261  LG            133933.224   3451 274768.448   24100472.448 283545.358
+262  LG+I          133678.948   3452 274261.897   24113773.897 283041.350
+263  LG+G4         129529.988   3452 265963.977   24105475.977 274743.430
+264  LG+I+G4       129466.871   3453 265839.742   24119163.742 274621.739
+265  LG+R2         130677.959   3453 268261.918   24121585.918 277043.915
+266  LG+R3         129981.753   3455 266873.507   24147833.507 275660.590
+267  LG+R4         129509.642   3457 265933.284   24174545.284 274725.454
+268  LG+R5         129405.038   3459 265728.077   24202008.077 274525.333
+269  LG+R6         129285.207   3461 265492.413   24229456.413 274294.756
+270  LG+R7         129285.203   3463 265496.405   24257160.405 274303.835
+274  LG+F          134261.557   3470 275463.114   24364203.114 284288.347
+275  LG+F+I        134023.646   3471 274989.292   24377613.292 283817.069
+276  LG+F+G4       129870.069   3471 266682.139   24369306.139 275509.915
+277  LG+F+I+G4     129810.028   3472 266564.056   24383076.056 275394.375
+278  LG+F+R2       130939.607   3472 268823.215   24385335.215 277653.534
+279  LG+F+R3       130349.826   3474 267647.653   24411947.653 276483.059
+280  LG+F+R4       129850.806   3476 266653.612   24438757.612 275494.105
+281  LG+F+R5       129759.075   3478 266474.151   24466398.151 275319.730
+282  LG+F+R6       129636.008   3480 266232.016   24493992.016 275082.682
+283  LG+F+R7       129635.968   3482 266235.937   24521847.937 275091.689
+287  DCMut         136494.999   3451 279891.997   24105595.997 288668.908
+288  DCMut+I       136251.073   3452 279406.146   24118918.146 288185.600
+289  DCMut+G4      132488.399   3452 271880.798   24111392.798 280660.251
+290  DCMut+I+G4    132398.656   3453 271703.312   24125027.312 280485.309
+291  DCMut+R2      133591.720   3453 274089.441   24127413.441 282871.438
+292  DCMut+R3      132714.573   3455 272339.146   24153299.146 281126.230
+293  DCMut+R4      132432.370   3457 271778.739   24180390.739 280570.909
+294  DCMut+R5      132306.810   3459 271531.621   24207811.621 280328.877
+295  DCMut+R6      132136.177   3461 271194.354   24235158.354 279996.697
+296  DCMut+R7      132112.944   3463 271151.887   24262815.887 279959.317
+297  DCMut+R8      131982.552   3465 270895.105   24290275.105 279707.621
+298  DCMut+R9      131964.248   3467 270862.495   24317974.495 279680.098
+299  DCMut+R10     131964.164   3469 270866.328   24345726.328 279689.018
+300  DCMut+F       136049.588   3470 279039.177   24367779.177 287864.409
+301  DCMut+F+I     135854.421   3471 278650.842   24381274.842 287478.618
+302  DCMut+F+G4    131937.316   3471 270816.631   24373440.631 279644.407
+303  DCMut+F+I+G4  131886.576   3472 270717.153   24387229.153 279547.472
+304  DCMut+F+R2    133018.079   3472 272980.158   24389492.158 281810.478
+305  DCMut+F+R3    132281.068   3474 271510.135   24415810.135 280345.541
+306  DCMut+F+R4    131920.957   3476 270793.914   24442897.914 279634.407
+307  DCMut+F+R5    131770.199   3478 270496.398   24470420.398 279341.977
+308  DCMut+F+R6    131637.138   3480 270234.277   24497994.277 279084.943
+309  DCMut+F+R7    131622.898   3482 270209.796   24525821.796 279065.549
+310  DCMut+F+R8    131498.308   3484 269964.616   24553444.616 278825.455
+311  DCMut+F+R9    131452.560   3486 269877.120   24581241.120 278743.046
+312  DCMut+F+R10   131452.533   3488 269881.065   24609145.065 278752.077
+313  PMB           135413.059   3451 277728.117   24103432.117 286505.027
+314  PMB+I         135177.873   3452 277259.745   24116771.745 286039.199
+315  PMB+G4        131733.265   3452 270370.529   24109882.529 279149.983
+316  PMB+I+G4      131665.937   3453 270237.875   24123561.875 279019.872
+317  PMB+R2        132707.552   3453 272321.103   24125645.103 281103.100
+318  PMB+R3        132008.810   3455 270927.621   24151887.621 279714.704
+319  PMB+R4        131643.684   3457 270201.369   24178813.369 278993.539
+320  PMB+R5        131508.164   3459 269934.327   24206214.327 278731.584
+321  PMB+R6        131424.137   3461 269770.273   24233734.273 278572.616
+322  PMB+R7        131419.263   3463 269764.526   24261428.526 278571.956
+323  PMB+R8        131322.374   3465 269574.747   24288954.747 278387.264
+324  PMB+R9        131308.946   3467 269551.892   24316663.892 278369.495
+325  PMB+R10       131308.413   3469 269554.826   24344414.826 278377.515
+326  PMB+F         135790.435   3470 278520.870   24367260.870 287346.103
+327  PMB+F+I       135554.529   3471 278051.059   24380675.059 286878.835
+328  PMB+F+G4      132110.536   3471 271163.072   24373787.072 279990.848
+329  PMB+F+I+G4    132049.537   3472 271043.074   24387555.074 279873.394
+330  PMB+F+R2      133094.175   3472 273132.351   24389644.351 281962.670
+331  PMB+F+R3      132398.227   3474 271744.455   24416044.455 280579.861
+332  PMB+F+R4      132031.887   3476 271015.775   24443119.775 279856.267
+333  PMB+F+R5      131912.514   3478 270781.027   24470705.027 279626.606
+334  PMB+F+R6      131824.328   3480 270608.655   24498368.655 279459.321
+335  PMB+F+R7      131820.533   3482 270605.066   24526217.066 279460.818
+339  HIVb          140580.233   3451 288062.466   24113766.466 296839.376
+340  HIVb+I        140197.646   3452 287299.293   24126811.293 296078.746
+341  HIVb+G4       135231.746   3452 277367.492   24116879.492 286146.946
+342  HIVb+I+G4     135126.994   3453 277159.989   24130483.989 285941.985
+343  HIVb+R2       136824.074   3453 280554.147   24133878.147 289336.144
+344  HIVb+R3       135813.013   3455 278536.027   24159496.027 287323.110
+345  HIVb+R4       135213.963   3457 277341.927   24185953.927 286134.097
+346  HIVb+R5       135077.124   3459 277072.249   24213352.249 285869.506
+347  HIVb+R6       134882.711   3461 276687.421   24240651.421 285489.765
+348  HIVb+R7       134879.846   3463 276685.693   24268349.693 285493.123
+352  HIVb+F        140599.690   3470 288139.380   24376879.380 296964.613
+353  HIVb+F+I      140238.786   3471 287419.571   24390043.571 296247.347
+354  HIVb+F+G4     135251.740   3471 277445.480   24380069.480 286273.256
+355  HIVb+F+I+G4   135164.265   3472 277272.529   24393784.529 286102.849
+356  HIVb+F+R2     136827.004   3472 280598.008   24397110.008 289428.328
+357  HIVb+F+R3     135889.471   3474 278726.942   24423026.942 287562.348
+358  HIVb+F+R4     135298.398   3476 277548.796   24449652.796 286389.289
+359  HIVb+F+R5     135103.327   3478 277162.653   24477086.653 286008.233
+360  HIVb+F+R6     134963.725   3480 276887.450   24504647.450 285738.116
+361  HIVb+F+R7     134962.969   3482 276889.938   24532501.938 285745.691
+365  HIVw          146732.005   3451 300366.009   24126070.009 309142.919
+366  HIVw+I        146296.854   3452 299497.708   24139009.708 308277.161
+367  HIVw+G4       141633.691   3452 290171.382   24129683.382 298950.836
+368  HIVw+I+G4     141524.913   3453 289955.825   24143279.825 298737.822
+369  HIVw+R2       143125.620   3453 293157.239   24146481.239 301939.236
+370  HIVw+R3       142032.218   3455 290974.435   24171934.435 299761.519
+371  HIVw+R4       141533.848   3457 289981.697   24198593.697 298773.867
+372  HIVw+R5       141415.355   3459 289748.710   24226028.710 298545.966
+373  HIVw+R6       141319.315   3461 289560.630   24253524.630 298362.973
+374  HIVw+R7       141318.355   3463 289562.710   24281226.710 298370.140
+378  HIVw+F        144724.218   3470 296388.436   24385128.436 305213.669
+379  HIVw+F+I      144351.034   3471 295644.068   24398268.068 304471.844
+380  HIVw+F+G4     139734.294   3471 286410.588   24389034.588 295238.364
+381  HIVw+F+I+G4   139644.236   3472 286232.473   24402744.473 295062.792
+382  HIVw+F+R2     141205.319   3472 289354.639   24405866.639 298184.958
+383  HIVw+F+R3     140197.133   3474 287342.266   24431642.266 296177.672
+384  HIVw+F+R4     139727.709   3476 286407.418   24458511.418 295247.911
+385  HIVw+F+R5     139556.761   3478 286069.521   24485993.521 294915.101
+386  HIVw+F+R6     139476.476   3480 285912.953   24513672.953 294763.619
+387  HIVw+F+R7     139475.596   3482 285915.193   24541527.193 294770.945
+391  JTTDCMut      135857.845   3451 278617.690   24104321.690 287394.600
+392  JTTDCMut+I    135566.666   3452 278037.332   24117549.332 286816.785
+393  JTTDCMut+G4   131539.471   3452 269982.941   24109494.941 278762.395
+394  JTTDCMut+I+G4 131451.661   3453 269809.323   24123133.323 278591.320
+395  JTTDCMut+R2   132766.899   3453 272439.797   24125763.797 281221.794
+396  JTTDCMut+R3   131917.144   3455 270744.288   24151704.288 279531.371
+397  JTTDCMut+R4   131505.441   3457 269924.883   24178536.883 278717.053
+398  JTTDCMut+R5   131363.997   3459 269645.993   24205925.993 278443.250
+399  JTTDCMut+R6   131256.886   3461 269435.773   24233399.773 278238.116
+400  JTTDCMut+R7   131254.831   3463 269435.662   24261099.662 278243.092
+404  JTTDCMut+F    135904.949   3470 278749.898   24367489.898 287575.131
+405  JTTDCMut+F+I  135641.880   3471 278225.760   24380849.760 287053.536
+406  JTTDCMut+F+G4 131603.785   3471 270149.570   24372773.570 278977.346
+407  JTTDCMut+F+I+G4 131540.065   3472 270024.130   24386536.130 278854.450
+408  JTTDCMut+F+R2 132798.328   3472 272540.657   24389052.657 281370.976
+409  JTTDCMut+F+R3 132001.823   3474 270951.647   24415251.647 279787.053
+410  JTTDCMut+F+R4 131575.591   3476 270103.182   24442207.182 278943.675
+411  JTTDCMut+F+R5 131416.971   3478 269789.942   24469713.942 278635.521
+412  JTTDCMut+F+R6 131329.753   3480 269619.505   24497379.505 278470.171
+413  JTTDCMut+F+R7 131328.475   3482 269620.949   24525232.949 278476.701
+417  FLU           138845.263   3451 284592.527   24110296.527 293369.437
+418  FLU+I         138474.100   3452 283852.200   24123364.200 292631.654
+419  FLU+G4        134001.620   3452 274907.240   24114419.240 283686.694
+420  FLU+I+G4      133911.587   3453 274729.174   24128053.174 283511.171
+421  FLU+R2        135265.244   3453 277436.489   24130760.489 286218.486
+422  FLU+R3        134304.590   3455 275519.180   24156479.180 284306.264
+423  FLU+R4        133925.053   3457 274764.107   24183376.107 283556.277
+424  FLU+R5        133794.751   3459 274507.502   24210787.502 283304.759
+425  FLU+R6        133709.616   3461 274341.231   24238305.231 283143.575
+426  FLU+R7        133709.240   3463 274344.480   24266008.480 283151.910
+430  FLU+F         139123.657   3470 285187.314   24373927.314 294012.546
+431  FLU+F+I       138772.050   3471 284486.100   24387110.100 293313.877
+432  FLU+F+G4      134194.552   3471 275331.104   24377955.104 284158.880
+433  FLU+F+I+G4    134108.777   3472 275161.553   24391673.553 283991.873
+434  FLU+F+R2      135443.236   3472 277830.472   24394342.472 286660.792
+435  FLU+F+R3      134609.518   3474 276167.036   24420467.036 285002.442
+436  FLU+F+R4      134200.766   3476 275353.532   24447457.532 284194.024
+437  FLU+F+R5      134047.699   3478 275051.398   24474975.398 283896.978
+438  FLU+F+R6      133956.327   3480 274872.654   24502632.654 283723.320
+439  FLU+F+R7      133956.084   3482 274876.168   24530488.168 283731.921
+443  Blosum62      135101.220   3451 277104.441   24102808.441 285881.351
+444  Blosum62+I    134863.284   3452 276630.569   24116142.569 285410.022
+445  Blosum62+G4   131500.611   3452 269905.223   24109417.223 278684.676
+446  Blosum62+I+G4 131432.202   3453 269770.403   24123094.403 278552.400
+447  Blosum62+R2   132434.986   3453 271775.971   24125099.971 280557.968
+448  Blosum62+R3   131788.225   3455 270486.451   24151446.451 279273.534
+449  Blosum62+R4   131428.125   3457 269770.251   24178382.251 278562.421
+450  Blosum62+R5   131311.024   3459 269540.047   24205820.047 278337.304
+451  Blosum62+R6   131253.572   3461 269429.144   24233393.144 278231.487
+452  Blosum62+R7   131253.471   3463 269432.942   24261096.942 278240.372
+456  Blosum62+F    135557.556   3470 278055.111   24366795.111 286880.344
+457  Blosum62+F+I  135320.104   3471 277582.208   24380206.208 286409.984
+458  Blosum62+F+G4 131969.608   3471 270881.215   24373505.215 279708.992
+459  Blosum62+F+I+G4 131901.788   3472 270747.577   24387259.577 279577.896
+460  Blosum62+F+R2 132918.065   3472 272780.129   24389292.129 281610.449
+461  Blosum62+F+R3 132274.349   3474 271496.698   24415796.698 280332.104
+462  Blosum62+F+R4 131906.616   3476 270765.232   24442869.232 279605.725
+463  Blosum62+F+R5 131808.470   3478 270572.940   24470496.940 279418.519
+464  Blosum62+F+R6 131742.574   3480 270445.148   24498205.148 279295.814
+465  Blosum62+F+R7 131742.484   3482 270448.969   24526060.969 279304.721
+469  mtMet         145297.946   3451 297497.892   24123201.892 306274.802
+470  mtMet+I       145208.520   3452 297321.039   24136833.039 306100.493
+471  mtMet+G4      137811.461   3452 282526.921   24122038.921 291306.375
+472  mtMet+I+G4    137782.833   3453 282471.665   24135795.665 291253.662
+473  mtMet+R2      139158.755   3453 285223.510   24138547.510 294005.507
+474  mtMet+R3      138129.508   3455 283169.016   24164129.016 291956.100
+475  mtMet+R4      137774.145   3457 282462.290   24191074.290 291254.460
+476  mtMet+R5      137699.067   3459 282316.133   24218596.133 291113.390
+477  mtMet+R6      137543.713   3461 282009.426   24245973.426 290811.769
+478  mtMet+R7      137542.094   3463 282010.188   24273674.188 290817.617
+482  mtMet+F       139195.948   3470 285331.895   24374071.895 294157.128
+483  mtMet+F+I     139076.534   3471 285095.069   24387719.069 293922.845
+484  mtMet+F+G4    133606.827   3471 274155.654   24376779.654 282983.430
+485  mtMet+F+I+G4  133589.320   3472 274122.640   24390634.640 282952.959
+486  mtMet+F+R2    134787.864   3472 276519.728   24393031.728 285350.048
+487  mtMet+F+R3    133997.188   3474 274942.376   24419242.376 283777.782
+488  mtMet+F+R4    133635.611   3476 274223.222   24446327.222 283063.715
+489  mtMet+F+R5    133445.643   3478 273847.286   24473771.286 282692.865
+490  mtMet+F+R6    133260.691   3480 273481.382   24501241.382 282332.047
+491  mtMet+F+R7    133259.570   3482 273483.139   24529095.139 282338.892
+495  mtVer         148227.778   3451 303357.557   24129061.557 312134.467
+496  mtVer+I       148117.564   3452 303139.127   24142651.127 311918.581
+497  mtVer+G4      139802.951   3452 286509.903   24126021.903 295289.357
+498  mtVer+I+G4    139769.555   3453 286445.110   24139769.110 295227.107
+499  mtVer+R2      141335.207   3453 289576.415   24142900.415 298358.412
+500  mtVer+R3      140387.796   3455 287685.593   24168645.593 296472.676
+501  mtVer+R4      139882.316   3457 286678.631   24195290.631 295470.801
+502  mtVer+R5      139694.609   3459 286307.219   24222587.219 295104.475
+503  mtVer+R6      139512.188   3461 285946.377   24249910.377 294748.720
+504  mtVer+R7      139512.182   3463 285950.364   24277614.364 294757.794
+508  mtVer+F       141884.183   3470 290708.367   24379448.367 299533.600
+509  mtVer+F+I     141764.020   3471 290470.041   24393094.041 299297.817
+510  mtVer+F+G4    136037.860   3471 279017.720   24381641.720 287845.496
+511  mtVer+F+I+G4  136022.591   3472 278989.183   24395501.183 287819.502
+512  mtVer+F+R2    137420.074   3472 281784.148   24398296.148 290614.467
+513  mtVer+F+R3    136504.849   3474 279957.697   24424257.697 288793.103
+514  mtVer+F+R4    136129.975   3476 279211.950   24451315.950 288052.443
+515  mtVer+F+R5    135945.977   3478 278847.954   24478771.954 287693.533
+516  mtVer+F+R6    135768.787   3480 278497.575   24506257.575 287348.241
+517  mtVer+F+R7    135768.785   3482 278501.570   24534113.570 287357.323
+521  mtInv         144546.850   3451 295995.700   24121699.700 304772.610
+522  mtInv+I       144448.846   3452 295801.691   24135313.691 304581.145
+523  mtInv+G4      137824.142   3452 282552.283   24122064.283 291331.737
+524  mtInv+I+G4    137812.632   3453 282531.265   24135855.265 291313.262
+525  mtInv+R2      139121.220   3453 285148.441   24138472.441 293930.437
+526  mtInv+R3      138213.579   3455 283337.159   24164297.159 292124.242
+527  mtInv+R4      137865.365   3457 282644.730   24191256.730 291436.900
+528  mtInv+R5      137722.640   3459 282363.279   24218643.279 291160.536
+529  mtInv+R6      137564.034   3461 282050.069   24246014.069 290852.412
+530  mtInv+R7      137564.028   3463 282054.055   24273718.055 290861.485
+534  mtInv+F       137425.054   3470 281790.108   24370530.108 290615.341
+535  mtInv+F+I     137291.398   3471 281524.795   24384148.795 290352.571
+536  mtInv+F+G4    132430.812   3471 271803.625   24374427.625 280631.401
+537  mtInv+F+I+G4  132407.585   3472 271759.169   24388271.169 280589.489
+538  mtInv+F+R2    133521.695   3472 273987.391   24390499.391 282817.710
+539  mtInv+F+R3    132827.936   3474 272603.872   24416903.872 281439.278
+540  mtInv+F+R4    132412.964   3476 271777.928   24443881.928 280618.421
+541  mtInv+F+R5    132239.035   3478 271434.071   24471358.071 280279.650
+542  mtInv+F+R6    132064.228   3480 271088.456   24498848.456 279939.122
+543  mtInv+F+R7    132064.223   3482 271092.446   24526704.446 279948.199
+Akaike Information Criterion:           LG+R6
+Corrected Akaike Information Criterion: LG
+Bayesian Information Criterion:         LG+R6
+Best-fit model: LG+R6 chosen according to BIC
+
+All model information printed to /mnt/ws/home/hlouw/iqtree-project/seq_msa_char_pf02033.fasta.model.gz
+CPU time for ModelFinder: 13475.696 seconds (3h:44m:35s)
+Wall-clock time for ModelFinder: 13525.646 seconds (3h:45m:25s)
+Generating 1000 samples for ultrafast bootstrap (seed: 469552)...
+
+NOTE: 186 MB RAM (0 GB) is required!
+Estimate model parameters (epsilon = 0.100)
+1. Initial log-likelihood: -129271.427
+2. Current log-likelihood: -129226.543
+3. Current log-likelihood: -129210.824
+4. Current log-likelihood: -129209.245
+Optimal log-likelihood: -129209.117
+Site proportion and rates:  (0.053,0.087) (0.107,0.311) (0.298,0.600) (0.193,0.984) (0.255,1.416) (0.095,2.459)
+Parameters optimization took 4 rounds (42.255 sec)
+Computing ML distances based on estimated model parameters... 866.823 sec
+WARNING: Some pairwise ML distances are too long (saturated)
+Computing BIONJ tree...
+6.619 seconds
+Log-likelihood of BIONJ tree: -129121.763
+--------------------------------------------------------------------
+|             INITIALIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+Generating 98 parsimony trees... 101.510 second
+Computing log-likelihood of 98 initial trees ... 242.285 seconds
+Current best score: -128893.861
+
+Do NNI search on 20 best initial trees
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 1: -128137.938
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 2: -127906.306
+Iteration 10 / LogL: -128178.052 / Time: 0h:30m:57s
+Iteration 20 / LogL: -128059.807 / Time: 0h:41m:5s
+Finish initializing candidate tree set (20)
+Current best tree score: -127906.306 / CPU time: 1537.427
+Number of iterations: 20
+--------------------------------------------------------------------
+|               OPTIMIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 22: -127815.370
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 27: -127814.112
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 29: -127801.573
+Iteration 30 / LogL: -127950.567 / Time: 0h:49m:20s (2h:48m:25s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 33: -127798.252
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 37: -127795.503
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 38: -127708.700
+Iteration 40 / LogL: -127838.220 / Time: 0h:56m:55s (2h:23m:1s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 46: -127593.588
+Iteration 50 / LogL: -127726.155 / Time: 1h:3m:41s (2h:4m:47s left)
+Log-likelihood cutoff on original alignment: -128069.977
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 59: -127587.694
+Iteration 60 / LogL: -127752.279 / Time: 1h:10m:37s (1h:58m:31s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 65: -127539.809
+Iteration 70 / LogL: -127682.443 / Time: 1h:17m:10s (1h:46m:15s left)
+Iteration 80 / LogL: -127727.815 / Time: 1h:23m:36s (1h:29m:57s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 85: -127479.956
+Iteration 90 / LogL: -127557.162 / Time: 1h:30m:7s (1h:36m:11s left)
+Iteration 100 / LogL: -127597.386 / Time: 1h:36m:34s (1h:22m:54s left)
+Log-likelihood cutoff on original alignment: -127949.958
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.844
+NOTE: UFBoot does not converge, continue at least 100 more iterations
+Iteration 110 / LogL: -127522.526 / Time: 1h:43m:10s (1h:25m:11s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 112: -127449.001
+Iteration 120 / LogL: -127490.609 / Time: 1h:50m:30s (1h:25m:26s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 124: -127430.714
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 126: -127415.909
+Iteration 130 / LogL: -127515.851 / Time: 1h:57m:40s (1h:27m:34s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 134: -127370.735
+Iteration 140 / LogL: -127402.411 / Time: 2h:3m:46s (1h:23m:42s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 146: -127367.212
+Iteration 150 / LogL: -127413.409 / Time: 2h:9m:49s (1h:23m:38s left)
+Log-likelihood cutoff on original alignment: -127599.484
+Iteration 160 / LogL: -127444.727 / Time: 2h:15m:51s (1h:13m:28s left)
+Iteration 170 / LogL: -127501.356 / Time: 2h:21m:31s (1h:3m:38s left)
+Iteration 180 / LogL: -127481.107 / Time: 2h:27m:34s (0h:54m:24s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 185: -127355.666
+Iteration 190 / LogL: -127465.647 / Time: 2h:33m:45s (1h:17m:17s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 191: -127330.134
+Iteration 200 / LogL: -127420.549 / Time: 2h:39m:58s (1h:13m:9s left)
+Log-likelihood cutoff on original alignment: -127598.886
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.881
+NOTE: UFBoot does not converge, continue at least 100 more iterations
+Iteration 210 / LogL: -127364.803 / Time: 2h:45m:49s (1h:11m:24s left)
+Iteration 220 / LogL: -127393.804 / Time: 2h:51m:32s (1h:2m:39s left)
+Iteration 230 / LogL: -127417.311 / Time: 2h:57m:30s (0h:54m:15s left)
+Iteration 240 / LogL: -127429.010 / Time: 3h:3m:28s (0h:46m:3s left)
+Iteration 250 / LogL: -127454.862 / Time: 3h:9m:27s (0h:38m:2s left)
+Log-likelihood cutoff on original alignment: -127598.886
+Iteration 260 / LogL: -127446.304 / Time: 3h:16m:1s (0h:30m:16s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 261: -127299.986
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 269: -127292.972
+Iteration 270 / LogL: -127426.525 / Time: 3h:22m:56s (1h:14m:41s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 274: -127268.599
+Iteration 280 / LogL: -127384.393 / Time: 3h:29m:4s (1h:10m:26s left)
+Iteration 290 / LogL: -127309.630 / Time: 3h:35m:14s (1h:2m:33s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 292: -127245.433
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 300: -127240.995
+Iteration 300 / LogL: -127240.995 / Time: 3h:41m:35s (1h:14m:6s left)
+Log-likelihood cutoff on original alignment: -127525.780
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.863
+NOTE: UFBoot does not converge, continue at least 100 more iterations
+Iteration 310 / LogL: -127340.907 / Time: 3h:47m:38s (1h:6m:18s left)
+Iteration 320 / LogL: -127393.850 / Time: 3h:53m:45s (0h:58m:37s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 329: -127214.681
+Iteration 330 / LogL: -127249.244 / Time: 3h:59m:57s (1h:12m:12s left)
+Iteration 340 / LogL: -127350.135 / Time: 4h:5m:57s (1h:4m:34s left)
+Iteration 350 / LogL: -127339.511 / Time: 4h:12m:6s (0h:57m:4s left)
+Log-likelihood cutoff on original alignment: -127523.047
+Iteration 360 / LogL: -127300.002 / Time: 4h:18m:14s (0h:49m:38s left)
+Iteration 370 / LogL: -127322.039 / Time: 4h:24m:15s (0h:42m:15s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 372: -127208.221
+Iteration 380 / LogL: -127301.477 / Time: 4h:30m:46s (1h:5m:43s left)
+Iteration 390 / LogL: -127242.614 / Time: 4h:37m:6s (0h:58m:24s left)
+Iteration 400 / LogL: -127245.591 / Time: 4h:43m:35s (0h:51m:10s left)
+Log-likelihood cutoff on original alignment: -127523.047
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.870
+NOTE: UFBoot does not converge, continue at least 100 more iterations
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 403: -127205.693
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 408: -127204.085
+Iteration 410 / LogL: -127279.924 / Time: 4h:50m:32s (1h:9m:37s left)
+Iteration 420 / LogL: -127457.801 / Time: 4h:56m:43s (1h:2m:19s left)
+Iteration 430 / LogL: -127296.041 / Time: 5h:3m:1s (0h:55m:5s left)
+Iteration 440 / LogL: -127245.707 / Time: 5h:9m:18s (0h:47m:54s left)
+Iteration 450 / LogL: -127274.548 / Time: 5h:16m:2s (0h:40m:49s left)
+Log-likelihood cutoff on original alignment: -127523.047
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 453: -127201.944
+Iteration 460 / LogL: -127307.357 / Time: 5h:22m:23s (1h:5m:19s left)
+Iteration 470 / LogL: -127256.307 / Time: 5h:28m:57s (0h:58m:12s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 473: -127195.579
+Iteration 480 / LogL: -127231.518 / Time: 5h:35m:46s (1h:5m:11s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 481: -127179.423
+Iteration 490 / LogL: -127205.219 / Time: 5h:42m:4s (1h:3m:39s left)
+Iteration 500 / LogL: -127301.094 / Time: 5h:48m:20s (0h:56m:32s left)
+Log-likelihood cutoff on original alignment: -127429.090
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.896
+NOTE: UFBoot does not converge, continue at least 100 more iterations
+Iteration 510 / LogL: -127319.155 / Time: 5h:54m:27s (1h:2m:40s left)
+Iteration 520 / LogL: -127294.047 / Time: 6h:0m:39s (0h:55m:35s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 522: -127168.300
+Iteration 530 / LogL: -127204.341 / Time: 6h:6m:49s (1h:3m:47s left)
+Iteration 540 / LogL: -127331.310 / Time: 6h:12m:59s (0h:56m:44s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 546: -127166.189
+Iteration 550 / LogL: -127223.671 / Time: 6h:18m:59s (1h:6m:16s left)
+Log-likelihood cutoff on original alignment: -127429.090
+Iteration 560 / LogL: -127234.351 / Time: 6h:25m:0s (0h:59m:13s left)
+Iteration 570 / LogL: -127242.407 / Time: 6h:31m:2s (0h:52m:13s left)
+Iteration 580 / LogL: -127414.496 / Time: 6h:37m:2s (0h:45m:15s left)
+Iteration 590 / LogL: -127185.721 / Time: 6h:42m:50s (0h:38m:18s left)
+Iteration 600 / LogL: -127308.422 / Time: 6h:48m:48s (0h:31m:23s left)
+Log-likelihood cutoff on original alignment: -127429.090
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.928
+NOTE: UFBoot does not converge, continue at least 100 more iterations
+Iteration 610 / LogL: -127234.801 / Time: 6h:54m:49s (1h:1m:18s left)
+Iteration 620 / LogL: -127245.091 / Time: 7h:0m:41s (0h:54m:22s left)
+Iteration 630 / LogL: -127255.119 / Time: 7h:6m:35s (0h:47m:28s left)
+Iteration 640 / LogL: -127180.651 / Time: 7h:12m:27s (0h:40m:36s left)
+Iteration 650 / LogL: -127188.650 / Time: 7h:18m:38s (0h:33m:47s left)
+Log-likelihood cutoff on original alignment: -127429.090
+Iteration 660 / LogL: -127291.463 / Time: 7h:25m:0s (0h:27m:0s left)
+Iteration 670 / LogL: -127250.511 / Time: 7h:31m:7s (0h:20m:13s left)
+Iteration 680 / LogL: -127376.019 / Time: 7h:36m:58s (0h:13m:27s left)
+Iteration 690 / LogL: -127277.182 / Time: 7h:42m:59s (0h:6m:43s left)
+Iteration 700 / LogL: -127207.632 / Time: 7h:49m:12s (0h:0m:0s left)
+Log-likelihood cutoff on original alignment: -127429.090
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.937
+NOTE: UFBoot does not converge, continue at least 100 more iterations
+Iteration 710 / LogL: -127289.208 / Time: 7h:55m:39s (1h:0m:22s left)
+Iteration 720 / LogL: -127365.682 / Time: 8h:1m:49s (0h:53m:36s left)
+Iteration 730 / LogL: -127192.879 / Time: 8h:7m:59s (0h:46m:51s left)
+Iteration 740 / LogL: -127172.400 / Time: 8h:14m:21s (0h:40m:8s left)
+Iteration 750 / LogL: -127192.497 / Time: 8h:20m:38s (0h:33m:25s left)
+Log-likelihood cutoff on original alignment: -127429.090
+Iteration 760 / LogL: -127256.073 / Time: 8h:27m:2s (0h:26m:43s left)
+Iteration 770 / LogL: -127266.657 / Time: 8h:33m:8s (0h:20m:1s left)
+Iteration 780 / LogL: -127240.329 / Time: 8h:39m:15s (0h:13m:19s left)
+Iteration 790 / LogL: -127173.784 / Time: 8h:45m:24s (0h:6m:39s left)
+Iteration 800 / LogL: -127371.717 / Time: 8h:51m:42s (0h:0m:0s left)
+Log-likelihood cutoff on original alignment: -127429.090
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.951
+NOTE: UFBoot does not converge, continue at least 100 more iterations
+Iteration 810 / LogL: -127256.921 / Time: 8h:57m:50s (0h:59m:50s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 813: -127161.874
+Iteration 820 / LogL: -127225.700 / Time: 9h:4m:10s (1h:1m:47s left)
+Iteration 830 / LogL: -127177.710 / Time: 9h:10m:31s (0h:55m:7s left)
+Iteration 840 / LogL: -127264.875 / Time: 9h:16m:52s (0h:48m:27s left)
+Iteration 850 / LogL: -127227.010 / Time: 9h:23m:1s (0h:41m:46s left)
+Log-likelihood cutoff on original alignment: -127429.090
+Iteration 860 / LogL: -127264.811 / Time: 9h:29m:26s (0h:35m:8s left)
+Iteration 870 / LogL: -127295.159 / Time: 9h:35m:46s (0h:28m:29s left)
+Iteration 880 / LogL: -127315.761 / Time: 9h:41m:56s (0h:21m:50s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 883: -127153.166
+Iteration 890 / LogL: -127271.279 / Time: 9h:48m:13s (1h:1m:32s left)
+Iteration 900 / LogL: -127262.561 / Time: 9h:54m:6s (0h:54m:51s left)
+Log-likelihood cutoff on original alignment: -127429.090
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.955
+NOTE: UFBoot does not converge, continue at least 100 more iterations
+Iteration 910 / LogL: -127232.655 / Time: 10h:0m:21s (0h:59m:26s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 918: -127152.122
+Iteration 920 / LogL: -127155.910 / Time: 10h:6m:42s (1h:4m:41s left)
+Iteration 930 / LogL: -127227.031 / Time: 10h:12m:40s (0h:58m:2s left)
+Iteration 940 / LogL: -127245.755 / Time: 10h:18m:56s (0h:51m:24s left)
+Iteration 950 / LogL: -127242.370 / Time: 10h:24m:57s (0h:44m:46s left)
+Log-likelihood cutoff on original alignment: -127429.090
+Iteration 960 / LogL: -127253.095 / Time: 10h:31m:9s (0h:38m:10s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 967: -127150.323
+Iteration 970 / LogL: -127330.585 / Time: 10h:37m:21s (1h:3m:48s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 978: -127138.231
+Iteration 980 / LogL: -127202.736 / Time: 10h:43m:38s (1h:4m:25s left)
+Iteration 990 / LogL: -127190.487 / Time: 10h:49m:39s (0h:57m:48s left)
+Iteration 1000 / LogL: -127229.751 / Time: 10h:55m:48s (0h:51m:12s left)
+Log-likelihood cutoff on original alignment: -127429.090
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.963
+NOTE: UFBoot does not converge, continue at least 100 more iterations
+WARNING: bootstrap analysis did not converge. You should rerun with higher number of iterations (-nm option)
+TREE SEARCH COMPLETED AFTER 1001 ITERATIONS / Time: 10h:56m:34s
+
+--------------------------------------------------------------------
+|                    FINALIZING TREE SEARCH                        |
+--------------------------------------------------------------------
+Performs final model parameters optimization
+Estimate model parameters (epsilon = 0.010)
+1. Initial log-likelihood: -127138.231
+Optimal log-likelihood: -127138.230
+Site proportion and rates:  (0.053,0.085) (0.107,0.313) (0.319,0.618) (0.207,1.050) (0.219,1.445) (0.096,2.421)
+Parameters optimization took 1 rounds (4.789 sec)
+BEST SCORE FOUND : -127138.230
+Creating bootstrap support values...
+Split supports printed to NEXUS file /mnt/ws/home/hlouw/iqtree-project/seq_msa_char_pf02033.fasta.splits.nex
+Total tree length: 435.317
+
+Total number of iterations: 1001
+CPU time used for tree search: 38353.461 sec (10h:39m:13s)
+Wall-clock time used for tree search: 38465.208 sec (10h:41m:5s)
+Total CPU time used: 39293.850 sec (10h:54m:53s)
+Total wall-clock time used: 39407.751 sec (10h:56m:47s)
+
+Computing bootstrap consensus tree...
+Reading input file /mnt/ws/home/hlouw/iqtree-project/seq_msa_char_pf02033.fasta.splits.nex...
+1727 taxa and 10349 splits.
+Consensus tree written to /mnt/ws/home/hlouw/iqtree-project/seq_msa_char_pf02033.fasta.contree
+Reading input trees file /mnt/ws/home/hlouw/iqtree-project/seq_msa_char_pf02033.fasta.contree
+Log-likelihood of consensus tree: -127106.289
+
+Analysis results written to: 
+  IQ-TREE report:                /mnt/ws/home/hlouw/iqtree-project/seq_msa_char_pf02033.fasta.iqtree
+  Maximum-likelihood tree:       /mnt/ws/home/hlouw/iqtree-project/seq_msa_char_pf02033.fasta.treefile
+  Likelihood distances:          /mnt/ws/home/hlouw/iqtree-project/seq_msa_char_pf02033.fasta.mldist
+
+Ultrafast bootstrap approximation results written to:
+  Split support values:          /mnt/ws/home/hlouw/iqtree-project/seq_msa_char_pf02033.fasta.splits.nex
+  Consensus tree:                /mnt/ws/home/hlouw/iqtree-project/seq_msa_char_pf02033.fasta.contree
+  Screen log file:               /mnt/ws/home/hlouw/iqtree-project/seq_msa_char_pf02033.fasta.log
+
+Date and Time: Fri Aug 30 05:17:13 2024
