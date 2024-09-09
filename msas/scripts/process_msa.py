@@ -104,27 +104,27 @@ def get_seqs(msa_file_path, sim):
     If the MSA is simulated, the file is in a format that we have to handle by creating a new temporary file. 
     In addition, the MSA in this case includes ancestral sequences that we want to exclude (those whose names don't begin with N).
     """
-    if sim:
-        with open(msa_file_path, 'r') as file_handle:
-            with open("temp.txt", 'w') as temp_file:
-                for i, line in enumerate(file_handle):
-                    if i >= 17:
-                        temp_file.write(line)
-        msa_file_path = "temp.txt"
-    format = "tab" if sim else "fasta"
-    # Initialize dictionary that will be returned
     seq_dict = {} # sequence id -> sequence
     count_sequences = 0
-    with open(msa_file_path, 'r') as file_handle:
-        for record in SeqIO.parse(file_handle, format):
-            if sim and record.id[0] != "N":
-                continue
-            count_sequences += 1
-            seq_dict[record.id] = str(record.seq).upper()
-            if count_sequences > MAX_SEQS:
-                break
     if sim:
-        remove("temp.txt")
+        with open(msa_file_path, 'r') as file_handle:
+           for i, line in enumerate(file_handle):
+                if i < 17 or line[0] != "N":
+                    continue
+                count_sequences += 1
+                id, seq = line.split()
+                seq_dict[id] = str(seq).upper()
+                if count_sequences > MAX_SEQS:
+                    break
+    else:
+        with open(msa_file_path, 'r') as file_handle:
+            for record in SeqIO.parse(file_handle, "fasta"):
+                if sim and record.id[0] != "N":
+                    continue
+                count_sequences += 1
+                seq_dict[record.id] = str(record.seq).upper()
+                if count_sequences > MAX_SEQS:
+                    break
     return seq_dict
 
 def remove_gaps(seq_dict, query_seq_id):
@@ -220,13 +220,12 @@ def one_hot_encode(seq_ary):
     return seq_ary_binary
 
 def main():
-    
     #### Preliminary steps and loading in the unprocessed MSA ########
     args = parse_commands()
     # Get PFAM accession to use as a directory name for file saving/loading
     msa_file_path = args.MSA
     acc, ext = path.splitext(path.basename(msa_file_path))
-    if ext in ["dat", "txt"]: # Non Psicov data
+    if ext in [".dat", ".txt"]: # Non Psicov data
         acc = acc.split("_")[0]
         if args.simul:
             num_seqs = path.dirname(msa_file_path).split("/")[-1]
@@ -240,7 +239,6 @@ def main():
         processed_directory = f"real/processed/{acc}"
     if not path.exists(processed_directory):
         makedirs(processed_directory)
-        
     # Save the mapping between characters and indices
     with open(f"{processed_directory}/aa_index.pkl", 'wb') as file_handle:
         pickle.dump(AA_INDEX, file_handle)
@@ -259,6 +257,7 @@ def main():
             pickle.dump(euk_ids, file_handle)
     else:
         seq_dict, euk_ids = get_seqs(msa_file_path, args.simul), None
+    
 
     # ensure that the query accession is in the MSA
     assert args.query_seq_id in seq_dict, f"Query accession {args.query_seq_id} not found in MSA"

@@ -28,14 +28,14 @@ The value of test and training loss, as well as test reconstruction accuracy, af
 4. The next step is to generate embeddings of the leaf sequences from this model. The file `embeddings/config.json` specifies the dataset (MSA) and fitted model you want to generate embeddings for/from. Simply run 
 
 ```
-python embeddings/gen_embeddings.py embeddings/config.json
+python embeddings/gen_embeddings.py embeddings/config_gen.json
 ```
 This will write the embeddings as a CSV file to the folder `embeddings/data/independent_sims/1250/COG28-l100-s1-aNone`
 
 5. Now that we have embedding of the leaf sequences, we want to use a Brownian motion model to infer embeddings at the internal nodes. In other words, we want to reconstruct "ancestral embeddings". For this purpose, we use the R package **Rphylopars**, which has functionality for scalable multivariate phylogenetic comparative analysis. To obtain ancestral reconstruction of embeddings, run 
 
 ```
-Rscript embeddings/scripts/embeddings_asr.R msas/independent_sims/processed/1250/COG28-l100-s1-aNone model_ld2_wd0_epoch30_2024-08-26
+Rscript embeddings/embeddings_asr.R msas/independent_sims/processed/1250/COG28-l100-s1-aNone model_ld2_wd0_epoch30_2024-08-26
 ```
 
 This will write a csv of ancestral embeddings into the same folder as the embeddings of the leaf sequences from step 4. 
