@@ -84,7 +84,7 @@ def get_modal_seq(data_path, idx_to_aa_dict):
 def run_iqtree(MSA_id, data_path, n_seq):
     with open(f"{data_path}/final_seq_names.txt") as file:
         final_seq_names = file.read().splitlines()
-    to_fasta(f"{data_path}/seq_msa_char.txt", f"{data_path}/seq_msa_char.fas", final_seq_names)
+    to_fasta(f"{data_path}/seq_msa_char.txt", f"{data_path}/seq_msa_char.fas", keep=final_seq_names)
     family = MSA_id.split("-")[0]
     tree_path = f"trees/fast_trees/{n_seq}/{family}.sim.trim.tree_revised"
     os.system(f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fas -m LG -te {tree_path} -asr -quiet")
@@ -186,9 +186,9 @@ def main():
     print("-" * 50)
 
     #run iqtree ancestral sequence reconstruction and evaluate
+    print("Evaluating iqtree ancestral sequences")
     run_iqtree(MSA_id, data_path, n_seq)
     iqtree_seqs = get_iqtree_ancseqs(data_path, n_seq, anc_id)
-    print("Evaluating iqtree ancestral sequences")
     evaluate_seqs(iqtree_seqs, real_seqs)
     print("-" * 50)
 
