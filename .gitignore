@@ -2,3 +2,7 @@
 *.Rhistory
 .vscode/
 exploration.ipynb
+
+# cache
+*__pycache__/
+.RData
