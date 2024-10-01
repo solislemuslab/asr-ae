@@ -33,11 +33,13 @@ echo "Enter Gamma rate heterogeneity (default 'None'):"
 read gamma_rate
 gamma_rate=${gamma_rate:-"None"}  # Default to 'None' if no input is provided
 
-echo "Enter the MSA family (e.g., COG28):"
+echo "Enter the MSA family (default 'COG28'):"
 read msa_family
+msa_family=${msa_family:-"COG28"}  # Default to 'None' if no input is provided
 
-echo "Enter the number of sequences (e.g., 1250):"
+echo "Enter the number of sequences (default "1250"):"
 read num_sequences
+num_sequences=${num_sequences:-"1250"}  # Default to 'None' if no input is provided
 
 echo "Enter the query sequence (e.g., N1):"
 read query_sequence
@@ -48,7 +50,7 @@ cd msas  # Step 1 and 2 are run from the msas directory
 ./scripts/gen_all_independent_msas.sh -l $sequence_length -s $branch_length -a $gamma_rate
 
 # Step 2: Process MSA for the Variational AutoEncoder
-python scripts/process_msa.py independent_sims/raw/$num_sequences/${msa_family}-l${sequence_length}-s${branch_length}-a${gamma_rate}_msa.dat $query_sequence --simul
+python scripts/process_msa.py independent_sims/raw/${num_sequences}/${msa_family}-l${sequence_length}-s${branch_length}-a${gamma_rate}_msa.dat $query_sequence --simul
 echo "MSAs generated and processed successfully!"
 
 cd ..  # Move back to the root directory
@@ -173,7 +175,7 @@ echo "Inferring ancestral embeddings..."
 # Step 5: Infer ancestral embeddings
 Rscript embeddings/embeddings_asr.R msas/independent_sims/processed/$num_sequences/$msa_id $model_id
 
-msa_path="msas/independent_sims/raw/$num_sequences/$msa_id"
+msa_path="msas/independent_sims/raw/$num_sequences/${msa_id}_msa.dat"
 echo "MSA path: $msa_path"
 config_file="embeddings/config_decode.json"
 tmp_file="tmp_config.json"
@@ -195,6 +197,6 @@ fi
 mv "$tmp_file" "$config_file"
 echo "embeddings/config_decode.json updated successfully!"
 
-# echo "Decoding reconstructed embeddings..."
-# # Step 6: Decode reconstructed embeddings
-# python embeddings/decode_recon_embeds.py embeddings/config_decode.json
+echo "Decoding reconstructed embeddings..."
+# Step 6: Decode reconstructed embeddings
+python embeddings/decode_recon_embeds.py embeddings/config_decode.json

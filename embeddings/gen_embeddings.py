@@ -1,5 +1,6 @@
 import sys
 import os 
+import re
 import json
 import matplotlib.pyplot as plt
 import numpy as np
@@ -84,7 +85,8 @@ def main():
     # load model
     model_dir = get_directory(data_path, MSA_id, "saved_models")
     model_path = f"{model_dir}/{model_name}"
-    model = load_model(model_path, nl, nc)
+    ld = int(re.search(r'ld(\d+)', model_name).group(1))
+    model = load_model(model_path, nl, nc, nlatent = ld)
     # get embeddings
     mu = get_embeddings(model, msa_binary)
     # plot embeddings
