@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 import json
 import numpy as np
 import matplotlib.pyplot as plt
@@ -87,7 +88,7 @@ def run_iqtree(MSA_id, data_path, n_seq):
     to_fasta(f"{data_path}/seq_msa_char.txt", f"{data_path}/seq_msa_char.fas", keep=final_seq_names)
     family = MSA_id.split("-")[0]
     tree_path = f"trees/fast_trees/{n_seq}/{family}.sim.trim.tree_revised"
-    os.system(f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fas -m LG -te {tree_path} -asr -quiet")
+    os.system(f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fas -m LG -te {tree_path} -asr -redo -quiet")
 
 def get_iqtree_ancseqs(data_path, n_seq, anc_id):
     iq_df = pd.read_table(f'{data_path}/seq_msa_char.fas.state', header=8)
@@ -151,7 +152,8 @@ def main():
     nc = 21
     model_dir = get_directory(data_path, MSA_id, "saved_models")
     model_path = os.path.join(model_dir, model_name)
-    model = load_model(model_path, nl, nc)
+    ld = int(re.search(r'ld(\d+)', model_name).group(1))
+    model = load_model(model_path, nl, nc, nlatent = ld)
 
     # get our reconstructed ancestral embeddings
     embeds_dir = get_directory(data_path, MSA_id, "embeddings", data_subfolder=True)
