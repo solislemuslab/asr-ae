@@ -12,7 +12,7 @@ do
    esac
 done
 
-# if parameterA=none, set h to empty string "", else set variable het to the string "-a $parameterA"
+# if parameterA=none, set het to empty string "", else set variable het to the string "-a $parameterA"
 if [ "$parameterA" = "None" ]; then
     het=""
 else

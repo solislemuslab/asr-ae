@@ -3,11 +3,9 @@ import os
 import re
 import json
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import pickle
 import torch
-from Bio import SeqIO
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from autoencoder.modules.model import load_model
 from utilities.utils import get_directory

@@ -4,6 +4,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+def load_model(model_path, nl, nc, nlatent=2):
+    """
+    Load the model from the model path.
+    """
+    model = VAE(nl = nl, nc = nc, dim_latent_vars=nlatent) # initiate to have the right architecture for loading
+    model_state_dict = torch.load(model_path)
+    model.load_state_dict(model_state_dict)
+    return model
+
 
 class VAE(nn.Module):
     def __init__(self, nl, nc=21, dim_latent_vars=10, num_hidden_units=[256, 256]):
@@ -50,8 +59,7 @@ class VAE(nn.Module):
         """
         encoder transforms x into latent space z
         """
-        # convert from matrix to vector by concatenating rows (which are one-hot vectors)
-        h = torch.flatten(x, start_dim=-2)  # start_dim=-2 to maintain batch dimension
+        h = torch.flatten(x, start_dim=-2)  # concatenates the one-hot vectors
         for T in self.encoder_linears:
             h = T(h)
             h = F.relu(h)
@@ -61,40 +69,44 @@ class VAE(nn.Module):
 
     def decoder(self, z):
         """
-        decoder transforms latent space z into p, which is the probability  of x being 1.
+        decoder transforms latent space z into probability distributions over amino-acids for every position in seq
         """
         h = z
         for i in range(len(self.decoder_linears) - 1):
             h = self.decoder_linears[i](h)
             h = F.relu(h)
-        h = self.decoder_linears[-1](h)  # Should now have dimension nc * nl
-
-        fixed_shape = tuple(h.shape[0:-1])
-        h = torch.unsqueeze(h, -1)
-        h = torch.reshape(h, fixed_shape + (-1, self.nc))
-        log_p = F.log_softmax(h, dim=-1)
-        # log_p = torch.reshape(log_p, fixed_shape + (-1,))
-
+        h = self.decoder_linears[-1](h) # batch_shape x (nl*nc) 
+        batch_shape = tuple(h.shape[0:-1]) 
+        h = h.view(batch_shape + (self.nl, self.nc)) # batch_shape x nl x nc
+        log_p = F.log_softmax(h, dim=-1) # batch shape x nl x nc 
         return log_p
 
     def compute_weighted_elbo(self, x, weight):
-        # sample z from q(z|x)
+        weight = weight / torch.sum(weight)
+        
+        ## sample z from q(z|x)
         mu, sigma = self.encoder(x)
         eps = torch.randn_like(sigma)
-        z = mu + sigma * eps
+        z = mu + sigma*eps
 
-        # compute log p(x|z)
+        ## compute log p(x|z)
         log_p = self.decoder(z)
-        log_PxGz = torch.sum(x * log_p, [-1, -2])  # sum over both position and character dimension
+        log_PxGz = torch.sum(x*log_p, [-1, -2]) # sum over both site and character dims
+        weighted_log_PxGz = log_PxGz * weight
 
-        # compute elbo
-        elbo = log_PxGz - torch.sum(0.5 * (sigma ** 2 + mu ** 2 - 2 * torch.log(sigma) - 1), -1)
-        weight = weight / torch.sum(weight)
-        elbo = torch.sum(elbo * weight)
+        ## compute kl
+        kl =  torch.sum(0.5*(sigma**2 + mu**2 - 2*torch.log(sigma) - 1), -1)
+        weighted_kl = kl*weight
 
-        return elbo
+        ## compute elbo
+        weighted_elbo = weighted_log_PxGz - weighted_kl
+        
+        ## return averages
+        weighted_ave_elbo = torch.sum(weighted_elbo)
+        weighted_ave_log_PxGz = torch.sum(weighted_log_PxGz)
+        return weighted_ave_elbo, weighted_ave_log_PxGz
 
-    def compute_elbo_with_multiple_samples(self, x, num_samples):
+    def compute_elbo_with_multiple_samples(self, x, num_samples=100):
         """
         Evidence lower bound is an lower bound of log P(x). Although it is a lower
         bound, we can use elbo to approximate log P(x).
@@ -122,7 +134,18 @@ class VAE(nn.Module):
             weight = torch.exp(log_weight)
             elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
             return elbo
-
+    
+    def compute_acc(self, x):
+        '''
+        Calculates the Hamming accuracy (i.e. percent residue identity)
+        '''
+        with torch.no_grad():    
+            real_aa_idxs = torch.argmax(x, -1)
+            mu, _ = self.encoder(x)
+            log_p = self.decoder(mu)
+            pred_aa_idxs = torch.argmax(log_p, -1)
+            recon_acc = torch.mean((real_aa_idxs == pred_aa_idxs).float(), -1)
+            return recon_acc
 
 class LVAE(nn.Module):
     def __init__(self, nl, nc=21, dim_latent_vars=10, num_hidden_units=[256, 256]):
@@ -170,20 +193,16 @@ class LVAE(nn.Module):
 
     def decoder(self, z):
         """
-        decoder transforms latent space z into p, which is the probability  of x being 1.
+        decoder transforms latent space z into probability distributions over amino-acids for every position in seq
         """
         h = z
         for i in range(len(self.decoder_linears) - 1):
             h = self.decoder_linears[i](h)
             h = F.relu(h)
-        h = self.decoder_linears[-1](h)  #Should now have dimension nc*nl
-
-        fixed_shape = tuple(h.shape[0:-1])
-        h = torch.unsqueeze(h, -1)
-        h = torch.reshape(h, fixed_shape + (-1, self.nc))
-        log_p = F.log_softmax(h, dim=-1)
-        # log_p = torch.reshape(log_p, fixed_shape + (-1,))
-
+        h = self.decoder_linears[-1](h) # batch_shape x (nl*nc) 
+        batch_shape = tuple(h.shape[0:-1]) 
+        h = h.view(batch_shape + (self.nl, self.nc)) # batch_shape x nl x nc
+        log_p = F.log_softmax(h, dim=-1) # batch shape x nl x nc 
         return log_p
 
     def compute_weighted_elbo(self, x, weight):
@@ -330,12 +349,9 @@ class TVAE(nn.Module):
         h = torch.flatten(h, start_dim=-2)
         h = self.linear2(h)
 
-        fixed_shape = tuple(h.shape[0:-1])
-        h = torch.unsqueeze(h, -1)
-        h = torch.reshape(h, fixed_shape + (-1, self.nc))
-        log_p = F.log_softmax(h, dim=-1)
-        # log_p = torch.reshape(log_p, fixed_shape + (-1,))
-
+        batch_shape = tuple(h.shape[0:-1]) 
+        h = h.view(batch_shape + (self.nl, self.nc)) # batch_shape x nl x nc
+        log_p = F.log_softmax(h, dim=-1) # batch shape x nl x nc 
         return log_p
 
     def compute_weighted_elbo(self, x, weight):
@@ -389,11 +405,3 @@ class TVAE(nn.Module):
             return elbo
 
 
-def load_model(model_path, nl, nc, nlatent=2):
-    """
-    Load the model from the model path.
-    """
-    model = VAE(nl = nl, nc = nc, dim_latent_vars=nlatent) # initiate to have the right architecture for loading
-    model_state_dict = torch.load(model_path)
-    model.load_state_dict(model_state_dict)
-    return model
