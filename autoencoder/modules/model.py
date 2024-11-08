@@ -7,6 +7,8 @@ import torch.nn.functional as F
 def load_model(model_path, nl, nc, nlatent=2):
     """
     Load the model from the model path.
+    TODO: Allow loading transformer, allow different number of hidden layers than default...
+    TODO: Determine model type and archictecture based on model path name
     """
     model = VAE(nl = nl, nc = nc, dim_latent_vars=nlatent) # initiate to have the right architecture for loading
     model_state_dict = torch.load(model_path)
@@ -206,21 +208,29 @@ class LVAE(nn.Module):
         return log_p
 
     def compute_weighted_elbo(self, x, weight):
-        # sample z from q(z|x)
+        weight = weight / torch.sum(weight)
+        
+        ## sample z from q(z|x)
         mu, sigma = self.encoder(x)
         eps = torch.randn_like(sigma)
-        z = mu + sigma * eps
+        z = mu + sigma*eps
 
-        # compute log p(x|z)
+        ## compute log p(x|z)
         log_p = self.decoder(z)
-        log_PxGz = torch.sum(x * log_p, [-1, -2])  # sum over both position and character dimension
+        log_PxGz = torch.sum(x*log_p, [-1, -2]) # sum over both site and character dims
+        weighted_log_PxGz = log_PxGz * weight
 
-        # compute elbo
-        elbo = log_PxGz - torch.sum(0.5 * (sigma ** 2 + mu ** 2 - 2 * torch.log(sigma) - 1), -1)
-        weight = weight / torch.sum(weight)
-        elbo = torch.sum(elbo * weight)
+        ## compute kl
+        kl =  torch.sum(0.5*(sigma**2 + mu**2 - 2*torch.log(sigma) - 1), -1)
+        weighted_kl = kl*weight
 
-        return elbo
+        ## compute elbo
+        weighted_elbo = weighted_log_PxGz - weighted_kl
+        
+        ## return averages
+        weighted_ave_elbo = torch.sum(weighted_elbo)
+        weighted_ave_log_PxGz = torch.sum(weighted_log_PxGz)
+        return weighted_ave_elbo, weighted_ave_log_PxGz
 
     def compute_elbo_with_multiple_samples(self, x, num_samples):
         """
@@ -256,7 +266,18 @@ class LVAE(nn.Module):
             weight = torch.exp(log_weight)
             elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
             return elbo
-
+    
+    def compute_acc(self, x):
+        '''
+        Calculates the Hamming accuracy (i.e. percent residue identity)
+        '''
+        with torch.no_grad():    
+            real_aa_idxs = torch.argmax(x, -1)
+            mu, _ = self.encoder(x)
+            log_p = self.decoder(mu)
+            pred_aa_idxs = torch.argmax(log_p, -1)
+            recon_acc = torch.mean((real_aa_idxs == pred_aa_idxs).float(), -1)
+            return recon_acc
 
 class TVAE(nn.Module):
     def __init__(
@@ -355,22 +376,29 @@ class TVAE(nn.Module):
         return log_p
 
     def compute_weighted_elbo(self, x, weight):
-        # sample z from q(z|x)
+        weight = weight / torch.sum(weight)
+        
+        ## sample z from q(z|x)
         mu, sigma = self.encoder(x)
         eps = torch.randn_like(sigma)
-        z = mu + sigma * eps
+        z = mu + sigma*eps
 
-        # compute log p(x|z)
+        ## compute log p(x|z)
         log_p = self.decoder(z)
-        # sum over both position and character dimension
-        log_PxGz = torch.sum(x * log_p, [-1, -2])
+        log_PxGz = torch.sum(x*log_p, [-1, -2]) # sum over both site and character dims
+        weighted_log_PxGz = log_PxGz * weight
 
-        # compute elbo
-        elbo = log_PxGz - torch.sum(0.5 * (sigma ** 2 + mu ** 2 - 2 * torch.log(sigma) - 1), -1)
-        weight = weight / torch.sum(weight)
-        elbo = torch.sum(elbo * weight)
+        ## compute kl
+        kl =  torch.sum(0.5*(sigma**2 + mu**2 - 2*torch.log(sigma) - 1), -1)
+        weighted_kl = kl*weight
 
-        return elbo
+        ## compute elbo
+        weighted_elbo = weighted_log_PxGz - weighted_kl
+        
+        ## return averages
+        weighted_ave_elbo = torch.sum(weighted_elbo)
+        weighted_ave_log_PxGz = torch.sum(weighted_log_PxGz)
+        return weighted_ave_elbo, weighted_ave_log_PxGz
 
     def compute_elbo_with_multiple_samples(self, x, num_samples):
         """
@@ -404,4 +432,14 @@ class TVAE(nn.Module):
             elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
             return elbo
 
-
+    def compute_acc(self, x):
+        '''
+        Calculates the Hamming accuracy (i.e. percent residue identity)
+        '''
+        with torch.no_grad():    
+            real_aa_idxs = torch.argmax(x, -1)
+            mu, _ = self.encoder(x)
+            log_p = self.decoder(mu)
+            pred_aa_idxs = torch.argmax(log_p, -1)
+            recon_acc = torch.mean((real_aa_idxs == pred_aa_idxs).float(), -1)
+            return recon_acc
