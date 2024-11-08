@@ -3,86 +3,14 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import pickle
 from sklearn.model_selection import train_test_split
 import sys
 import torch
 from torch.utils.data import DataLoader
 import torch.optim as optim
-
 from modules.model import VAE, TVAE
-from modules.data import MSA_Dataset
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from utilities.utils import get_directory
-
-def load_data(data_path):
-    """
-    Load the data from the data path.
-    """
-    with open(f"{data_path}/seq_msa_binary.pkl", 'rb') as file_handle:
-        msa_binary = torch.tensor(pickle.load(file_handle))
-    nl = msa_binary.shape[1]
-    nc = msa_binary.shape[2]
-
-    with open(f"{data_path}/seq_names.pkl", 'rb') as file_handle:
-        seq_names = pickle.load(file_handle)
-
-    with open(f"{data_path}/seq_weight.pkl", 'rb') as file_handle:
-        seq_weight = pickle.load(file_handle)
-    seq_weight = seq_weight.astype(np.float32)
-    assert np.abs(seq_weight.sum() - 1) < 1e-6
-
-    data = MSA_Dataset(msa_binary, seq_weight, seq_names)
-
-    return data, nl, nc
-
-
-# Define how to do an epoch of training
-def train(model, device, train_loader, optimizer, epoch, verbose):
-    model.train()
-    running_elbo = []
-
-    for batch_idx, (msa, weight, _) in enumerate(train_loader):
-        msa, weight = msa.to(device), weight.to(device)
-        optimizer.zero_grad()
-        loss = (-1) * model.compute_weighted_elbo(msa, weight)
-        loss.backward()
-        optimizer.step()
-        elbo_scalar = -loss.item()
-        if verbose:
-            print("Epoch: {:>4}, Step: {:>4}, loss: {:>4.2f}".format(epoch, batch_idx, elbo_scalar), flush=True)
-        running_elbo.append(elbo_scalar)
-
-    return running_elbo
-
-
-# Define how to evaluate the model on the validation data
-def eval(model, device, valid_loader, recon=False):
-    model.eval()
-    elbos = []
-    if recon:
-        recon_accs = []
-    with torch.no_grad():
-        for (msa, _, _) in valid_loader:
-            msa = msa.to(device)
-            # compute elbo loss
-            elbo = model.compute_elbo_with_multiple_samples(msa,
-                                                            100)  # how many samples to use for IWAE estimate of ELBO
-            elbo_scalar = torch.mean(elbo).item()
-            elbos.append(elbo_scalar)
-
-            if recon:
-                # compute proportion of amino acids correctly reconstructed
-                real = torch.argmax(msa, -1)
-                mu, _ = model.encoder(msa)
-                p = torch.exp(model.decoder(mu))
-                preds = torch.argmax(p, -1)
-                recon_acc = torch.sum(real == preds) / real.nelement()
-                recon_acc_scalar = recon_acc.data.item()
-                recon_accs.append(recon_acc_scalar)
-
-    return elbos, recon_accs
-
+from utilities.utils import get_directory, load_data 
 
 def main():
     name_script = sys.argv[0]
@@ -129,31 +57,55 @@ def main():
     print("device: ", device)
     print("-" * 50)
 
+    # The default archictecture for the VAE will be two hidden layers in both the decoder 
+    # and encoder, with 256 neurons in each. Can change this by specifying argument
+    # num_hidden_units in the constructor
     if use_transformer:
         model = TVAE(nl=nl, nc=nc, dim_latent_vars=latent_dim).to(device)
     else:
         model = VAE(nl=nl, nc=nc, dim_latent_vars=latent_dim).to(device)
 
     optimizer = optim.Adam(model.parameters(), weight_decay=wd)
-    train_idx, test_idx = train_test_split(range(len(data)), test_size=0.1, random_state=42)
-    train_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(train_idx))
-    test_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(test_idx))
+    # train_idx, test_idx = train_test_split(range(len(data)), test_size=0.1, random_state=42)
+    # train_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(train_idx))
+    # valid_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(test_idx))
+    train_data_loader = DataLoader(data, batch_size = batch_size, shuffle = True)
 
     # training the model
-    train_elbos = []
-    test_elbos = []
-    test_recon_accs = []
+    vae_elbo, recon_log, recon_acc, iwae_elbo = [], [], [], []
     for epoch in range(num_epochs):
-        batch_elbos, batch_recon_accs = eval(model, device, test_loader, recon=True)
-        epoch_test_elbo, epoch_test_recon_acc = np.mean(batch_elbos), np.mean(batch_recon_accs)
-        test_elbos.append(epoch_test_elbo)
-        test_recon_accs.append(epoch_test_recon_acc)
-        print(f"Test elbo for epoch {epoch}: {epoch_test_elbo}")
-        print(f"Test reconstruction accuracy for fold epoch {epoch}: {epoch_test_recon_acc}")
-        batch_elbos = train(model, device, train_loader, optimizer, epoch, verbose)
-        epoch_train_elbo = np.mean(batch_elbos)
-        train_elbos.append(epoch_train_elbo)
-        print(f"Training elbo for epoch {epoch}: {epoch_train_elbo}")
+        ves, rls, ras, ies = [], [], [], []
+        for (msa, weight, _) in train_data_loader:
+            msa, weight = msa.to(device), weight.to(device)
+            # Evaluate
+            model.eval()
+            #all_seq_elbos = vae.compute_iwae_elbo(msa, num_samples=100)
+            all_seq_accs = model.compute_acc(msa)  
+            #ave_elbos = torch.mean(all_seq_elbos).item()
+            ave_acc = torch.mean(all_seq_accs).item()
+            #ies.append(ave_elbos)
+            ras.append(ave_acc)
+
+            # Train
+            model.train()
+            elbo, log_pxgz = model.compute_weighted_elbo(msa, weight)
+            ves.append(elbo.item())
+            rls.append(log_pxgz.item())
+            loss = (-1) * elbo
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+        vae_elbo.append(np.mean(ves))
+        recon_log.append(np.mean(rls))
+        recon_acc.append(np.mean(ras))
+        #iwae_elbo.append(np.mean(ies))
+        if verbose: 
+            print(("Epoch: {:>4}, "
+                   "VAE Elbo: {:>4.2f} "
+                   "Recon log: {:>4.2f} "
+                   "Recon acc: {:>7.5f} "
+                   "IWAE Elbo: NA ").format(epoch, np.mean(ves), np.mean(rls), np.mean(ras)), flush=True)
 
     # save the model
     today = date.today()
@@ -169,18 +121,18 @@ def main():
         plot_name = os.path.splitext(model_name)[0] + ".png"
         
         fig, axs = plt.subplots(1, 2)
-        axs[0].plot(test_recon_accs[1:], color='r')
+        axs[0].plot(recon_acc, color='r')
         axs[0].set_xlabel('epoch')
         axs[0].set_ylabel(f"Amino acid reconstruction accuracy")
 
-        axs[1].plot(test_elbos[1:], label="test", color='r')
-        axs[1].plot(train_elbos[1:], label="train", color='b')
+        axs[1].plot(recon_log, label="Log p(x | z)", color='r')
+        axs[1].plot(vae_elbo, label="ELBO", color='b')
         axs[1].set_xlabel('epoch')
         axs[1].set_ylabel(f"elbo")
         axs[1].legend()
 
         # add title
-        plt.suptitle(f"Learning curve for VAE trained on {MSA_id}")
+        plt.suptitle(f"Learning curves for VAE trained on {MSA_id}")
         plt.tight_layout()
         #save figure
         plot_dir = get_directory(data_path, MSA_id, "plots")

@@ -1,4 +1,10 @@
 import os
+import torch
+import numpy as np
+import pickle
+import sys 
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+from autoencoder.modules.data import MSA_Dataset
 
 def get_directory(data_path, MSA_id, folder, data_subfolder = False):
     if MSA_id[0:3] == "COG": # this is a simulated dataset
@@ -30,7 +36,25 @@ def to_fasta(f_in, f_out, ids_included = True, keep = False):
                     continue
                 out_file.write(f">{id}\n{seq}\n")
             else:
-                out_file.write(f">Seq{idx}\n{line.strip()}\n")
-    
-            
+                out_file.write(f">Seq{idx}\n{line.strip()}\n")                
 
+def load_data(data_path):
+    """
+    Load the data from the data path.
+    """
+    with open(f"{data_path}/seq_msa_binary.pkl", 'rb') as file_handle:
+        msa_binary = torch.tensor(pickle.load(file_handle))
+    nl = msa_binary.shape[1]
+    nc = msa_binary.shape[2]
+
+    with open(f"{data_path}/seq_names.pkl", 'rb') as file_handle:
+        seq_names = pickle.load(file_handle)
+
+    with open(f"{data_path}/seq_weight.pkl", 'rb') as file_handle:
+        seq_weight = pickle.load(file_handle)
+    seq_weight = seq_weight.astype(np.float32)
+    assert np.abs(seq_weight.sum() - 1) < 1e-6
+
+    data = MSA_Dataset(msa_binary, seq_weight, seq_names)
+
+    return data, nl, nc
