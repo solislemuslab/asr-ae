@@ -12,11 +12,11 @@ The defaults for the three optional arguments are 100, 1, and "none", respective
 2. Next, choose an MSA to work with. Let's say I want to work with the COG28 family with 1250 sequences. We have to process the MSA to generate the Python objects we'll need for our Variational AutoEncoder. To do this, we run 
 
 ```
-python scripts/process_msa.py independent_sims/raw/1250/COG28-l100-s1-aNone_msa.dat N1 --simul 
+python scripts/process_msa.py independent_sims/raw/1250/COG28-l100-s1-aNone_msa.dat N1 
 ```
-The "N1" argument tells the script we want to specify sequence N1 as a query sequence. The query sequences are more relevant for when we're processing the MSAs from real PFAM family. For the simulated MSAs, we choose a query sequence arbitrarilly. We include the `--simul` flag because we're processing a simulated MSA, rather than one of the MSAs from the real PFAM family.
+The "N1" argument tells the script we want to specify sequence N1 as a reference sequence. The query sequences are more relevant for when we're processing the MSAs from real PFAM family. For the simulated MSAs, we arbitrarilly choose the first sequence N1 as our reference.
 
-This command will generate a directory in `msas/independent_sims/processed/1250` called `COG28-l100-s1-aNone`. In this directory, you will find all the Python objects (as `.pkl` files) that represent the processed MSA for the purposes of the VAE, as well as a text file version of the processed MSA. As opposed to the raw MSA generated in step 1, this processed MSA does not include the ancestral sequences. The processed MSA also has any duplicates of leaf sequences removed.
+This command will generate a directory in `msas/independent_sims/processed/1250` called `COG28-l100-s1-aNone`. In this directory, you will find all the Python objects (as `.pkl` files) that represent the processed MSA for the purposes of the VAE, as well as a text file version of the processed MSA. As opposed to the raw MSA generated in step 1, this processed MSA does not include the ancestral sequences. The processed MSA also has any exact duplicates of leaf sequences removed.
 
 3. The next step is to train the VAE! Check out the file `autoencoder/config.json`. This file contains configuration details for the training. You can manually edit the details of this file. When you have all the configs you want, simply run from the project root directory 
 
