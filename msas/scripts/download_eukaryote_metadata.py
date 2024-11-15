@@ -8,14 +8,14 @@ from urllib.error import HTTPError
 from time import sleep
 
 parser = argparse.ArgumentParser(description='This script downloads from the InterPro website all the protein sequences *from Eukaryote species* that match a particular PFAM entry')
-parser.add_argument('pfam_acc', type=str, help='PFAM accession (e.g. PF00041')
+parser.add_argument('pfam_acc', type=str, help='PFAM accession (e.g. PF00565')
 args = parser.parse_args()
 
 
 pfam_acc = args.pfam_acc
 # 2759 corresponds to eukaryote taxon
 BASE_URL = f"https://www.ebi.ac.uk:443/interpro/api/protein/UniProt/entry/pfam/{pfam_acc}/taxonomy/uniprot/2759/?page_size=200"
-output_file_path = f"data/pevae_real/{pfam_acc}_eukaryotes.tsv"
+output_file_path = f"real/raw/{pfam_acc}_eukaryotes.tsv"
 with open(output_file_path, "w") as file:
     file.write("accession\tsource_database\tname\ttaxId\tscientificName\tlength\tentry_accession\tentry_protein_locations\n")
     

@@ -25,18 +25,7 @@ def idx_to_aa(aa_index):
     idx_to_aa_dict = {}
     for k, v in aa_index.items():
         idx_to_aa_dict[v] = k
-    return idx_to_aa_dict
-
-def to_fasta(f_in, f_out, ids_included = True, keep = False):
-    with open(f_in) as in_file, open(f_out, "w") as out_file:
-        for idx, line in enumerate(in_file):
-            if ids_included:
-                id, seq = line.split()
-                if keep and id not in keep:
-                    continue
-                out_file.write(f">{id}\n{seq}\n")
-            else:
-                out_file.write(f">Seq{idx}\n{line.strip()}\n")                
+    return idx_to_aa_dict   
 
 def load_data(data_path):
     """
