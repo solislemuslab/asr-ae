@@ -29,13 +29,13 @@ if (sim) {
 plot_dir = if (sim) path("plots", "independent_sims", n_seq, msa_id) else path("plots", "real", msa_id)
 
 # cluster file
-cluster_path = path(tree_dir, "clusters", paste0(family, "_clusters.txt"))
-cats <- read.table(cluster_path, header = TRUE) |>
-  mutate(ClusterNumber = as.factor(ClusterNumber))
-num_cats = length(levels(cats$ClusterNumber))
-# create vector of colors for clusters
-cols = c(rainbow(num_cats), "black")
-names(cols) = as.character(c(1:(num_cats-1), -1, 0 ))
+# cluster_path = path(tree_dir, "clusters", paste0(family, "_clusters.txt"))
+# cats <- read.table(cluster_path, header = TRUE) |>
+#   mutate(ClusterNumber = as.factor(ClusterNumber))
+# num_cats = length(levels(cats$ClusterNumber))
+# # create vector of colors for clusters
+# cols = c(rainbow(num_cats), "black")
+# names(cols) = as.character(c(1:(num_cats-1), -1, 0 ))
 
 ## Read in family tree #####
 if (sim) {
@@ -73,15 +73,16 @@ stopifnot(
   all.equal(dplyr::distinct(embeds, dim0, dim1, .keep_all = TRUE), embeds)
 )
 
-# Because we dropped duplicate sequences prior to obtaining embeddings,
-# we don't have embeddings for every tip in our tree
+# Because we dropped duplicate sequences prior to obtaining embeddings, we don't have embeddings for every tip in our tree
 # We subset the tree to only include the tips that we have embeddings for.
-cat("Original tree has ", Ntip(tree), " tips and ", Nnode(tree), " internal nodes.\n")
 subtree = keep.tip(tree, embeds$species)
-# We also remove any extremely short external branches
+# We perform additional pruning, remove any extremely short external branches, and update the embeddings dataframe accordingly
+# This is done to avoid numerical issues when running phylopars() 
 thresh = .001
 twig_ids <- subtree$edge[subtree$edge.length  < thresh & subtree$edge[,2] <= Ntip(subtree), 2]
 subtree <- drop.tip(subtree, twig_ids)
+embeds <- embeds[match(subtree$tip.label,embeds$species),]
+ntips = Ntip(subtree)
 cat("Pruned tree has ", Ntip(subtree), " tips and ", Nnode(subtree), " internal nodes.\n")
 # Save the final tree and the names of sequences that appear in it
 subtree_path = str_replace(tree_path, "cleaned", "revised")
@@ -91,46 +92,45 @@ write(subtree$tip.label, names_path)
 
 
 ## Plot tree colored by category ####
-sim.tree = subtree
-for (k in levels(cats$ClusterNumber)) {
-  tips = filter(cats, ClusterNumber == k) |>
-    pull(SequenceName)
-  tip_idxs = na.omit(match(tips, sim.tree$tip.label))
-  if (length(tip_idxs) > 0)
-    sim.tree = paintBranches(sim.tree, edge=tip_idxs,
-                            state = k, anc.state = "0")
-} 
-png(file = path(plot_dir, paste0(model, "_colored-tree.png")), width = 1200, height = 1200)
-plot(sim.tree,
-     colors = cols,
-     ftype = "off",
-     lwd = 1
-)
-invisible(dev.off())
+# sim.tree = subtree
+# for (k in levels(cats$ClusterNumber)) {
+#   tips = filter(cats, ClusterNumber == k) |>
+#     pull(SequenceName)
+#   tip_idxs = na.omit(match(tips, sim.tree$tip.label))
+#   if (length(tip_idxs) > 0)
+#     sim.tree = paintBranches(sim.tree, edge=tip_idxs,
+#                             state = k, anc.state = "0")
+# } 
+# png(file = path(plot_dir, paste0(model, "_colored-tree.png")), width = 1200, height = 1200)
+# plot(sim.tree,
+#      colors = cols,
+#      ftype = "off",
+#      lwd = 1
+# )
+# invisible(dev.off())
 
 ## Plot embeddings colored by category ####
-embeds <- dplyr::left_join(embeds, cats, dplyr::join_by(species == SequenceName))
-embeds <- embeds[match(subtree$tip.label,embeds$species),]
-ntips = nrow(embeds)
-colored_embeds = ggplot(embeds, aes(dim0, dim1, col = ClusterNumber)) +
-  geom_point(size = .8, alpha = .5) +
-  scale_color_manual(values = cols) +
-  theme_minimal() +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.line = element_line(colour = "black"))
-ggsave(
-  path(plot_dir, paste0(model, "_colored-embeddings.png")), 
-  colored_embeds, 
-  bg="white",
-  width = 6,
-  height = 6
-  )
+#embeds <- dplyr::left_join(embeds, cats, dplyr::join_by(species == SequenceName))
+# colored_embeds = ggplot(embeds, aes(dim0, dim1, col = ClusterNumber)) +
+#   geom_point(size = .8, alpha = .5) +
+#   scale_color_manual(values = cols) +
+#   theme_minimal() +
+#   theme(panel.grid.major = element_blank(),
+#         panel.grid.minor = element_blank(),
+#         axis.line = element_line(colour = "black"))
+# ggsave(
+#   path(plot_dir, paste0(model, "_colored-embeddings.png")), 
+#   colored_embeds, 
+#   bg="white",
+#   width = 6,
+#   height = 6
+#   )
 
 ## Fit model and get predicted reconstructed ancestral embeddings #####
 # fit model
-p_BM <- phylopars(trait_data = select(embeds, -c(ClusterNumber)),
-                  tree = subtree)
+# p_BM <- phylopars(trait_data = select(embeds, -c(ClusterNumber)),
+#                   tree = subtree)
+p_BM <- phylopars(trait_data = embeds, tree = subtree)
 # get dataframe including embeddings at both tips and reconstructed embeddings at ancestors
 all_embeds = p_BM$anc_recon
 
@@ -144,7 +144,7 @@ anc_embed_path = str_match(embed_path, "^(.*)embeddings.csv")[2] |>
 anc_embeds = all_embeds[(ntips+1):nrow(all_embeds),]
 write.csv(anc_embeds, anc_embed_path)
 
-# Plot as a network
+# Plot tree in (in first two dimensions of) embedding space
 net = as.network(subtree)
 vert_type = rep(c("tip", "internal"),
                   c(ntips, nrow(all_embeds)-ntips))
@@ -154,7 +154,7 @@ vert_col = c(#root = "green",
 edge_col = scales::alpha("black", .2)
 png(file = path(plot_dir, paste0(model, "_network.png")), width = 1200, height = 1200)
 plot.network(net,
-  coord = all_embeds,
+  coord = all_embeds[,1:2],
   vertex.border = NA,
   vertex.cex = .3,
   edge.lwd = .3,

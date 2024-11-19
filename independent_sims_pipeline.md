@@ -32,15 +32,15 @@ python embeddings/gen_embeddings.py embeddings/config_gen.json
 ```
 This will write the embeddings as a CSV file to the folder `embeddings/data/independent_sims/1250/COG28-l100-s1-aNone`
 
-5. Now that we have embedding of the leaf sequences, we want to use a Brownian motion model to infer embeddings at the internal nodes. In other words, we want to reconstruct "ancestral embeddings". For this purpose, we use the R package **Rphylopars**, which has functionality for scalable multivariate phylogenetic comparative analysis. To obtain ancestral reconstruction of embeddings, run 
+5. Now that we have embedding of the leaf sequences, we want to use a Brownian motion model to infer embeddings at the internal nodes. In other words, we want to reconstruct "ancestral embeddings". For this purpose, we use the R package **Rphylopars**, which implements scalable multivariate phylogenetic comparative analysis. To obtain ancestral reconstruction of embeddings, run 
 
 ```
-Rscript embeddings/embeddings_asr.R msas/independent_sims/processed/1250/COG28-l100-s1-aNone model_ld2_wd0_epoch30_2024-08-26
+Rscript embeddings/embeddings_asr.R msas/independent_sims/processed/1250/COG28-l100-s1-aNone name_of_model
 ```
 
 This will write a csv of ancestral embeddings into the same folder as the embeddings of the leaf sequences from step 4. 
 
-Note that the script modifies the original tree on which the MSA evolved slightly to get rid of any tips whose sequence was an exact duplicate of another tip's sequence (such sequences had been dropped from our MSA in step 2), as well as any other external branches that are extremely short (less than 0.01). This will reduce the number of nodes in the tree, and the new size of the tree is printed to standard output. The new tree is saved to the tree directory with "_cleaned" (see step 1) replaced with "_revised" in the file name. The leaf node identitifiers (names) of this final tree are also saved to a file in the `processed` directory.
+Note that the script modifies the original tree on which the MSA evolved slightly to get rid of any tips whose sequence was an exact duplicate of another tip's sequence (such sequences have already been dropped from our MSA in step 2), as well as any other external branches that are extremely short (less than 0.01). This will reduce the number of nodes in the tree, and the new size of the tree is printed to standard output. The new tree is saved to the tree directory with "_cleaned" (see step 1) replaced with "_revised" in the file name. The leaf node identifiers (names) of this final tree are also saved to a file `final_seq_names.txt` in the `processed` directory.
 
 Finally, it will also produce a plot that shows the phylogenetic tree in embedding space (in the appropriate subdirectory of `plots`).
 
