@@ -4,6 +4,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# TODO: Refactor so that every specific VAE is a subclass of a general VAE class
+
+
 def load_model(model_path, nl, nc, nlatent=2):
     """
     Load the model from the model path.
@@ -108,46 +111,44 @@ class VAE(nn.Module):
         weighted_ave_log_PxGz = torch.sum(weighted_log_PxGz)
         return weighted_ave_elbo, weighted_ave_log_PxGz
 
-    def compute_elbo_with_multiple_samples(self, x, num_samples=100):
+    @torch.no_grad()
+    def compute_iwae_elbo(self, x, num_samples=100):
         """
         Evidence lower bound is an lower bound of log P(x). Although it is a lower
         bound, we can use elbo to approximate log P(x).
         Using multiple samples to calculate the elbo makes it be a better approximation
         of log P(x).
         """
-
-        with torch.no_grad():
-            x = x.expand(num_samples, x.shape[0], x.shape[1], x.shape[2])
-            mu, sigma = self.encoder(x)
-            eps = torch.randn_like(mu)
-            z = mu + sigma * eps
-            log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 * torch.log(2 * z.new_tensor(np.pi)), -1)
-            log_p = self.decoder(z)
-            log_PxGz = torch.sum(x * log_p, [-1, -2])  # sum over both position and character dimension
-            log_Pxz = log_Pz + log_PxGz
-
-            log_QzGx = torch.sum(-0.5 * (eps) ** 2 -
-                                 0.5 * torch.log(2 * z.new_tensor(np.pi))
-                                 - torch.log(sigma), -1)
-            log_weight = log_Pxz - log_QzGx
-            log_weight = log_weight.double()
-            log_weight_max = torch.max(log_weight, 0)[0]
-            log_weight = log_weight - log_weight_max
-            weight = torch.exp(log_weight)
-            elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
-            return elbo
+        x = x.expand(num_samples, x.shape[0], x.shape[1], x.shape[2])
+        mu, sigma = self.encoder(x)
+        eps = torch.randn_like(mu)
+        z = mu + sigma * eps
+        log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 * torch.log(2 * z.new_tensor(np.pi)), -1)
+        log_p = self.decoder(z)
+        log_PxGz = torch.sum(x * log_p, [-1, -2])  # sum over both position and character dimension
+        log_Pxz = log_Pz + log_PxGz
+        log_QzGx = torch.sum(-0.5 * (eps) ** 2 -
+                             0.5 * torch.log(2 * z.new_tensor(np.pi))
+                             - torch.log(sigma), -1)
+        log_weight = log_Pxz - log_QzGx
+        log_weight = log_weight.double()
+        log_weight_max = torch.max(log_weight, 0)[0]
+        log_weight = log_weight - log_weight_max
+        weight = torch.exp(log_weight)
+        elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
+        return elbo
     
+    @torch.no_grad()
     def compute_acc(self, x):
         '''
         Calculates the Hamming accuracy (i.e. percent residue identity)
         '''
-        with torch.no_grad():    
-            real_aa_idxs = torch.argmax(x, -1)
-            mu, _ = self.encoder(x)
-            log_p = self.decoder(mu)
-            pred_aa_idxs = torch.argmax(log_p, -1)
-            recon_acc = torch.mean((real_aa_idxs == pred_aa_idxs).float(), -1)
-            return recon_acc
+        real_aa_idxs = torch.argmax(x, -1)
+        mu, _ = self.encoder(x)
+        log_p = self.decoder(mu)
+        pred_aa_idxs = torch.argmax(log_p, -1)
+        recon_acc = torch.mean((real_aa_idxs == pred_aa_idxs).float(), -1)
+        return recon_acc
 
 class LVAE(nn.Module):
     def __init__(self, nl, nc=21, dim_latent_vars=10, num_hidden_units=[256, 256]):
@@ -232,7 +233,8 @@ class LVAE(nn.Module):
         weighted_ave_log_PxGz = torch.sum(weighted_log_PxGz)
         return weighted_ave_elbo, weighted_ave_log_PxGz
 
-    def compute_elbo_with_multiple_samples(self, x, num_samples):
+    @torch.no_grad()
+    def compute_iwae_elbo(self, x, num_samples):
         """
         Evidence lower bound is an lower bound of log P(x). Although it is a lower
         bound, we can use elbo to approximate log P(x).
@@ -240,44 +242,42 @@ class LVAE(nn.Module):
         of log P(x).
         """
 
-        with torch.no_grad():
-            x = x.expand(num_samples, x.shape[0], x.shape[1], x.shape[2])
-            # LSTM doesn't take 4D input
-            x = x.reshape(-1, x.shape[2], x.shape[3])
-            mu, sigma = self.encoder(x)
-            eps = torch.randn_like(mu)
-            z = mu + sigma * eps
-            log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 * torch.log(2 * z.new_tensor(np.pi)), -1)
-            log_p = self.decoder(z)
-            # log_p = log_p.reshape(x.shape)
-            # sum over both position and character dimension
-            log_PxGz = torch.sum(x * log_p, [-1, -2])
-            # log_Pz = log_Pz.reshape(log_PxGz.shape)
-            log_Pxz = log_Pz + log_PxGz
-
-            log_QzGx = torch.sum(-0.5 * (eps) ** 2 -
-                                 0.5 * torch.log(2 * z.new_tensor(np.pi))
-                                 - torch.log(sigma), -1)
-            # log_QzGx = log_QzGx.reshape(log_Pxz.shape)
-            log_weight = (log_Pxz - log_QzGx).detach().data
-            log_weight = log_weight.double()
-            log_weight_max = torch.max(log_weight, 0)[0]
-            log_weight = log_weight - log_weight_max
-            weight = torch.exp(log_weight)
-            elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
-            return elbo
+        x = x.expand(num_samples, x.shape[0], x.shape[1], x.shape[2])
+        # LSTM doesn't take 4D input
+        x = x.reshape(-1, x.shape[2], x.shape[3])
+        mu, sigma = self.encoder(x)
+        eps = torch.randn_like(mu)
+        z = mu + sigma * eps
+        log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 * torch.log(2 * z.new_tensor(np.pi)), -1)
+        log_p = self.decoder(z)
+        # log_p = log_p.reshape(x.shape)
+        # sum over both position and character dimension
+        log_PxGz = torch.sum(x * log_p, [-1, -2])
+        # log_Pz = log_Pz.reshape(log_PxGz.shape)
+        log_Pxz = log_Pz + log_PxGz
+        log_QzGx = torch.sum(-0.5 * (eps) ** 2 -
+                             0.5 * torch.log(2 * z.new_tensor(np.pi))
+                             - torch.log(sigma), -1)
+        # log_QzGx = log_QzGx.reshape(log_Pxz.shape)
+        log_weight = (log_Pxz - log_QzGx).detach().data
+        log_weight = log_weight.double()
+        log_weight_max = torch.max(log_weight, 0)[0]
+        log_weight = log_weight - log_weight_max
+        weight = torch.exp(log_weight)
+        elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
+        return elbo
     
+    @torch.no_grad()
     def compute_acc(self, x):
         '''
         Calculates the Hamming accuracy (i.e. percent residue identity)
         '''
-        with torch.no_grad():    
-            real_aa_idxs = torch.argmax(x, -1)
-            mu, _ = self.encoder(x)
-            log_p = self.decoder(mu)
-            pred_aa_idxs = torch.argmax(log_p, -1)
-            recon_acc = torch.mean((real_aa_idxs == pred_aa_idxs).float(), -1)
-            return recon_acc
+        real_aa_idxs = torch.argmax(x, -1)
+        mu, _ = self.encoder(x)
+        log_p = self.decoder(mu)
+        pred_aa_idxs = torch.argmax(log_p, -1)
+        recon_acc = torch.mean((real_aa_idxs == pred_aa_idxs).float(), -1)
+        return recon_acc
 
 class TVAE(nn.Module):
     def __init__(
@@ -399,47 +399,46 @@ class TVAE(nn.Module):
         weighted_ave_elbo = torch.sum(weighted_elbo)
         weighted_ave_log_PxGz = torch.sum(weighted_log_PxGz)
         return weighted_ave_elbo, weighted_ave_log_PxGz
-
-    def compute_elbo_with_multiple_samples(self, x, num_samples):
+    
+    @torch.no_grad()
+    def compute_iwae_elbo(self, x, num_samples):
         """
         Evidence lower bound is an lower bound of log P(x). Although it is a
         lower bound, we can use elbo to approximate log P(x).
         Using multiple samples to calculate the elbo makes it be a better
         approximation of log P(x).
         """
-        with torch.no_grad():
-            x = x.expand(num_samples, x.shape[0], x.shape[1], x.shape[2])
-            mu, sigma = self.encoder(x)
-            eps = torch.randn_like(mu)
-            z = mu + sigma * eps
-            log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 * torch.log(2 * z.new_tensor(np.pi)), -1)
-            log_p = self.decoder(z)
-            log_p = log_p.reshape(x.shape)
-            # sum over both position and character dimension
-            log_PxGz = torch.sum(x * log_p, [-1, -2])
-            log_Pz = log_Pz.reshape(log_PxGz.shape)
-            log_Pxz = log_Pz + log_PxGz
-
-            log_QzGx = torch.sum(-0.5 * (eps) ** 2 -
-                                 0.5 * torch.log(2 * z.new_tensor(np.pi))
-                                 - torch.log(sigma), -1)
-            log_QzGx = log_QzGx.reshape(log_Pxz.shape)
-            log_weight = log_Pxz - log_QzGx
-            log_weight = log_weight.double()
-            log_weight_max = torch.max(log_weight, 0)[0]
-            log_weight = log_weight - log_weight_max
-            weight = torch.exp(log_weight)
-            elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
-            return elbo
-
+        x = x.expand(num_samples, x.shape[0], x.shape[1], x.shape[2])
+        mu, sigma = self.encoder(x)
+        eps = torch.randn_like(mu)
+        z = mu + sigma * eps
+        log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 * torch.log(2 * z.new_tensor(np.pi)), -1)
+        log_p = self.decoder(z)
+        log_p = log_p.reshape(x.shape)
+        # sum over both position and character dimension
+        log_PxGz = torch.sum(x * log_p, [-1, -2])
+        log_Pz = log_Pz.reshape(log_PxGz.shape)
+        log_Pxz = log_Pz + log_PxGz
+        log_QzGx = torch.sum(-0.5 * (eps) ** 2 -
+                             0.5 * torch.log(2 * z.new_tensor(np.pi))
+                             - torch.log(sigma), -1)
+        log_QzGx = log_QzGx.reshape(log_Pxz.shape)
+        log_weight = log_Pxz - log_QzGx
+        log_weight = log_weight.double()
+        log_weight_max = torch.max(log_weight, 0)[0]
+        log_weight = log_weight - log_weight_max
+        weight = torch.exp(log_weight)
+        elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
+        return elbo
+    
+    @torch.no_grad()
     def compute_acc(self, x):
         '''
         Calculates the Hamming accuracy (i.e. percent residue identity)
-        '''
-        with torch.no_grad():    
-            real_aa_idxs = torch.argmax(x, -1)
-            mu, _ = self.encoder(x)
-            log_p = self.decoder(mu)
-            pred_aa_idxs = torch.argmax(log_p, -1)
-            recon_acc = torch.mean((real_aa_idxs == pred_aa_idxs).float(), -1)
-            return recon_acc
+        '''  
+        real_aa_idxs = torch.argmax(x, -1)
+        mu, _ = self.encoder(x)
+        log_p = self.decoder(mu)
+        pred_aa_idxs = torch.argmax(log_p, -1)
+        recon_acc = torch.mean((real_aa_idxs == pred_aa_idxs).float(), -1)
+        return recon_acc

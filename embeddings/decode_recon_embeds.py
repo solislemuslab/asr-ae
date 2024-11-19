@@ -9,25 +9,16 @@ import torch
 import pickle
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from autoencoder.modules.model import load_model
-from utilities.utils import get_directory, idx_to_aa, to_fasta
+from utilities.utils import get_directory, idx_to_aa, filter_fasta
 
 
-def load_real_ancseqs(msa_path, n_seq, nl):
-    """
-    Should probably make this more robust, but for now it works.
-    """
-    if n_seq == 1250:
-        header = f'2497 {nl}'  
-    elif n_seq == 5000:
-        header = f'9997 {nl}' 
+def load_real_ancseqs(msa_path):
     real_seqs_dict = {}
     with open(msa_path, 'r') as msa:
-        # Skips text before the beginning of the interesting block:
-        for line in msa:
-            if line.strip() == header:  
-                break
+        # skip the first line, which is Phylip header
+        next(msa)
         # Read only ancestral sequences
-        for line in msa:  # This keeps reading the file
+        for line in msa: 
             id, seq = line.split()
             if id[0] != 'N':
                 real_seqs_dict[id] = seq
@@ -57,9 +48,8 @@ def get_recon_ancseqs(recon_embeds, model, idx_to_aa_dict):
     # now we decode
     with torch.no_grad():
       log_p = model.decoder(mu)
-      p = torch.exp(log_p)
     # Now we covert probablities into actual protein sequences by choosing the most likely amino acid at each position.
-    max_prob_idx = torch.argmax(p, -1)
+    max_prob_idx = torch.argmax(log_p, -1)
     # Decode the integer `max_prob_idx` to character and display reconstructed ancestral sequences
     max_prob_idx = max_prob_idx.numpy()
     recon_seqs = []
@@ -69,7 +59,7 @@ def get_recon_ancseqs(recon_embeds, model, idx_to_aa_dict):
     return recon_seqs
 
 def get_modal_seq(data_path, idx_to_aa_dict):
-    with open(f"{data_path}/seq_msa.pkl", 'rb') as file_handle:
+    with open(f"{data_path}/seq_msa_int.pkl", 'rb') as file_handle:
         real_seq_leaves_int = pickle.load(file_handle)
     real_seq_leaves = []
     for i in range(real_seq_leaves_int.shape[0]):
@@ -82,16 +72,17 @@ def get_modal_seq(data_path, idx_to_aa_dict):
     maj_seq = "".join(maj_seq)
     return maj_seq
 
-def run_iqtree(MSA_id, data_path, n_seq):
+def run_iqtree(MSA_id, data_path, model_name, n_seq, iqtree_dir):
     with open(f"{data_path}/final_seq_names.txt") as file:
         final_seq_names = file.read().splitlines()
-    to_fasta(f"{data_path}/seq_msa_char.txt", f"{data_path}/seq_msa_char.fas", keep=final_seq_names)
+    # we have to create a new fasta file with only the sequences that ended up in our final tree
+    filter_fasta(f"{data_path}/seq_msa_char.fasta", f"{data_path}/seq_msa_char.fasta", keep=final_seq_names)
     family = MSA_id.split("-")[0]
     tree_path = f"trees/fast_trees/{n_seq}/{family}.sim.trim.tree_revised"
-    os.system(f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fas -m LG -te {tree_path} -asr -redo -quiet")
+    os.system(f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fasta -m LG -te {tree_path} -asr -redo -quiet -pre {iqtree_dir}/{model_name}")
 
-def get_iqtree_ancseqs(data_path, n_seq, anc_id):
-    iq_df = pd.read_table(f'{data_path}/seq_msa_char.fas.state', header=8)
+def get_iqtree_ancseqs(iqtree_dir, model_name, n_seq, anc_id):
+    iq_df = pd.read_table(f'{iqtree_dir}/{model_name}.state', header=8)
     iq_df_sk = iq_df[["Node", "Site", "State"]]
     iq_df_sk = iq_df_sk.sort_values(by=["Node", "Site"])
     iq_df_sk.set_index("Node", inplace=True)
@@ -143,15 +134,14 @@ def main():
         aa_index = pickle.load(file_handle)
     idx_to_aa_dict = idx_to_aa(aa_index)
 
-    # load the real ancestral sequences 
-    n_seq = int(msa_path.split("/")[-2])
-    nl = int(MSA_id.split("-")[1][1:])
-    real_seqs_dict = load_real_ancseqs(msa_path, n_seq, nl)
+    # load the real ancestral sequences     
+    real_seqs_dict = load_real_ancseqs(msa_path)
     
     # load the model
     nc = 21
     model_dir = get_directory(data_path, MSA_id, "saved_models")
     model_path = os.path.join(model_dir, model_name)
+    nl = int(MSA_id.split("-")[1][1:])
     ld = int(re.search(r'ld(\d+)', model_name).group(1))
     model = load_model(model_path, nl, nc, nlatent = ld)
 
@@ -189,8 +179,11 @@ def main():
 
     #run iqtree ancestral sequence reconstruction and evaluate
     print("Evaluating iqtree ancestral sequences")
-    run_iqtree(MSA_id, data_path, n_seq)
-    iqtree_seqs = get_iqtree_ancseqs(data_path, n_seq, anc_id)
+    n_seq = int(msa_path.split("/")[-2])
+    iqtree_dir = get_directory(data_path, MSA_id, "iqtree", data_subfolder=True)
+    os.makedirs(iqtree_dir, exist_ok=True)
+    run_iqtree(MSA_id, data_path, model_name, n_seq, iqtree_dir)
+    iqtree_seqs = get_iqtree_ancseqs(iqtree_dir, model_name, n_seq, anc_id)
     evaluate_seqs(iqtree_seqs, real_seqs)
     print("-" * 50)
 
