@@ -1,14 +1,17 @@
 {
-    "MSA_id": "COG28-l100-s1-aNone",
-    "data_path": "msas/independent_sims/processed/1250/COG28-l100-s1-aNone",
+    "MSA_id": "COG1309-l100-s1-aNone",
+    "data_path": "msas/independent_sims/processed/5000/COG1309-l100-s1-aNone",
     "weigh_seqs": false,
     "use_transformer": false,
-    "num_epochs": 100,
+    "num_epochs": 5000,
+    "num_hidden_units": [100],
     "batch_size": 128,
     "learning_rate": 0.001,
-    "weight_decay": 0,
+    "weight_decay": 0.01,
     "latent_dim": 2,
-    "verbose": true,
+    "validate": false,
+    "iwae_num_samples": 100,
+    "verbose": false,
     "save_model": true,
-    "plot_results": true
+    "plot_results": true 
 }

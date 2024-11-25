@@ -143,7 +143,12 @@ def main():
     model_path = os.path.join(model_dir, model_name)
     nl = int(MSA_id.split("-")[1][1:])
     ld = int(re.search(r'ld(\d+)', model_name).group(1))
-    model = load_model(model_path, nl, nc, nlatent = ld)
+    layers_match = re.search(r'layers(\d+(\-\d+)*)', model_name)
+    if layers_match:
+        num_hidden_units = [int(size) for size in layers_match.group(1).split('-')]
+        model = load_model(model_path, nl, nc, num_hidden_units=num_hidden_units, nlatent = ld)  
+    else: # if not specified, assume default argument for num_hidden_units
+        model = load_model(model_path, nl, nc, nlatent = ld)
 
     # get our reconstructed ancestral embeddings
     embeds_dir = get_directory(data_path, MSA_id, "embeddings", data_subfolder=True)

@@ -1,7 +1,7 @@
 {
-    "MSA_id": "COG28-l100-s1-aNone",
-    "msa_path": "msas/independent_sims/raw/1250/COG28-l100-s1-aNone_msa.dat",
-    "data_path": "msas/independent_sims/processed/1250/COG28-l100-s1-aNone",
-    "model_name": "model_ld10_wd0_epoch100_2024-11-18.pt",
+    "MSA_id": "COG1309-l100-s1-aNone",
+    "msa_path": "msas/independent_sims/raw/5000/COG1309-l100-s1-aNone_msa.dat",
+    "data_path": "msas/independent_sims/processed/5000/COG1309-l100-s1-aNone",
+    "model_name": "model_layers256-256_ld2_wd0.01_epoch500_2024-11-21.pt",
     "plot": true
 }
