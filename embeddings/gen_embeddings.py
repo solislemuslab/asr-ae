@@ -77,14 +77,18 @@ def main():
     print("model_name: ", model_name)
     print("plot: ", plot)
     print("-" * 50)
-
     # get msa
     msa_binary, nl, nc, _ = load_binary_data(data_path)
     # load model
     model_dir = get_directory(data_path, MSA_id, "saved_models")
     model_path = f"{model_dir}/{model_name}"
     ld = int(re.search(r'ld(\d+)', model_name).group(1))
-    model = load_model(model_path, nl, nc, nlatent = ld)
+    layers_match = re.search(r'layers(\d+(\-\d+)*)', model_name)
+    if layers_match:
+        num_hidden_units = [int(size) for size in layers_match.group(1).split('-')]
+        model = load_model(model_path, nl, nc, num_hidden_units=num_hidden_units, nlatent = ld)  
+    else: # if not specified, assume default argument for num_hidden_units
+        model = load_model(model_path, nl, nc, nlatent = ld)
     # get embeddings
     mu = get_embeddings(model, msa_binary)
     # plot embeddings

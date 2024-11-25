@@ -155,6 +155,8 @@ edge_col = scales::alpha("black", .2)
 png(file = path(plot_dir, paste0(model, "_network.png")), width = 1200, height = 1200)
 plot.network(net,
   coord = all_embeds[,1:2],
+  xlim = range(all_embeds[,1]),
+  ylim = range(all_embeds[,2]),
   vertex.border = NA,
   vertex.cex = .3,
   edge.lwd = .3,
@@ -167,7 +169,7 @@ plot.network(net,
   #label.pos = 5,
   suppress.axes = TRUE,
 )
-legend("bottomleft", inset = c(.025,.025),
+legend("bottomleft",
        pch = 16,
        cex = 2,
        border = "black",

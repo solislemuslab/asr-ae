@@ -23,7 +23,7 @@ done
 # Set non-provided options to default values
 if [ -z "$seq_length" ] 
 then
-   echo "Default branch length of 100 will be used";
+   echo "Default sequence length of 100 will be used";
    seq_length=100
 fi
 

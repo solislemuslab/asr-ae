@@ -1,6 +1,6 @@
 {
-    "MSA_id": "COG28-l100-s1-aNone",
-    "data_path": "msas/independent_sims/processed/1250/COG28-l100-s1-aNone",
-    "model_name": "model_ld10_wd0_epoch100_2024-11-18.pt",
+    "MSA_id": "COG1309-l100-s1-aNone",
+    "data_path": "msas/independent_sims/processed/5000/COG1309-l100-s1-aNone",
+    "model_name": "model_layers100_ld2_wd0.01_epoch5000_2024-11-25.pt",
     "plot": true
 }
