@@ -3,7 +3,7 @@ helpFunction()
 {
    echo ""
    echo "Usage: $0 [-l parameterL] [-s parameterS] [-h parameterH]"
-   echo -e "\t-l Sequence length (defualt 100)"
+   echo -e "\t-l Sequence length (default 100)"
    echo -e "\t-s Branch length scaling factor (default 1)"
    echo -e "\t-a Gamma rate heterogeneity (either positive real number or \"None\")"
    exit 1 # Exit script after printing help

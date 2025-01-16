@@ -8,9 +8,13 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from autoencoder.modules.data import MSA_Dataset
 
 def get_directory(data_path, MSA_id, folder, data_subfolder = False):
+    """
+    Take data path and MSA id and return the directory where the data is stored.
+    """
     if MSA_id[0:3] == "COG": # this is a simulated dataset
-        num_seqs = os.path.dirname(data_path).split("/")[-1]
-        dir =  f"{folder}/independent_sims/{num_seqs}/{MSA_id}"
+        sim_type = os.path.dirname(data_path).split("/")[1] #either coupled or independent
+        num_seqs = os.path.dirname(data_path).split("/")[-1] 
+        dir =  f"{folder}/{sim_type}/{num_seqs}/{MSA_id}"
     else:
         dir = f"{folder}/real/{MSA_id}"
     if data_subfolder:
@@ -21,7 +25,8 @@ def get_directory(data_path, MSA_id, folder, data_subfolder = False):
 
 def idx_to_aa(aa_index):
     """
-    Create a dictionary that maps integers to amino acids.
+    Takes: dictionary mapping amino acids to integer indices
+    Returns: Inverse dictionary that maps integers to amino acids.
     """
     # In our integer encoding of proteins, we've encoded several different amino acid characters as 0
     # For decoding purposes, we will decode all 0's as '-'
@@ -47,7 +52,7 @@ def filter_fasta(og_path, new_path, keep):
 
 def load_data(data_path, weigh_seqs):
     """
-    Load the data from the data path.
+    Load the sequence data from the data path as an MSA_Dataset object.
     """
     with open(f"{data_path}/seq_msa_binary.pkl", 'rb') as file_handle:
         msa_binary = torch.tensor(pickle.load(file_handle))

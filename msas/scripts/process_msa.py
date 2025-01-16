@@ -6,8 +6,7 @@ from os import path, makedirs, remove
 import numpy as np
 import pandas as pd
 from Bio import SeqIO
-import sys
-sys.path.insert(1, os.path.join(sys.path[0], '../..'))
+
 
 MAX_SEQS = 50_000 # Only used for PF00565, see `get_euk_seqs`
 MAX_GAPS_IN_SEQ = 50
@@ -82,24 +81,34 @@ def get_euk_seqs(msa_file_path, metadata_file_path):
                 break
     return seq_dict, euk_ids
 
-def get_seqs(msa_file_path, real):
+def get_seqs(msa_file_path, sim_type):
     """
-    Processes the sequences from the MSA file into a dictionary 
+    Collect the leaf sequences from the MSA file into a dictionary 
+
+    This needs to get fixed to deal with the fact that the format output by SeqGen is currently not being parsed correctly by SeqIO
     """
     seq_dict = {} # sequence id -> sequence
-    count_sequences = 0
-    if not real: #simulated data is in relaxed Phylip format
-        with open(msa_file_path, 'r') as file_handle:
-           seq_data = file_handle.readlines()[1:] # first line is header
-        for line in seq_data:
-             if line[0] != "N": #exclude ancestral sequences
-                 continue
-             id, seq = line.split()
-             seq_dict[id] = str(seq).upper()
-    else: # real data (other than PF00565, see `get_euk_seqs`, is in fasta format)
-        with open(msa_file_path, 'r') as file_handle:
-            for record in SeqIO.parse(file_handle, "fasta"):
-                count_sequences += 1
+    format_type = {
+        'real' : "fasta",
+        'coupling_sims' : "phylip-relaxed",
+        'independent_sims' : "phylip-sequential" #Weirdly SeqIO is not parsing the MSAs output by SeqGen as (sequential) Phylip format
+    }[sim_type]
+    with open(msa_file_path, 'r') as file_handle:
+        if sim_type != "real": #simulated data 
+            if sim_type == "coupling_sims":
+                for record in SeqIO.parse(file_handle, format_type):
+                    if record.id[0] != "N": #exclude ancestral sequences
+                        continue
+                    seq_dict[record.id] = str(record.seq).upper()
+            else: #this else branch should eventually not be needed once we figure out what's going on with SeqGen format
+                seq_data = file_handle.readlines()[1:] # first line is phylip header
+                for line in seq_data:
+                    if line[0] != "N": #exclude ancestral sequences
+                        continue
+                    id, seq = line.split()
+                    seq_dict[id] = str(seq).upper()
+        else: #real data (other than PF00565, see `get_euk_seqs`) is in fasta format and does not have ancestral sequences
+            for record in SeqIO.parse(file_handle, format_type):
                 seq_dict[record.id] = str(record.seq).upper()
     return seq_dict
 
@@ -194,15 +203,15 @@ def one_hot_encode(seq_ary):
 def main():
     #### Preliminary steps and loading in the unprocessed MSA ########
     args = parse_commands()
-    # Get family name to use as a directory name for saving processed data
     msa_file_path = args.MSA
-    fam_name, ext = path.splitext(path.basename(msa_file_path))
-    # If simulated, the family name consists of the settings used to generate the data followed by "_msa"
+    fam_name, _ = path.splitext(path.basename(msa_file_path))
     if not args.real:
-        fam_name = fam_name.split("_")[0]
+        sim_type = path.dirname(msa_file_path).split("/")[0] #either coupled or independent
         num_seqs = path.dirname(msa_file_path).split("/")[-1] #either 1250 or 5000
-        processed_directory = f"independent_sims/processed/{num_seqs}/{fam_name}"
+        fam_name = fam_name.split("_")[0]
+        processed_directory = f"{sim_type}/processed/{num_seqs}/{fam_name}"
     else:
+        sim_type = "real"
         processed_directory = f"real/processed/{fam_name}"
     if not path.exists(processed_directory):
         makedirs(processed_directory)
@@ -217,7 +226,7 @@ def main():
         with open(f"{processed_directory}/label_accession_mapping.pkl", 'wb') as file_handle:
             pickle.dump(euk_ids, file_handle)
     else: 
-        seq_dict = get_seqs(msa_file_path, args.real)
+        seq_dict = get_seqs(msa_file_path, sim_type)
     
     # ensure that the query accession is in the MSA
     assert args.query_seq_id in seq_dict, f"Query accession {args.query_seq_id} not found in MSA"

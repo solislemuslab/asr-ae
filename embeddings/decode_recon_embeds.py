@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import torch
 import pickle
+from Bio import SeqIO
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from autoencoder.modules.model import load_model
 from utilities.utils import get_directory, idx_to_aa, filter_fasta
@@ -15,13 +16,10 @@ from utilities.utils import get_directory, idx_to_aa, filter_fasta
 def load_real_ancseqs(msa_path):
     real_seqs_dict = {}
     with open(msa_path, 'r') as msa:
-        # skip the first line, which is Phylip header
-        next(msa)
-        # Read only ancestral sequences
-        for line in msa: 
-            id, seq = line.split()
-            if id[0] != 'N':
-                real_seqs_dict[id] = seq
+        for record in SeqIO.parse(msa, "phylip-relaxed"):
+            if record.id[0] == "N": #exclude leaf sequences
+                continue
+            real_seqs_dict[record.id] = str(record.seq).upper()
     return real_seqs_dict
 
 def get_prior_seqs(model, n_seqs, idx_to_aa_dict):

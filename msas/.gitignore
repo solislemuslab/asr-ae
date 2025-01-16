@@ -1,4 +1,5 @@
-coupling_sims/ccm
+coupling_sims/processed/
+coupling_sims/raw/
 independent_sims/processed/1250/*
 independent_sims/processed/5000/*
 independent_sims/processed/10000/*
