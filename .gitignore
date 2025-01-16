@@ -2,6 +2,7 @@
 *.Rhistory
 .vscode/
 exploration.ipynb
+*.tar.gz
 
 # cache
 *__pycache__/

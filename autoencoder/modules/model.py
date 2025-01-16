@@ -117,6 +117,10 @@ class VAE(nn.Module):
         bound, we can use elbo to approximate log P(x).
         Using multiple samples to calculate the elbo makes it be a better approximation
         of log P(x).
+
+        Note that this function does not incorporate the sequence weights. Therefore, 
+        there might obtain unexpected results in comparing IWAE Elbo with regular 
+        ELBO computed with non-uniform weights.
         """
         x = x.expand(num_samples, x.shape[0], x.shape[1], x.shape[2])
         mu, sigma = self.encoder(x)

@@ -1,2 +1,3 @@
-independent_sims/*/*
-real/*/*
+independent_sims
+real
+coupling_sims

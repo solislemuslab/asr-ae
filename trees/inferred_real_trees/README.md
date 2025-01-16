@@ -6,7 +6,7 @@ IQ-Tree Scripts for PF00565, PF00067, PF00041 can be found in `iqtree\IQ-TREE_Di
 
   - These scripts were executed using the `tmux` command to run on the WID server
   
-  - These trees are being constructed based on the processed MSAs from Evan, located at `msas/real/processed/seq_msa_char_pf*.fasta`. This is what is fed to IQTree
+  - These trees are being constructed based on the processed MSAs from Evan, located at `msas/real/processed/pfam_id/seq_msa_char_pf*.fasta`. This is what is fed to IQTree
   
   - Because of no a priori information given regarding the evolutionary model, we use the `-MFP` command to let IQ-Tree find the best-fitting evolutionary model for each of the 3 datasets, respectively using lowest-BIC criterion.
   
