@@ -24,7 +24,7 @@ fi
 name=$(basename "$tree_file" .tree_cleaned)
 fam_name=${name%%.*} # removes "sim.trim"
 n_seq=$(basename "$(dirname "$tree_file")")
-output_dir="independent_sims/raw/${n_seq}"
+output_dir="independent/raw/${n_seq}"
 # Create output directory if it doesn't exist
 if [ ! -d "$output_dir" ]; then
   mkdir -p "$output_dir"

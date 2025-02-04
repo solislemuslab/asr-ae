@@ -4,7 +4,7 @@ For PFAM protein family PF00144 (beta-lactamase), which was analyzed by [Detlefs
 
 Finally, for PF02033 (Ribosome-binding factor A), we download an alignment the alignment found at `aln/1josA.aln` of `http://bioinf.cs.ucl.ac.uk/downloads/PSICOV/suppdata/`, which was published with the [PSICOV paper](https://academic.oup.com/bioinformatics/article/28/2/184/198108). We don't have meaningful sequence labels for this family.
 
-To each of these MSAs, we then applied the pre-processing steps from the Ding paper. Specifically for PF00565, this entails first filtering the alignment to retain only sequences from Eukaryotic species + 1 sequence from a non-Eukaryotic species as an outgroup for tree rooting. For all families, however, it entails specifying a query sequence, which is recorded below, and filtering to retain only sequences that do not have too many gaps in the positions where the query sequence has amino acids. The output of this pre-processing, i.e. the processed data, is in `processed/`.
+To each of these MSAs, we then applied the pre-processing steps from the Ding paper. For PF00565, we first filtered the alignment to retain only sequences from Eukaryotic species + 1 sequence from a non-Eukaryotic species as an outgroup for tree rooting. For all families, Ding's preprocessing involves specifying a query sequence, which is recorded below, and filtering to retain only sequences that do not have too many gaps in the positions where the query sequence has amino acids. For each family, the output of this pre-processing includes the data objects that our VAE can process and is placed in the `processed` directory.
 
 | PFAM ID | Query sequence | Outgroup sequence | Taxa of outgroup
 |---------|---------|-------|----------|

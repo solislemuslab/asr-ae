@@ -5,8 +5,8 @@ from collections import Counter
 import matplotlib.pyplot as plt
 
 # File paths
-coevolution_file = 'coupling_sims/coevolution_stationary.txt'
-lg_lg_file = 'independent_sims/lg_LG.PAML.txt'
+coevolution_file = 'coupling/coevolution_stationary.txt'
+lg_lg_file = 'independent/lg_LG.PAML.txt'
 
 # Get the FASTA file from command line arguments
 if len(sys.argv) != 2:
@@ -16,9 +16,9 @@ if len(sys.argv) != 2:
 fasta_file = sys.argv[1]
 
 # Determine the type of simulation based on the directory structure
-if 'independent_sims' in fasta_file:
+if 'independent' in fasta_file:
     sim_type = 'independent'
-elif 'coupling_sims' in fasta_file:
+elif 'coupled' in fasta_file:
     sim_type = 'coupled'
 else:
     raise ValueError("Unknown simulation type based on the directory structure.")
