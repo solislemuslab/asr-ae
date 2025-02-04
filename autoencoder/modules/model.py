@@ -94,7 +94,7 @@ class VAE(nn.Module):
         z = mu + sigma*eps
 
         ## compute log p(x|z)
-        log_p = self.decoder(z)
+        log_p = self.decoder(z) # batch shape x nl x nc
         log_PxGz = torch.sum(x*log_p, [-1, -2]) # sum over both site and character dims
         weighted_log_PxGz = log_PxGz * weight
 

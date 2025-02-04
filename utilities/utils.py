@@ -1,11 +1,9 @@
 import os
-import torch
-import numpy as np
 import pickle
 import sys 
 from Bio import SeqIO
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from autoencoder.modules.data import MSA_Dataset
+from utilities import config
 
 def get_directory(data_path, MSA_id, folder, data_subfolder = False):
     """
@@ -23,18 +21,51 @@ def get_directory(data_path, MSA_id, folder, data_subfolder = False):
         dir = ("/").join(dir_list)
     return dir
 
-def idx_to_aa(aa_index):
+def aa_to_int(main_aa_symbols, unknown_aa_symbols):
     """
-    Takes: dictionary mapping amino acids to integer indices
-    Returns: Inverse dictionary that maps integers to amino acids.
+    From a list of amino acids symbols (sorted to be in the desired order) 
+    and a list of symbols representing ambiguous residues,
+    generates a dictionary mapping amino acid symbols to integer indices.
+
+    main_aas: list of amino acids to include in the dictionary
+    unknown_aas: list of amino acids to map to 0, representing either gaps or other amino acids with ambiguity
     """
-    # In our integer encoding of proteins, we've encoded several different amino acid characters as 0
-    # For decoding purposes, we will decode all 0's as '-'
-    del aa_index['.'], aa_index['X'], aa_index['B'], aa_index['Z'], aa_index['J']
-    idx_to_aa_dict = {}
-    for k, v in aa_index.items():
-        idx_to_aa_dict[v] = k
-    return idx_to_aa_dict   
+    aa_index = {}
+    for i, aa in enumerate(main_aa_symbols):
+        aa_index[aa] = i + 1
+    for i, aa in enumerate(unknown_aa_symbols):
+        aa_index[aa] = 0
+    return aa_index
+
+def aa_to_int_from_file(data_path, MSA_id):
+    """
+    Load the amino acid to integer mapping from pickle file that's already been created.
+    """
+    if MSA_id == "pevae":    
+            with open(f"{data_path}/LG_matrix.pkl", 'rb') as file_handle:
+                LG_matrix = pickle.load(file_handle)
+            amino_acids = LG_matrix['amino_acids']
+            aa_index = aa_to_int(amino_acids, config.UNKNOWN)
+    else:
+        with open(f"{data_path}/aa_index.pkl", 'rb') as file_handle:
+            aa_index = pickle.load(file_handle)
+    return aa_index
+
+def invert_dict(aa_index, unknown_symbol = '.'):
+    """
+    Takes: dictionary mapping amino acid symbols to integer indices
+    Returns: Inverse dictionary that maps integers to amino acid symbols.
+
+    Many characters may get mapped to 0 in aa_index, so we have to choose one of these to map 0 to in our inverse dictionary.
+    This is specified by the argument `unknown_symbol`.
+    The function makes lasting changes to the input dictionary aa_index passed in so that after function call, only `unknown_symbol` is mapped to 0.
+    """
+    keys_to_delete = [s for s in config.UNKNOWN if s != unknown_symbol]
+    for symbol in keys_to_delete:
+        if symbol in aa_index:
+            del aa_index[symbol]
+    index_aa = {v: k for k, v in aa_index.items()}
+    return index_aa  
 
 def filter_fasta(og_path, new_path, keep):
     """
@@ -50,24 +81,3 @@ def filter_fasta(og_path, new_path, keep):
     with open(new_path, 'w') as new:
         SeqIO.write(records_to_keep, new, "fasta")
 
-def load_data(data_path, weigh_seqs):
-    """
-    Load the sequence data from the data path as an MSA_Dataset object.
-    """
-    with open(f"{data_path}/seq_msa_binary.pkl", 'rb') as file_handle:
-        msa_binary = torch.tensor(pickle.load(file_handle))
-    nl = msa_binary.shape[1]
-    nc = msa_binary.shape[2]
-
-    with open(f"{data_path}/seq_names.pkl", 'rb') as file_handle:
-        seq_names = pickle.load(file_handle)
-    if weigh_seqs:
-        with open(f"{data_path}/seq_weight.pkl", 'rb') as file_handle:
-            seq_weight = pickle.load(file_handle)
-    else:
-        seq_weight = np.ones(len(seq_names)) / len(seq_names)
-    seq_weight = seq_weight.astype(np.float32) 
-    assert np.abs(seq_weight.sum() - 1) < 1e-6
-    data = MSA_Dataset(msa_binary, seq_weight, seq_names)
-
-    return data, nl, nc

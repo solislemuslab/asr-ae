@@ -10,8 +10,9 @@ import torch
 from torch.utils.data import DataLoader
 import torch.optim as optim
 from modules.model import VAE, TVAE
+from modules.data import load_data
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from utilities.utils import get_directory, load_data 
+from utilities.utils import get_directory
 
 def train(model, device, train_loader, optimizer, epoch, verbose):
     """
@@ -43,7 +44,7 @@ def eval(model, device, valid_loader, n_samples = 100):
     elbos = []
     log_pxgzs = []
     elbo_iwaes = []
-
+    accs = []
     with torch.no_grad():
         for (msa, weight, _) in valid_loader:
             msa = msa.to(device)
@@ -54,10 +55,16 @@ def eval(model, device, valid_loader, n_samples = 100):
 
             # compute elbo loss with iwae elbo
             all_iwae_elbos = model.compute_iwae_elbo(msa, n_samples)
-            ave_iwae_elbos = torch.mean(all_iwae_elbos).item()
-            elbo_iwaes.append(ave_iwae_elbos)
+            ave_iwae_elbo = torch.mean(all_iwae_elbos).item()
+            elbo_iwaes.append(ave_iwae_elbo)
 
-    return elbos, log_pxgzs, elbo_iwaes
+            # compute reconstruction accuracy
+            all_accs = model.compute_acc(msa)
+            ave_acc = torch.mean(all_accs).item()
+            accs.append(ave_acc)
+
+
+    return elbos, log_pxgzs, elbo_iwaes, accs
 
 def main():
     name_script = sys.argv[0]
@@ -139,19 +146,22 @@ def main():
         pickle.dump(valid_idx, file_handle)
 
     # training the model
-    train_elbos, val_elbos, val_log_pxgzs, val_iwae_elbos = [], [], [], []
+    train_elbos, val_elbos, val_log_pxgzs, val_iwae_elbos, val_accs = [], [], [], [], []
     for epoch in range(num_epochs):
         # Validation metrics
         if validate:
-            val_elbos_on_batches, val_log_pxgzs_on_batches, val_elbo_iwae_on_batches = eval(
+            val_elbos_on_batches, val_log_pxgzs_on_batches, val_elbo_iwae_on_batches, val_accs_on_batches = eval(
                 model, device, valid_loader, iwae_num_samples)
             epoch_val_elbo = np.mean(val_elbos_on_batches)
             epoch_val_log_pxgz = np.mean(val_log_pxgzs_on_batches)
             epoch_val_elbo_iwae = np.mean(val_elbo_iwae_on_batches)
+            epoch_val_acc = np.mean(val_accs_on_batches)
             val_elbos.append(epoch_val_elbo)
             val_log_pxgzs.append(epoch_val_log_pxgz)
             val_iwae_elbos.append(epoch_val_elbo_iwae)
+            val_accs.append(epoch_val_acc)
             print(f"Validation elbo for epoch {epoch}: {epoch_val_elbo}", flush=True)
+            print(f"Validation accuracy for epoch {epoch}: {epoch_val_acc}", flush=True)
         # Training metrics
         batch_elbos = train(model, device, train_loader, optimizer, epoch, verbose)
         epoch_train_elbo = np.mean(batch_elbos)

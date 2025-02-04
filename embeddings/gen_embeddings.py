@@ -5,6 +5,7 @@ import json
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
+from sklearn.decomposition import PCA
 import torch
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from autoencoder.modules.model import load_model
@@ -31,17 +32,38 @@ def get_embeddings(model, msa_binary):
         mu, _ = model.encoder(msa_binary)
     return mu
 
-def plot_embeddings(mu, data_path, model_name, MSA_id):
+def plot_embeddings(mu, data_path, model_name, MSA_id, valid_idx=None):
     """
     Plot the embeddings.
     """
-    plot_name = os.path.splitext(model_name)[0] + "_embeddings.png"
+    # title 
+    
+    # color points based on whether they are in the validation set
+    if valid_idx:
+        col = ["green" if i in valid_idx else "orange" for i in range(len(mu))]
+    else:
+        col = "orange"
+    # reduce dimension of embdeddings to 2D if it is higher with pca
+    dim_embed = mu.shape[1]
+    if dim_embed > 2:
+        pca = PCA(n_components=2)
+        mu = pca.fit_transform(mu)
     plt.figure(figsize=(5, 4))
-    plt.scatter(mu[:, 0], mu[:, 1], s=1, alpha=0.9)
-    plt.xlabel('Dimension 1')
-    plt.ylabel('Dimension 2')
-    plt.title('2D Embeddings Visualization')
+    plt.scatter(mu[:, 0], mu[:, 1], s=1, alpha=0.9, c = col)
+    if valid_idx:
+        plt.scatter([], [], c='green', label='Test', s=10)  # Dummy scatter for legend
+        plt.scatter([], [], c='orange', label='Train', s=10)  # Dummy scatter for legend
+    if dim_embed > 2:
+        plt.xlabel('Principal Component 1')
+        plt.ylabel('Principal Component 2')
+        plt.legend()
+    else:
+        plt.xlabel('Dimension 1')
+        plt.ylabel('Dimension 2')
+    plt.title('Embeddings of sequences at tips of the tree')
+    # save plot
     plot_dir = get_directory(data_path, MSA_id, "plots")
+    plot_name = os.path.splitext(model_name)[0] + "_embeddings.png"
     os.makedirs(plot_dir, exist_ok=True)
     plt.savefig(f"{plot_dir}/{plot_name}", bbox_inches='tight')
 
@@ -91,9 +113,12 @@ def main():
         model = load_model(model_path, nl, nc, nlatent = ld)
     # get embeddings
     mu = get_embeddings(model, msa_binary)
+    # get indices of validation set
+    with open(f"{model_dir}/valid_idx.pkl", 'rb') as file_handle:
+        valid_idx = pickle.load(file_handle)
     # plot embeddings
     if plot:
-        plot_embeddings(mu, data_path, model_name, MSA_id)
+        plot_embeddings(mu, data_path, model_name, MSA_id, valid_idx)
     # save embeddings
     save_embeddings(mu, data_path, model_name, MSA_id)
 
