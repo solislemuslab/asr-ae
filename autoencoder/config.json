@@ -3,7 +3,7 @@
     "data_path": "msas/coupled/processed/1250/COG183-l100-s1.0-aNone",
     "weigh_seqs": false,
     "use_transformer": false,
-    "num_epochs": 200,
+    "num_epochs": 100,
     "num_hidden_units": [256, 256],
     "batch_size": 64,
     "learning_rate": 0.001,

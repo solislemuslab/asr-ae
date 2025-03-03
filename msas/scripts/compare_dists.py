@@ -1,16 +1,15 @@
-import os
 import re
 import sys
 from collections import Counter
 import matplotlib.pyplot as plt
 
 # File paths
-coevolution_file = 'coupling/coevolution_stationary.txt'
-lg_lg_file = 'independent/lg_LG.PAML.txt'
+coevolution_file = 'msas/coupled/coevolution_stationary.txt'
+lg_lg_file = 'msas/independent/lg_LG.PAML.txt'
 
 # Get the FASTA file from command line arguments
 if len(sys.argv) != 2:
-    print("Usage: python compare_dists.py <fasta_file>")
+    print("Usage: python msas/scripts/compare_dists.py <fasta_file>")
     sys.exit(1)
 
 fasta_file = sys.argv[1]
@@ -18,7 +17,7 @@ fasta_file = sys.argv[1]
 # Determine the type of simulation based on the directory structure
 if 'independent' in fasta_file:
     sim_type = 'independent'
-elif 'coupled' in fasta_file:
+elif 'coupled' in fasta_file or 'cherry' in fasta_file:
     sim_type = 'coupled'
 else:
     raise ValueError("Unknown simulation type based on the directory structure.")
@@ -88,7 +87,8 @@ ax.plot([0, max(expected)], [0, max(expected)], 'r--')
 ax.set_xlabel(xlabel)
 ax.set_ylabel(ylabel)
 ax.set_title('Scatter Plot of Observed vs Expected Probabilities')
-
+ax.set_xscale('log')
+ax.set_yscale('log')
 # Annotate points with labels
 for i, label in enumerate(labels):
     ax.annotate(label, (expected[i], observed[i]), fontsize=8, alpha=0.7)

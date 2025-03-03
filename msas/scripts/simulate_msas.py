@@ -165,33 +165,23 @@ if __name__ == "__main__":
         seq_len = msa_length // 2
     elif type == "independent":
         seq_len = msa_length
-
+    
     # Get parameters and states
     if type == "coupled":    
-        S_df = read_rate_matrix_from_csv("msas/coupled/coevolution.txt")
+        Q_df = read_rate_matrix_from_csv("msas/coupled/coevolution.txt")
         pi_df = read_probability_distribution_from_csv("msas/coupled/coevolution_stationary.txt")
         states = pi_df.index.tolist() # these are pairs of amino acid characters
-        assert states == S_df.columns.tolist()
-        S = S_df.to_numpy()
+        assert states == Q_df.columns.tolist()
+        Q = Q_df.to_numpy()
         pi = pi_df.to_numpy().flatten()
     elif type == "independent":
         S, pi = read_params_from_PAML("msas/independent/lg_LG.PAML.txt")
+        Q = S @ np.diag(pi)
+        np.fill_diagonal(Q, -Q.sum(axis=1))
         states = config.AA
-    # compute rate matrix
-    Q = S @ np.diag(pi)
-    # recompute the diagonal to make sure it is equal to minus the sum of the other terms
-    Q = Q - np.diag(Q)
-    diago = -Q.sum(1)
-    np.fill_diagonal(Q, diago)
-    print(Q)
-    sys.exit()
-    # Rescale the rate matrix
-    scale = compute_scale(Q, pi)
-    print("Before rescaling: " + str(scale))
-    Q = Q / scale
-    scale = compute_scale(Q, pi)
-    print("After rescaling: " + str(scale))
-
+    assert np.allclose(Q @ np.ones_like(pi), 0, atol=1e-6)
+    assert np.allclose(pi @ Q, 0, atol=1e-6)
+    
     # set seed
     random.seed(770)
     np.random.seed(770)

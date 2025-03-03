@@ -107,27 +107,33 @@ write.csv(anc_embeds, anc_embed_path)
 # Plot tree in (in first two dimensions of) embedding space
 net <- as.network(trimmed_tree)
 vert_type <- rep(
-    c("tip", "root", "internal"),
-    c(ntips_trimmed, 1, nrow(all_embeds) - ntips_trimmed - 1)
+    c("tip", "internal"),
+    c(ntips_trimmed, nrow(all_embeds) - ntips_trimmed)
 )
 vert_col <- c( # root = "green",
-    internal = scales::alpha("blue", .7),
-    tip = scales::alpha("red", .7),
-    root = scales::alpha("green", .7)
+    internal = scales::alpha("blue", .4),
+    tip = scales::alpha("red", .4)
 )
-vert_size <- c( # root = 2,
+vert_size <- c( 
     internal = .3,
-    tip = .3,
-    root = .3
+    tip = .3
 )
 edge_col <- scales::alpha("black", .2)
 png(file = path(plot_dir, paste0(model, "_network.png")), width = 1200, height = 1200)
+if (ncol(all_embeds) > 2) {
+    pca <- prcomp(all_embeds)
+    plotted_coords <- pca$x[, 1:2]
+} else {
+   plotted_coords <- all_embeds
+}
+    
+
 plot.network(net,
-    coord = all_embeds[, 1:2],
-    xlim = range(all_embeds[, 1]),
-    ylim = range(all_embeds[, 2]),
+    coord = plotted_coords[, 1:2],
+    xlim = range(plotted_coords[, 1]),
+    ylim = range(plotted_coords[, 2]),
     vertex.border = NA,
-    vertex.cex = vert_size,
+    vertex.cex = vert_size[vert_type],
     edge.lwd = .3,
     edge.col = edge_col,
     usearrows = FALSE,
@@ -138,6 +144,11 @@ plot.network(net,
     # label.pos = 5,
     suppress.axes = TRUE,
 )
+# highlight the root, which should be the first row of the internal nodes in all_embeds
+root_index <- ntips_trimmed + 1
+points(plotted_coords[root_index, 1], plotted_coords[root_index, 2], 
+       col = "green", pch = 16, cex = 1)
+
 legend("bottomleft",
     pch = 16,
     cex = 2,

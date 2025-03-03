@@ -2,7 +2,7 @@
     "MSA_id": "COG183-l100-s1.0-aNone",
     "msa_path": "msas/coupled/raw/1250/COG183-l100-s1.0-aNone_msa.dat",
     "data_path": "msas/coupled/processed/1250/COG183-l100-s1.0-aNone",
-    "model_name": "model_layers256-256_ld8_wd0.01_epoch200_2025-02-03.pt",
+    "model_name": "model_layers256-256_ld8_wd0.01_epoch100_2025-03-03.pt",
     "plot": true,
-    "redo_iqtree": true
+    "redo_iqtree": false
 }
