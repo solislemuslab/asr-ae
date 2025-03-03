@@ -10,7 +10,7 @@ import pickle
 from Bio import SeqIO
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from autoencoder.modules.model import load_model
-from utilities.utils import get_directory, invert_dict, filter_fasta, aa_to_int_from_file
+from utilities.utils import get_directory, invert_dict, filter_fasta, aa_to_int_from_file, get_depths
 
 
 def load_real_ancseqs(msa_path):
@@ -70,14 +70,11 @@ def get_modal_seq(data_path, index_aa):
     maj_seq = "".join(maj_seq)
     return maj_seq
 
-def run_iqtree(MSA_id, data_path, model_name, n_seq, iqtree_dir, redo):
+def run_iqtree(data_path, tree_path, iqtree_dir, redo):
     with open(f"{data_path}/final_seq_names.txt") as file:
         final_seq_names = file.read().splitlines()
     # we have to create a new fasta file with only the sequences that ended up in our final tree
     filter_fasta(f"{data_path}/seq_msa_char.fasta", f"{data_path}/seq_msa_char.fasta", keep=final_seq_names)
-    family = MSA_id.split("-")[0]
-    #scaling_factor = float(MSA_id.split("-")[2][1:])
-    tree_path = f"trees/fast_trees/{n_seq}/{family}.sim.fully_trim.tree"
     
     # Scale the tree
     # scaled_tree_path = f"{tree_path}_scaled{scaling_factor}"
@@ -89,9 +86,9 @@ def run_iqtree(MSA_id, data_path, model_name, n_seq, iqtree_dir, redo):
     
     # Run IQTree with scaled tree (only actually runs if analysis has not yet been done or redo is true)
     redo = " -redo" if redo else ""
-    os.system(f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fasta -m LG -te {tree_path} -asr -quiet {redo} -pre {iqtree_dir}/{model_name}")
+    os.system(f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fasta -m LG -te {tree_path} -asr -quiet {redo} -pre {iqtree_dir}/results")
 
-def get_iqtree_ancseqs(iqtree_dir, model_name, n_seq, anc_id):
+def get_iqtree_ancseqs(iqtree_dir, n_seq, anc_id):
     """
     Note that for some reason, IQTree does not reconstruct the sequence at the root node. Not sure why...
     Usually, our trees will be unrooted, but occassionally, the trimming of extremely short external branches 
@@ -101,7 +98,7 @@ def get_iqtree_ancseqs(iqtree_dir, model_name, n_seq, anc_id):
     For now, this function just notifies the user of the lack of predictions from IQTree for this node, but in the future, 
     we will want to change how we handle this so that we evaluate IQTree and our approach on exactly the same set of nodes.
     """
-    iq_df = pd.read_table(f'{iqtree_dir}/{model_name}.state', header=8)
+    iq_df = pd.read_table(f'{iqtree_dir}/results.state', header=8)
     iq_df_sk = iq_df[["Node", "Site", "State"]]
     iq_df_sk = iq_df_sk.sort_values(by=["Node", "Site"])
     iq_df_sk.set_index("Node", inplace=True)
@@ -112,6 +109,7 @@ def get_iqtree_ancseqs(iqtree_dir, model_name, n_seq, anc_id):
         if node_id not in iq_df_sk.index:
             print(f"Reconstructions for {node_id} not found in IQTree output because it is the root node in the trimmed tree, "
                   "and for some reason, IQTree does not reconstruct the sequence at the root node.")
+            iq_seqs.append(None)
             continue
         recon_seq_df = iq_df_sk.loc[node_id]
         recon_seq = "".join(recon_seq_df.State.values)
@@ -121,15 +119,30 @@ def get_iqtree_ancseqs(iqtree_dir, model_name, n_seq, anc_id):
 def evaluate_seqs(est_seqs, real_seqs):
     correct = 0
     total = 0
-    acc = []
     for (est_seq, real_seq) in zip(est_seqs, real_seqs):
-      n_correct = sum([est_c == real_c for (est_c, real_c) in zip(est_seq, real_seq)])
-      correct += n_correct
-      total += len(real_seq)
-      acc.append(n_correct)
+      if est_seq: # only evaluate non-missing reconstructions (iqtree)
+        n_correct = sum([est_c == real_c for (est_c, real_c) in zip(est_seq, real_seq)])
+        correct += n_correct
+        total += len(real_seq)
     print(f"correct: {correct}")
     print(f"total: {total}")
     print(f"Percentage correct: {np.round(100*correct/total, 2)}")
+
+
+def plot_error_vs_depth(est_seqs, real_seqs, depths):
+    ham_errors = []
+    for (est_seq, real_seq) in zip(est_seqs, real_seqs):
+        if not est_seq: # handle missing reconstructions (iqtree)
+            ham_errors.append(None) 
+            continue
+        ham_error = sum([est_c != real_c for (est_c, real_c) in zip(est_seq, real_seq)])/len(real_seq)
+        ham_errors.append(ham_error)
+    plt.scatter(depths, ham_errors)
+    plt.xlabel("Node depth")
+    plt.ylabel("Hamming reconstruction error")
+    plt.title("Accuracy of reconstructed sequences vs. depth in tree")
+    plt.show()
+
 
 def main():
     name_script = sys.argv[0]
@@ -208,11 +221,16 @@ def main():
 
     #run iqtree ancestral sequence reconstruction and evaluate
     print("Evaluating iqtree ancestral sequences")
-    n_seq = int(msa_path.split("/")[-2])
+    # create directory for iqtree results
     iqtree_dir = get_directory(data_path, MSA_id, "iqtree", data_subfolder=True)
     os.makedirs(iqtree_dir, exist_ok=True)
-    run_iqtree(MSA_id, data_path, model_name, n_seq, iqtree_dir, redo=redo_iqtree)
-    iqtree_seqs = get_iqtree_ancseqs(iqtree_dir, model_name, n_seq, anc_id)
+    # run iqtree
+    n_seq = int(msa_path.split("/")[-2])
+    family = MSA_id.split("-")[0]
+    tree_path = f"trees/fast_trees/{n_seq}/{family}.sim.fully_trim.tree"
+    run_iqtree(data_path, tree_path, iqtree_dir, redo=redo_iqtree)
+    # retrieve iqtree's reconstructed sequences and evaluate
+    iqtree_seqs = get_iqtree_ancseqs(iqtree_dir, n_seq, anc_id)
     evaluate_seqs(iqtree_seqs, real_seqs)
     print("-" * 50)
 
@@ -230,6 +248,14 @@ def main():
     #         print(node_id, seq_type, seq_type_dict[seq_type][anc_id.index(node_id)])
     
     # plot reconstruction accuracy as a function of distance from root
+    depths = get_depths(tree_path)
+    ordered_depths = [depths[f"Node{int(k) - n_seq}"] for k in anc_id]
+    plot_error_vs_depth(recon_ancseqs, real_seqs, ordered_depths)
+    plot_error_vs_depth(iqtree_seqs, real_seqs, ordered_depths)
+    #plot_error_vs_depth([maj_seq]*n_anc, real_seqs, ordered_depths)
+    #plot_error_vs_depth(prior_seqs, real_seqs, ordered_depths)
+
+
 
 
 if __name__ == "__main__":

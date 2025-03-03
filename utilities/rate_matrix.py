@@ -70,3 +70,9 @@ def read_probability_distribution_from_csv(
             "should add to 1.0, with a tolerance of 1e-6."
         )
     return res
+
+def compute_scale(rate_matrix, eq_probs):
+    diago = np.diag(rate_matrix)
+    tmp = np.multiply(diago, eq_probs)
+    scale = -np.sum(tmp)
+    return scale
