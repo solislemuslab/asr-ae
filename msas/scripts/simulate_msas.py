@@ -17,7 +17,8 @@ from utilities import config
 from utilities.rate_matrix import (
     read_params_from_PAML, 
     read_rate_matrix_from_csv, 
-    read_probability_distribution_from_csv
+    read_probability_distribution_from_csv,
+    compute_scale
 )
 
 def sample(probability_distribution: np.array, size: tuple = None) -> int:
@@ -167,18 +168,30 @@ if __name__ == "__main__":
 
     # Get parameters and states
     if type == "coupled":    
-        Q_df = read_rate_matrix_from_csv("msas/coupled/coevolution.txt")
+        S_df = read_rate_matrix_from_csv("msas/coupled/coevolution.txt")
         pi_df = read_probability_distribution_from_csv("msas/coupled/coevolution_stationary.txt")
         states = pi_df.index.tolist() # these are pairs of amino acid characters
-        assert states == Q_df.columns.tolist()
-        Q = Q_df.to_numpy()
+        assert states == S_df.columns.tolist()
+        S = S_df.to_numpy()
         pi = pi_df.to_numpy().flatten()
     elif type == "independent":
         S, pi = read_params_from_PAML("msas/independent/lg_LG.PAML.txt")
-        Q = S @ np.diag(pi)
-        np.fill_diagonal(Q, -Q.sum(axis=1))
         states = config.AA
-    
+    # compute rate matrix
+    Q = S @ np.diag(pi)
+    # recompute the diagonal to make sure it is equal to minus the sum of the other terms
+    Q = Q - np.diag(Q)
+    diago = -Q.sum(1)
+    np.fill_diagonal(Q, diago)
+    print(Q)
+    sys.exit()
+    # Rescale the rate matrix
+    scale = compute_scale(Q, pi)
+    print("Before rescaling: " + str(scale))
+    Q = Q / scale
+    scale = compute_scale(Q, pi)
+    print("After rescaling: " + str(scale))
+
     # set seed
     random.seed(770)
     np.random.seed(770)
@@ -192,7 +205,7 @@ if __name__ == "__main__":
             os.makedirs(output_dir)
 
         # get list of cleaned tree files (note that this assumes that the independent simulations have already been run, producing these cleaned trees)
-        tree_files = glob.glob(os.path.join(tree_dirs[n_seq], '*.tree'))
+        tree_files = glob.glob(os.path.join(tree_dirs[n_seq], '*.sim.trim.tree'))
 
         # Simulate MSAs on all tree_files
         for tree_file in tree_files:
