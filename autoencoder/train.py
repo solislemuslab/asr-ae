@@ -12,7 +12,7 @@ import torch.optim as optim
 from modules.model import VAE, TVAE
 from modules.data import load_data
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from utilities.utils import get_directory
+from utilities.paths import get_directory
 
 def train(model, device, train_loader, optimizer, epoch, verbose):
     """
