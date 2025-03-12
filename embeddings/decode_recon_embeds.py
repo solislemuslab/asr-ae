@@ -1,6 +1,8 @@
 import sys
 import os
 import re
+import argparse
+from types import SimpleNamespace
 import json
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,18 +11,21 @@ import torch
 import pickle
 from Bio import SeqIO
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from autoencoder.modules.model import load_model
-from utilities.utils import get_directory, invert_dict, filter_fasta, aa_to_int_from_file, get_depths
+from utilities.seq import invert_dict, filter_fasta, aa_to_int_from_path 
+from utilities.model import load_model
+from utilities.paths import get_directory
+from utilities.tree import get_depths
 
-
-def load_real_ancseqs(msa_path):
+def get_real_seqs(msa_path, anc_id):
     real_seqs_dict = {}
     with open(msa_path, 'r') as msa:
         for record in SeqIO.parse(msa, "phylip-relaxed"):
             if record.id[0] == "N": #exclude leaf sequences
                 continue
-            real_seqs_dict[record.id] = str(record.seq).upper()
-    return real_seqs_dict
+            real_seqs_dict[record.id] = str(record.seq).upper()     
+    # order true ancestral sequences according to the order of the reconstructed embeddings
+    real_seqs = [real_seqs_dict[id] for id in anc_id]
+    return real_seqs
 
 def get_prior_seqs(model, n_seqs, index_aa):
     dim_latent_space = model.dim_latent_vars
@@ -94,9 +99,9 @@ def get_iqtree_ancseqs(iqtree_dir, n_seq, anc_id):
     Usually, our trees will be unrooted, but occassionally, the trimming of extremely short external branches 
     (for the software that fits a Brownian motion on the embeddings to reconstruct ancestral embeddings)
     results in a tree that is rooted. In this case, there will be one node (i.e. the root) for which we
-    are able to obtain a reconstructed embedding that we can convert to a sequence, but which IQ won't produce an ancestral sequence for.
-    For now, this function just notifies the user of the lack of predictions from IQTree for this node, but in the future, 
-    we will want to change how we handle this so that we evaluate IQTree and our approach on exactly the same set of nodes.
+    are able to obtain a reconstructed embedding that we can convert to a sequence, but for which IQ won't produce an ancestral sequence. 
+    For now, this function just notifies the user of the lack of predictions from IQTree for this node.
+    In the future, we can try to change this so that we evaluate IQTree and our approach on precisely the same set of nodes.
     """
     iq_df = pd.read_table(f'{iqtree_dir}/results.state', header=8)
     iq_df_sk = iq_df[["Node", "Site", "State"]]
@@ -128,7 +133,6 @@ def evaluate_seqs(est_seqs, real_seqs):
     print(f"total: {total}")
     print(f"Percentage correct: {np.round(100*correct/total, 2)}")
 
-
 def plot_error_vs_depth(est_seqs, real_seqs, depths):
     ham_errors = []
     for (est_seq, real_seq) in zip(est_seqs, real_seqs):
@@ -143,51 +147,39 @@ def plot_error_vs_depth(est_seqs, real_seqs, depths):
     plt.title("Accuracy of reconstructed sequences vs. depth in tree")
     plt.show()
 
-
 def main():
-    name_script = sys.argv[0]
-    name_json = sys.argv[1]
+    parser = argparse.ArgumentParser(description='Decode \'ancestral\' embeddings into reconstructed ancestral sequences and evaluate accuracy')
+    parser.add_argument('config_file', nargs='?', default='embeddings/config_decode.json', 
+                    help='Path to configuration file specifying details, such as which family reconstructions are for, etc.')
+    args = parser.parse_args()
+    with open(args.config_file, 'r') as f:
+        config = json.load(f, object_hook=lambda d: SimpleNamespace(**d))
+    print(f"Executing {sys.argv[0]} following {args.config_file}")
     print("-" * 50)
-    print("Executing " + name_script + " following " + name_json, flush=True)
+    print("MSA_id: ", config.MSA_id)
+    print("msa_path: ", config.msa_path)
+    print("data_path: ", config.data_path)
+    print("model_name: ", config.model_name)
+    print("plot: ", config.plot)
+    print("redo_iqtree:", config.redo_iqtree)
     print("-" * 50)
-    # opening Json file
-    json_file = open(name_json)
-    data_json = json.load(json_file)
-    MSA_id = data_json["MSA_id"]
-    msa_path = data_json["msa_path"]
-    data_path = data_json["data_path"]
-    model_name = data_json["model_name"]
-    plot = data_json["plot"]
-    redo_iqtree = data_json["redo_iqtree"]
-    # print the information for training
-    print("MSA_id: ", MSA_id)
-    print("msa_path: ", msa_path)
-    print("data_path: ", data_path)
-    print("model_name: ", model_name)
-    print("plot: ", plot)
-    print("-" * 50)
-    
+    MSA_id, msa_path, data_path, model_name = config.MSA_id, config.msa_path, config.data_path, config.model_name
+
     # load mappling from integer to amino acid and vice versa
-    aa_index = aa_to_int_from_file(data_path, MSA_id)
+    aa_index = aa_to_int_from_path(data_path)
     index_aa = invert_dict(aa_index)
 
-    # load the real ancestral sequences     
-    real_seqs_dict = load_real_ancseqs(msa_path)
-    
     # load the model
-    nc = 21
     model_dir = get_directory(data_path, MSA_id, "saved_models")
     model_path = os.path.join(model_dir, model_name)
     nl = int(MSA_id.split("-")[1][1:])
     ld = int(re.search(r'ld(\d+)', model_name).group(1))
     layers_match = re.search(r'layers(\d+(\-\d+)*)', model_name)
-    if layers_match:
-        num_hidden_units = [int(size) for size in layers_match.group(1).split('-')]
-        model = load_model(model_path, nl, nc, num_hidden_units=num_hidden_units, nlatent = ld)  
-    else: # if not specified, assume default argument for num_hidden_units
-        model = load_model(model_path, nl, nc, nlatent = ld)
-
-    # get our reconstructed ancestral embeddings
+    num_hidden_units = [int(size) for size in layers_match.group(1).split('-')]
+    model = load_model(model_path, nl, nc=21,
+                           num_hidden_units=num_hidden_units, nlatent = ld)  
+    
+    # Get our reconstructed ancestral embeddings
     embeds_dir = get_directory(data_path, MSA_id, "embeddings", data_subfolder=True)
     embeds_path = os.path.join(embeds_dir,
                                model_name.replace(".pt", "_anc-embeddings.csv"))
@@ -195,68 +187,46 @@ def main():
     n_anc = recon_embeds.shape[0]
     anc_id = [str(id) for id in recon_embeds.index]
 
-    # order true ancestral sequences according to the order of the reconstructed embeddings
-    real_seqs = [real_seqs_dict[id] for id in anc_id]
+    # Run IQTree
+    iqtree_dir = get_directory(data_path, MSA_id, "iqtree", data_subfolder=True)
+    os.makedirs(iqtree_dir, exist_ok=True)
+    n_seq = int(msa_path.split("/")[-2])
+    family = MSA_id.split("-")[0]
+    tree_path = f"trees/fast_trees/{n_seq}/{family}.sim.fully_trim.tree"
+    print("Running IQTree...")
+    run_iqtree(data_path, tree_path, iqtree_dir, redo=config.redo_iqtree)
 
+    # Retrieve sequences
+    real_seqs = get_real_seqs(msa_path, anc_id)
     # TODO: embed the real ancestral sequences and visually compare them with the reconstructed embeddings
-
-    # evaluate as baseline the accuracy of the modal sequence
     maj_seq = get_modal_seq(data_path, index_aa)
+    prior_seqs = get_prior_seqs(model, n_anc, index_aa)
+    recon_ancseqs = get_recon_ancseqs(recon_embeds, model, index_aa)
+    iqtree_seqs = get_iqtree_ancseqs(iqtree_dir, n_seq, anc_id)
+
+    # Evaluate accuracy of different approaches
+    print("-" * 50)
     print("Evaluating modal sequence")
     #print(maj_seq)
     evaluate_seqs([maj_seq]*n_anc, real_seqs)
     print("-" * 50)
-
-    # evaluate draws from the prior and compare them with the real ancestral sequences
-    prior_seqs = get_prior_seqs(model, n_anc, index_aa)
     print("Evaluating sequences sampled under the prior of trained VAE")
     evaluate_seqs(prior_seqs, real_seqs)
-    print("-" * 50)
-
-    # evaluate the reconstructed embeddings and compare them with the real ancestral sequences
-    recon_ancseqs = get_recon_ancseqs(recon_embeds, model, index_aa)
+    print("-" * 50)    
     print("Evaluating decoded reconstructed embeddings (our approach)")
     evaluate_seqs(recon_ancseqs, real_seqs)
     print("-" * 50)
-
-    #run iqtree ancestral sequence reconstruction and evaluate
     print("Evaluating iqtree ancestral sequences")
-    # create directory for iqtree results
-    iqtree_dir = get_directory(data_path, MSA_id, "iqtree", data_subfolder=True)
-    os.makedirs(iqtree_dir, exist_ok=True)
-    # run iqtree
-    n_seq = int(msa_path.split("/")[-2])
-    family = MSA_id.split("-")[0]
-    tree_path = f"trees/fast_trees/{n_seq}/{family}.sim.fully_trim.tree"
-    run_iqtree(data_path, tree_path, iqtree_dir, redo=redo_iqtree)
-    # retrieve iqtree's reconstructed sequences and evaluate
-    iqtree_seqs = get_iqtree_ancseqs(iqtree_dir, n_seq, anc_id)
     evaluate_seqs(iqtree_seqs, real_seqs)
     print("-" * 50)
 
-    # show the reconstructions of different models for some top level nodes
-    # determine the top level nodes in the tree 
-    # top_level_nodes = ["1251", "1252", "1253"]
-    # seq_type_dict = {
-    #     #"prior": prior_seqs, 
-    #     "reconstructed": recon_ancseqs, 
-    #     "iqtree": iqtree_seqs,
-    #     "real": real_seqs
-    #     }
-    # for seq_type in seq_type_dict.keys():
-    #     for node_id in top_level_nodes:
-    #         print(node_id, seq_type, seq_type_dict[seq_type][anc_id.index(node_id)])
-    
-    # plot reconstruction accuracy as a function of distance from root
+    # Plot reconstruction accuracy as a function of distance from root
     depths = get_depths(tree_path)
     ordered_depths = [depths[f"Node{int(k) - n_seq}"] for k in anc_id]
     plot_error_vs_depth(recon_ancseqs, real_seqs, ordered_depths)
     plot_error_vs_depth(iqtree_seqs, real_seqs, ordered_depths)
-    #plot_error_vs_depth([maj_seq]*n_anc, real_seqs, ordered_depths)
-    #plot_error_vs_depth(prior_seqs, real_seqs, ordered_depths)
-
-
-
+    plot_error_vs_depth([maj_seq]*n_anc, real_seqs, ordered_depths)
+    plot_error_vs_depth(prior_seqs, real_seqs, ordered_depths)
 
 if __name__ == "__main__":
     main()

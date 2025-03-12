@@ -1,9 +1,9 @@
 *.DS_Store
 *.Rhistory
 .vscode/
-exploration.ipynb
 *.tar.gz
 *icloud
+notebooks/
 # cache
 *__pycache__/
 .RData

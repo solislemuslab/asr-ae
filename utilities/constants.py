@@ -10,3 +10,5 @@ REAL_AA = ['R', 'H', 'K',
       'S', 'T', 'N', 'Q',
       'C', 'G', 'P',
       'A', 'V', 'I', 'L', 'M', 'F', 'Y', 'W']
+MAX_GAPS_IN_SEQ = 50
+MAX_GAPS_IN_POS = 0.2

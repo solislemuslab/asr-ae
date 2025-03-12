@@ -8,8 +8,8 @@ import pickle
 from sklearn.decomposition import PCA
 import torch
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from autoencoder.modules.model import load_model
-from utilities.utils import get_directory
+from utilities.model import load_model
+from utilities.paths import get_directory
 
 def load_binary_data(data_path):
     """

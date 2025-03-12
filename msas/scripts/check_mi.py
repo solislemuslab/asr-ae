@@ -22,7 +22,7 @@ def compute_mutual_information(col1, col2):
     return mi
 
 
-def plot_mi_heatmap(msa, output):
+def plot_mi_heatmap(msa, output_dir):
 
     num_sites = msa.shape[1]
     mi_matrix = np.zeros((num_sites, num_sites))
@@ -38,7 +38,7 @@ def plot_mi_heatmap(msa, output):
     plt.title("Mutual Information Between Sites")
     plt.xlabel("Site")
     plt.ylabel("Site")
-    plt.savefig(output)
+    plt.savefig(output_dir + "/mi_heatmap.png")
 
 
 def main(args):

@@ -5,19 +5,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 # TODO: Refactor so that every specific VAE is a subclass of a general VAE class
-
-
-def load_model(model_path, nl, nc, num_hidden_units=[256, 256], nlatent=2):
-    """
-    Load the model from the model path.
-    TODO: Allow loading transformer or LSTM models
-    """
-    model = VAE(nl = nl, nc = nc, num_hidden_units=num_hidden_units, dim_latent_vars=nlatent) 
-    model_state_dict = torch.load(model_path)
-    model.load_state_dict(model_state_dict)
-    return model
-
-
 class VAE(nn.Module):
     def __init__(self, nl, nc=21, dim_latent_vars=10, num_hidden_units=[256, 256]):
         """

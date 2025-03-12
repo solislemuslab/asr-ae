@@ -8,12 +8,12 @@ import numpy as np
 import pandas as pd
 from Bio import SeqIO
 sys.path.insert(1, os.path.join(sys.path[0], '../..'))
-from utilities import config
-from utilities.utils import aa_to_int, invert_dict
+from utilities import constants
+from utilities.seq import aa_to_int, invert_dict
 
 ## Define global variables for gap-based filtering (relevant for real MSAs)
-MAX_GAPS_IN_SEQ = 50 
-MAX_GAPS_IN_POS = 0.2
+MAX_GAPS_IN_SEQ = constants.MAX_GAPS_IN_SEQ 
+MAX_GAPS_IN_POS = constants.MAX_GAPS_IN_POS
 
 def parse_commands():
     parser = argparse.ArgumentParser(description='This script pre-processes an MSA')
@@ -86,7 +86,7 @@ def get_seqs(msa_file_path, sim_type):
                 seq_dict[record.id] = str(record.seq).upper()
     return seq_dict
 
-def remove_gaps(seq_dict, query_seq_id, aa_symbols = config.REAL_AA):
+def remove_gaps(seq_dict, query_seq_id, aa_symbols = constants.REAL_AA):
     """
     Modifies seq_dict, removing from all sequences the positions that are gaps in the query sequences
     Returns the positions that are not gaps in the query sequences as a boolean array
@@ -102,7 +102,7 @@ def remove_seqs(seq_dict, max_gaps_in_seq = MAX_GAPS_IN_SEQ):
     Remove sequences with too many remaining gaps (called after removing positions that are gaps in the query sequences)
     """
     for k in list(seq_dict.keys()):
-        if len([char for char in seq_dict[k] if char in config.UNKNOWN]) > max_gaps_in_seq:
+        if len([char for char in seq_dict[k] if char in constants.UNKNOWN]) > max_gaps_in_seq:
             seq_dict.pop(k)
 
 def to_numpy(seq_dict, aa_index):
@@ -151,7 +151,7 @@ def one_hot_encode(seq_ary):
     """
     Convert the integer encoded array to a binary (one-hot) encoding
     """
-    K = len(config.AA) + 1 ## num of classes of aa
+    K = len(constants.AA) + 1 ## num of classes of aa
     D = np.identity(K)
     num_seq = seq_ary.shape[0]
     len_seq = seq_ary.shape[1]
@@ -178,9 +178,9 @@ def main():
     
     # Create mapping between amino acids and integers
     if args.real:
-        aa_index = aa_to_int(config.REAL_AA, config.UNKNOWN)
+        aa_index = aa_to_int(constants.REAL_AA, constants.UNKNOWN)
     else:
-        aa_index = aa_to_int(config.AA, config.UNKNOWN)
+        aa_index = aa_to_int(constants.AA, constants.UNKNOWN)
     with open(f"{processed_directory}/aa_index.pkl", 'wb') as file_handle:
         pickle.dump(aa_index, file_handle)
 

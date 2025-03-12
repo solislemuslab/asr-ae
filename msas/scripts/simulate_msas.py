@@ -13,7 +13,7 @@ import sys
 import os
 import re 
 sys.path.insert(1, os.path.join(sys.path[0], '../..'))
-from utilities import config
+from utilities import constants
 from utilities.rate_matrix import (
     read_params_from_PAML, 
     read_rate_matrix_from_csv, 
@@ -178,7 +178,7 @@ if __name__ == "__main__":
         S, pi = read_params_from_PAML("msas/independent/lg_LG.PAML.txt")
         Q = S @ np.diag(pi)
         np.fill_diagonal(Q, -Q.sum(axis=1))
-        states = config.AA
+        states = constants.AA
     assert np.allclose(Q @ np.ones_like(pi), 0, atol=1e-6)
     assert np.allclose(pi @ Q, 0, atol=1e-6)
     
