@@ -1,6 +1,6 @@
 {
-    "MSA_id": "COG251-l100-s1.0-aNone",
-    "data_path": "msas/independent/processed/1250/COG251-l100-s1.0-aNone",
-    "model_name": "model_layers500_ld12_wd0.01_epoch100_2025-03-12.pt",
+    "MSA_id": "COG438-pottsPF00076",
+    "data_path": "msas/potts/processed/5000/COG438-pottsPF00076",
+    "model_name": "model_layers500_ld12_wd0.01_epoch100_2025-03-17.pt",
     "plot": true
 }
