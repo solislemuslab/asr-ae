@@ -94,7 +94,8 @@ p_BM <- phylopars(trait_data = embeds, tree = trimmed_tree)
 all_embeds <- p_BM$anc_recon 
 # note that all_embeds has the first ntips rows corresponding to tips and the rest to internal nodes
 # the ordering is the same as the ordering of the tips and internal nodes in the tree object 
-# we add rownames to all_embeds that correspond to the names for internal nodes in the original simulated MSA
+# we add rownames to all_embeds that correspond to the names for internal nodes in the original simulated MSA, 
+# which corresponds to a preorder traversal
 anc_rownames <- as.integer(str_extract(trimmed_tree$node.label, "\\d+")) + as.integer(n_seq)
 rownames(all_embeds)[(ntips_trimmed + 1):nrow(all_embeds)] <- anc_rownames
 

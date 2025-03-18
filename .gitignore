@@ -7,3 +7,5 @@ notebooks/
 # cache
 *__pycache__/
 .RData
+container
+

@@ -16,13 +16,23 @@ from utilities.model import load_model
 from utilities.paths import get_directory
 from utilities.tree import get_depths
 
-def get_real_seqs(msa_path, anc_id):
+def get_real_seqs(msa_path, anc_id, preserved_pos=None):
+    sim_type = msa_path.split(os.sep)[1]
+    format = {
+        'potts': "fasta",
+        'real' : "fasta",
+        'coupled' : "phylip-relaxed",
+        'independent' : "phylip-relaxed" 
+    }[sim_type]
     real_seqs_dict = {}
     with open(msa_path, 'r') as msa:
-        for record in SeqIO.parse(msa, "phylip-relaxed"):
-            if record.id[0] == "N": #exclude leaf sequences
+        for record in SeqIO.parse(msa, format):
+            if record.id[0] == "N":  # exclude leaf sequences
                 continue
-            real_seqs_dict[record.id] = str(record.seq).upper()     
+            seq = str(record.seq)
+            if preserved_pos:
+                seq = "".join([seq[pos] for pos in preserved_pos])
+            real_seqs_dict[record.id] = seq
     # order true ancestral sequences according to the order of the reconstructed embeddings
     real_seqs = [real_seqs_dict[id] for id in anc_id]
     return real_seqs
@@ -172,8 +182,19 @@ def main():
     # load the model
     model_dir = get_directory(data_path, MSA_id, "saved_models")
     model_path = os.path.join(model_dir, model_name)
-    nl = int(MSA_id.split("-")[1][1:])
+    # to load the model, need to supply the sequence length, number of latent dims, and number of hidden units in each layer
+    # first, sequence length, which is contained as substring of MSA_id for non-potts msas
+    nl_match = re.search(r'nl(\d+)', MSA_id)
+    if nl_match:
+        preserved_pos = None
+        nl = int(nl_match.group(1))
+    else: # one way to identify sequence length for potts simulated msas 
+        with open(f"{data_path}/pos_preserved.pkl", 'rb') as file:
+            preserved_pos = pickle.load(file)
+            nl = len(preserved_pos)
+    # next, latent dimension
     ld = int(re.search(r'ld(\d+)', model_name).group(1))
+    # finally, number of hidden units in each layer
     layers_match = re.search(r'layers(\d+(\-\d+)*)', model_name)
     num_hidden_units = [int(size) for size in layers_match.group(1).split('-')]
     model = load_model(model_path, nl, nc=21,
@@ -197,7 +218,7 @@ def main():
     run_iqtree(data_path, tree_path, iqtree_dir, redo=config.redo_iqtree)
 
     # Retrieve sequences
-    real_seqs = get_real_seqs(msa_path, anc_id)
+    real_seqs = get_real_seqs(msa_path, anc_id, preserved_pos)
     # TODO: embed the real ancestral sequences and visually compare them with the reconstructed embeddings
     maj_seq = get_modal_seq(data_path, index_aa)
     prior_seqs = get_prior_seqs(model, n_anc, index_aa)

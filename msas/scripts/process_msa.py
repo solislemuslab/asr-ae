@@ -70,32 +70,33 @@ def get_seqs(msa_file_path, sim_type):
     This needs to get fixed to deal with the fact that the format output by SeqGen is currently not being parsed correctly by SeqIO
     """
     seq_dict = {} # sequence id -> sequence
-    format_type = {
+    format = {
+        'potts': "fasta",
         'real' : "fasta",
         'coupled' : "phylip-relaxed",
         'independent' : "phylip-relaxed" 
     }[sim_type]
     with open(msa_file_path, 'r') as file_handle:
         if sim_type != "real": #simulated data 
-            for record in SeqIO.parse(file_handle, format_type):
-                if record.id[0] != "N": #exclude ancestral sequences
+            for record in SeqIO.parse(file_handle, format):
+                if not (record.id.startswith("N") and record.id[1:].isdigit()): # exclude ancestral sequences
                     continue
                 seq_dict[record.id] = str(record.seq).upper()
         else: #real data (other than PF00565, see `get_euk_seqs`) is in fasta format and does not have ancestral sequences
-            for record in SeqIO.parse(file_handle, format_type):
+            for record in SeqIO.parse(file_handle, format):
                 seq_dict[record.id] = str(record.seq).upper()
     return seq_dict
 
 def remove_gaps(seq_dict, query_seq_id, aa_symbols = constants.REAL_AA):
     """
     Modifies seq_dict, removing from all sequences the positions that are gaps in the query sequences
-    Returns the positions that are not gaps in the query sequences as a boolean array
+    Returns the indices of the preserved positions 
     """
     query_seq = seq_dict[query_seq_id] ## with gaps
     is_not_gap = [ s in aa_symbols for s in query_seq]
     for seq_id, seq in seq_dict.items():
         seq_dict[seq_id] = ''.join([char for char, keep in zip(seq, is_not_gap) if keep])
-    return is_not_gap
+    return np.where(is_not_gap)[0]
 
 def remove_seqs(seq_dict, max_gaps_in_seq = MAX_GAPS_IN_SEQ):
     """
@@ -166,8 +167,8 @@ def main():
     msa_file_path = args.MSA
     fam_name, _ = path.splitext(path.basename(msa_file_path))
     if not args.real:
-        sim_type = path.dirname(msa_file_path).split("/")[1] #either coupled or independent
-        num_seqs = path.dirname(msa_file_path).split("/")[-1] #either 1250 or 5000
+        sim_type =  msa_file_path.split(os.sep)[1] #either potts, coupled, or independent
+        num_seqs = msa_file_path.split(os.sep)[-2] #either 1250 or 5000
         fam_name = fam_name.split("_")[0]
         processed_directory = f"msas/{sim_type}/processed/{num_seqs}/{fam_name}"
     else:
@@ -203,15 +204,16 @@ def main():
         is_not_query_gap = remove_gaps(seq_dict, args.query_seq_id) 
 
     # Step 2: Remove sequences with too many gaps
-    if args.real:
-        remove_seqs(seq_dict)
+    remove_seqs(seq_dict)
     
     # Step 3: Convert to an integer encoding
     seq_ary_int, seq_names = to_numpy(seq_dict, aa_index)
     
     # Step 4: remove positions where too many sequences have gaps 
+    seq_ary_int, pos_not_sparse = remove_sparse_positions(seq_ary_int)
+    # note that pos_not_sparse indexes positions in the sequences after the gaps from the query sequence have already been removed
     if args.real:
-        seq_ary_int, pos_not_sparse = remove_sparse_positions(seq_ary_int)
+        pos_not_sparse = is_not_query_gap[pos_not_sparse]
 
     # Step 5: get sequence weights
     seq_weight = weight_seqs(seq_ary_int)
@@ -226,6 +228,9 @@ def main():
     # save the sequence weights
     with open(f"{processed_directory}/seq_weight.pkl", 'wb') as file_handle:
         pickle.dump(seq_weight, file_handle)
+    # save the positions in the original sequences that are preserved in the processed MSA
+    with open(f"{processed_directory}/pos_preserved.pkl", 'wb') as file_handle:
+        pickle.dump(pos_not_sparse, file_handle)
     # save integer encoded MSA
     with open(f"{processed_directory}/seq_msa_int.pkl", 'wb') as file_handle:
         pickle.dump(seq_ary_int, file_handle)
