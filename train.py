@@ -9,8 +9,8 @@ import sys
 import torch
 from torch.utils.data import DataLoader
 import torch.optim as optim
-from modules.model import VAE, TVAE
-from modules.data import load_data
+from autoencoder.model import VAE, TVAE
+from autoencoder.data import load_data
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilities.paths import get_directory
 
@@ -149,6 +149,7 @@ def main():
     train_elbos, val_elbos, val_log_pxgzs, val_iwae_elbos, val_accs = [], [], [], [], []
     for epoch in range(num_epochs):
         # Validation metrics
+        print(f"Epoch {epoch}:", end=' ', flush=True)
         if validate:
             val_elbos_on_batches, val_log_pxgzs_on_batches, val_elbo_iwae_on_batches, val_accs_on_batches = eval(
                 model, device, valid_loader, iwae_num_samples)
@@ -160,13 +161,13 @@ def main():
             val_log_pxgzs.append(epoch_val_log_pxgz)
             val_iwae_elbos.append(epoch_val_elbo_iwae)
             val_accs.append(epoch_val_acc)
-            print(f"Validation elbo for epoch {epoch}: {epoch_val_elbo}", flush=True)
-            print(f"Validation accuracy for epoch {epoch}: {epoch_val_acc}", flush=True)
+            print(f"Validation elbo: {epoch_val_elbo}", end=', ', flush=True)
+            print(f"Validation accuracy: {epoch_val_acc}", end=', ', flush=True)
         # Training metrics
         batch_elbos = train(model, device, train_loader, optimizer, epoch, verbose)
         epoch_train_elbo = np.mean(batch_elbos)
         train_elbos.append(epoch_train_elbo)
-        print(f"Training elbo for epoch {epoch}: {epoch_train_elbo}", flush=True)
+        print(f"Training elbo {epoch}: {epoch_train_elbo}", flush=True)
 
     # save the model
     today = date.today()
@@ -178,7 +179,7 @@ def main():
 
     # plot learning curve
     if plot_results:
-        plt.plot(train_elbos[:-1], label="Training elbos", color='y')
+        plt.plot(train_elbos[1:], label="Training elbos", color='y')
         if validate:
             plt.plot(val_elbos[1:], label="Validation elbos", color='r')
             plt.plot(val_log_pxgzs[1:], label="Validation log reconstruction probs", color='g')

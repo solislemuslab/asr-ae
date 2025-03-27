@@ -1,5 +1,5 @@
 import torch
-from autoencoder.modules.model import VAE
+from autoencoder.model import VAE
 
 def load_model(model_path, nl, nc=21, num_hidden_units=[256, 256], nlatent=2):
     """

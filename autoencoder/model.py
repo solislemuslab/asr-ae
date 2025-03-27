@@ -72,6 +72,13 @@ class VAE(nn.Module):
         log_p = F.log_softmax(h, dim=-1) # batch shape x nl x nc 
         return log_p
 
+    def forward(self, x):
+        mu, sigma = self.encoder(x)
+        eps = torch.randn_like(mu)
+        z = mu + sigma * eps
+        log_p = self.decoder(z)
+        return mu, sigma, z, log_p
+
     def compute_weighted_elbo(self, x, weight):
         weight = weight / torch.sum(weight)
         

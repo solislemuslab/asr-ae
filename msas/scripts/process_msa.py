@@ -177,14 +177,15 @@ def main():
     if not path.exists(processed_directory):
         makedirs(processed_directory)
     
-    # Create mapping between amino acids and integers
+    # Create mapping between from amino-acids to integers (all symbols in constants.UNKNOWN are mapped to 0)
+    # TODO: use vocabulary of MSA to create aa_index instead of one size fits all 
+    # (can allow for multiple indices for different unknown symbols, for example)
     if args.real:
         aa_index = aa_to_int(constants.REAL_AA, constants.UNKNOWN)
     else:
         aa_index = aa_to_int(constants.AA, constants.UNKNOWN)
     with open(f"{processed_directory}/aa_index.pkl", 'wb') as file_handle:
         pickle.dump(aa_index, file_handle)
-
     # Load the sequences from the MSA file
     if fam_name == "PF00565":
         metadata_file_path = f"msas/real/raw/PF00565_eukaryotes.tsv"
@@ -237,8 +238,8 @@ def main():
     # save one-hot encoded MSA
     with open(f"{processed_directory}/seq_msa_binary.pkl", 'wb') as file_handle:
         pickle.dump(seq_ary_binary, file_handle)
-    # Save a character version of our processed MSA (fasta format)
-    index_aa = invert_dict(aa_index, unknown_symbol = '.') 
+    # Save a character version of our processed MSA (fasta format) 
+    index_aa = invert_dict(aa_index, unknown_symbol = '-') #all unknown characters will be represented by '-'
     with open(f"{processed_directory}/seq_msa_char.fasta", "w") as f:
         for seq_id, seq in zip(seq_names, seq_ary_int.tolist()):
             decoded_seq = "".join([index_aa[i] for i in seq])
