@@ -112,7 +112,17 @@ potts = read_graph("msas/potts/parameters_PF00076.dat")
 
 # now try simulating MSA on a tree ########
 tree = read_tree("trees/fast_trees/5000/COG438.sim.trim.tree")
-avg_branch_lengths = mean([node.tau for node in collect(values(tree.lnodes)) if node.isroot == false])
+println(mean([node.tau for node in collect(values(tree.lnodes)) if node.isroot == false]))
+# scale branch lengths to make reconstruction harder
+s = 1.0
+if s != 1.0
+    for node in collect(values(tree.lnodes))
+        if node.isroot == false
+            node.tau = s*node.tau
+        end
+    end
+end
+println(mean([node.tau for node in collect(values(tree.lnodes)) if node.isroot == false]))
 label_nodes!(tree)
 # How should we interpret branch lengths for simulating sequence evolution? See ?BranchLengthMeaning 
 b_meaning = BranchLengthMeaning(type=:sweep, length=:round)
@@ -122,8 +132,8 @@ result = mcmc_sample(potts, tree, parameters; init=:random_aa)
 # for some reason, sampling adds weird suffixes to the names of internal nodes
 internal_sequences.names = map(x -> split(x, "__")[1], internal_sequences.names)
 all_sequences = cat(leaf_sequences, internal_sequences)
-@assert length(all_sequences) == 9998
-write("msas/potts/raw/5000/COG438-pottsPF00076_msa.dat", all_sequences)
+@assert length(all_sequences) == 2*length(tree.lleaves) - 2
+write("msas/potts/raw/5000/COG438-s$s-pottsPF00076_msa.dat", all_sequences)
 #freqtable(leaf_sequences.data[55,:], leaf_sequences.data[56,:])
 #mi_matrix = compute_all_mis(leaf_sequences)
 #heatmap(mi_matrix, aspect_ratio=1, color=:viridis, title="Mutual Information")

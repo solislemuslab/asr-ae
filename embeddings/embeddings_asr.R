@@ -21,8 +21,8 @@ sim <- str_detect(msa_id, "COG")
 
 # tree directory
 if (sim) {
-    n_seq <- path_file(path_dir(data_path))
-    # get the type of simulation, either independent or coupling
+    n_seq <- as.integer(path_file(path_dir(data_path)))
+    # get the type of simulation, either independent, coupling, or potts
     sim_type <- path_split(data_path)[[1]][2]
     tree_dir <- path("trees", "fast_trees", n_seq)
 } else {
@@ -31,7 +31,6 @@ if (sim) {
 
 # plot directory
 plot_dir <- if (sim) path("plots", sim_type, n_seq, msa_id) else path("plots", "real", msa_id)
-
 
 ## Read in family tree #####
 if (sim) {
@@ -42,9 +41,11 @@ if (sim) {
         # check that tip labels are what they should be
         all(sort(paste0("N", 1:n_seq)) == sort(tree$tip.label))
     )
-    tree <- makeNodeLabel(tree)
+} else {
+     tree_file <- paste0(family, ".treefile")
 }
 
+tree$node.label = paste0("Node", (n_seq+1):(2*n_seq-2)) #e.g. Node5001 -> Node9998
 
 ## Read in embeddings #####
 embed_dir <- path("embeddings", "data")
@@ -68,9 +69,10 @@ embeds <- read.csv(embed_path) |>
     dplyr::rename(species = id)
 
 # Before running phylopars() to fit a Brownian motion model and perform ASR, 
-# we trim our tree to get rid of extremely short external branches,
-# which cause problems for the function 
-# We update the embeddings dataframe accordingly
+# we trim our tree to get rid of extremely short external branches, which cause problems for the function and update the embeddings dataframe accordingly. 
+# We save our new tree to disk
+# We will later update the MSA of sequences (at the leaves) that we have saved as a fasta file on disk, 
+# removing sequences to match our updated tree. This is done by the script `decode_recon_embeds.py`
 thresh <- 0.001
 # get ids of the tips of the short external branches
 twig_ids <- tree$edge[tree$edge.length < thresh & tree$edge[, 2] <= Ntip(tree), 2] 
@@ -82,7 +84,7 @@ embeds <- embeds[match(trimmed_tree$tip.label, embeds$species), ]
 cat("Pruned tree has ", Ntip(trimmed_tree), " tips and ", Nnode(trimmed_tree), " internal nodes.\n")
 ntips_trimmed <- Ntip(trimmed_tree)
 # Save the final tree and the names of sequences that appear in it
-trimmed_tree_path <- str_replace(tree_path, "trim", "fully_trim")
+trimmed_tree_path <- str_replace(tree_path, "trim", "fully_trim") #fix this for real trees
 names_path <- path(data_path, "final_seq_names.txt")
 write.tree(trimmed_tree, trimmed_tree_path)
 write(trimmed_tree$tip.label, names_path)
@@ -96,7 +98,7 @@ all_embeds <- p_BM$anc_recon
 # the ordering is the same as the ordering of the tips and internal nodes in the tree object 
 # we add rownames to all_embeds that correspond to the names for internal nodes in the original simulated MSA, 
 # which corresponds to a preorder traversal
-anc_rownames <- as.integer(str_extract(trimmed_tree$node.label, "\\d+")) + as.integer(n_seq)
+anc_rownames <- as.integer(str_extract(trimmed_tree$node.label, "\\d+")) 
 rownames(all_embeds)[(ntips_trimmed + 1):nrow(all_embeds)] <- anc_rownames
 
 # save reconstructed ancestral embeddings
