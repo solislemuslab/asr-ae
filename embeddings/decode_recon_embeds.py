@@ -11,9 +11,9 @@ import torch
 import pickle
 from Bio import SeqIO
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from utilities.seq import aa_to_int_from_path, filter_fasta
-from utilities.model import load_model
-from utilities.paths import get_directory
+from utilities.seq import aa_to_int_from_path
+from utilities.vae import load_model
+from utilities.utils import get_directory, parse_model_name
 from utilities.tree import get_depths, run_fitch, run_iqtree
 
 def get_real_seqs(msa_path, anc_id, aa_index, pos_preserved=None):
@@ -172,39 +172,31 @@ def main():
         with open(f"{data_path}/pos_preserved.pkl", 'rb') as file:
             pos_preserved = pickle.load(file) # positions preserved in processed MSA (only relevant for Potts)
         nl = len(pos_preserved)
-    # Latent dimension of VAE
-    ld = int(re.search(r'ld(\d+)', model_name).group(1))
-    # Number of hidden units in VAE
-    layers_match = re.search(r'layers(\d+(\-\d+)*)', model_name)
-    num_hidden_units = [int(size) for size in layers_match.group(1).split('-')]
+    ld, num_hidden_units, dim_aa_embed, one_hot = parse_model_name(model_name)
 
     # load mappling from integer to amino acid and vice versa
     aa_index = aa_to_int_from_path(data_path)
 
     # load the model
-    model_dir = get_directory(data_path, MSA_id, "saved_models")
+    model_dir = get_directory(data_path, "saved_models")
     model_path = os.path.join(model_dir, model_name)
-    model = load_model(model_path, nl, nc=21,
-                           num_hidden_units=num_hidden_units, nlatent = ld)  
+    model = load_model(model_path, nl=nl, nc=21,
+                           num_hidden_units=num_hidden_units, nlatent=ld,
+                           one_hot=one_hot, dim_aa_embed=dim_aa_embed)  
     
     # Get our reconstructed ancestral embeddings
-    embeds_dir = get_directory(data_path, MSA_id, "embeddings", data_subfolder=True)
+    embeds_dir = get_directory(data_path, "embeddings", data_subfolder=True)
     embeds_path = os.path.join(embeds_dir,
                                model_name.replace(".pt", "_anc-embeddings.csv"))
     recon_embeds = pd.read_csv(embeds_path, index_col=0)
     n_anc = recon_embeds.shape[0]
     anc_id = [str(id) for id in recon_embeds.index]
-
-    # Create a new fasta file with only the sequences that ended up in our final tree
-    with open(f"{data_path}/final_seq_names.txt") as file:
-        final_seq_names = file.read().splitlines()
-    filter_fasta(f"{data_path}/seq_msa_char.fasta", f"{data_path}/seq_msa_char.fasta", keep=final_seq_names)
     
     # Run Fitch
     print("Running Fitch...")
     recon_fitch_dict = run_fitch(data_path, tree_path)
     # Run IQTree
-    iqtree_dir = get_directory(data_path, MSA_id, "reconstructions/iqtree")
+    iqtree_dir = get_directory(data_path, "reconstructions/iqtree")
     os.makedirs(iqtree_dir, exist_ok=True)
     print("Running IQTree...")
     run_iqtree(data_path, tree_path, iqtree_dir, redo=config.redo_iqtree)
@@ -217,7 +209,7 @@ def main():
     recon_ancseqs = get_recon_ancseqs(model, recon_embeds)
     iqtree_seqs = get_iqtree_ancseqs(iqtree_dir, anc_id, aa_index)
     finch_seqs = get_finch_ancseqs(recon_fitch_dict, anc_id, aa_index)
-    ardca_dir = get_directory(data_path, MSA_id, "reconstructions/ardca")
+    ardca_dir = get_directory(data_path, "reconstructions/ardca")
     ardca_seqs = get_ardca_ancseqs(ardca_dir, anc_id, aa_index)
 
     # Evaluate accuracy of different approaches

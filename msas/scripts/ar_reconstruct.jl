@@ -1,52 +1,55 @@
 using AncestralSequenceReconstruction
+using ArDCA
 using JLD2
 using TreeTools
 using FASTX
 
-# Form path to data directory
-data_context = joinpath("msas", "potts", "processed", "5000")
-tree_family = "COG438"
-potts_family = "pottsPF00076"
-family = "$tree_family-$potts_family"
-data_dir = joinpath(data_context, family)
+data_dir, tree_file = ARGS # the tree should have internal node names (assigned by the R script)
+msa_file = joinpath(data_dir, "seq_msa_char.fasta") # make sure this file has exactly same sequences as leaves of the tree (also ensured by R script)
 
-# Retrieve the ardca model learned for the family
-arnet = let 
-    saved_model = JLD2.load(joinpath(data_dir, "ardca_model.jld2"))
-    saved_model["arnet"]
+# Where will reconstructed sequences be written
+ardca_dir = joinpath("reconstructions", "ardca", splitpath(data_dir)[[2,4,5]]...)
+reconstruct_fasta = joinpath(ardca_dir, "reconstructed.fasta")
+if isfile(reconstruct_fasta)
+    @info "$reconstruct_fasta already exists with reconstructed sequences. ArDCA reconstruction has already been performed"
+    exit()
 end
-# When wrapping the arnet model in a struct defined in the AncestralSequenceReconstruction package, 
-# We specify the mapping of aa -> integer to match the mapping used in the ARDCA model (i.e. "-" comes last, not first)
-ar_model = AutoRegressiveModel(arnet; alphabet=:ardca_aa) 
 
-# Tree and fasta file 
-tree_file = joinpath("trees", "fast_trees", "5000", "COG438.sim.fully_trim.tree") # make sure this tree has internal node names (assigned by the R script)
-fasta_file = joinpath(data_dir, "seq_msa_char.fasta")
+# Fit ArDCA model to the sequence alignment
+if isfile("$data_dir/ardca_model.jld2")
+    @info "ArDCA model files already exists. Skipping model fitting."
+    arnet, arvar = load("$data_dir/ardca_model.jld2", "arnet", "arvar")
+else
+    arnet, arvar = ardca(msa_file)
+    jldsave("$data_dir/ardca_model.jld2"; arnet, arvar)
+end
+
+# Check whether model has gaps in it and choose the alphabet accordingly
+# Note that :ardca_aa corresponds to Alphabet("ACDEFGHIKLMNPQRSTVWY-")
+alphabet = arvar.q == 21 ? :ardca_aa : ASR.Alphabet("ACDEFGHIKLMNPQRSTVWY") 
+ar_model = AutoRegressiveModel(arnet; alphabet=alphabet) 
 
 # ASR strategy
 strategy = strategy = ASRMethod(;
     joint = false, # (default) - joint reconstruction not functional yet
     ML = true, # (default)
-    verbosity = 1, # the default is 0. 
+    verbosity = 2, # the default is 0. 
     optimize_branch_length = false, # (default: false) - optimize the branch lengths of the tree using the evolutionary model
     optimize_branch_scale = false, # (default) - optimizes the branches while keeping their relative lengths fixed. Incompatible with the previous. 
     repetitions = 1 # (default) - for Bayesian reconstruction, multiple repetitions of the reconstruction process can be done to sample likely ancestors
 )
 
-# Actual ASR
+# Run ASR
 opt_tree, reconstructed_sequences = infer_ancestral(
-	tree_file, fasta_file, ar_model, strategy
+	tree_file, msa_file, ar_model, strategy
 )	
 
 # Write reconstructed sequences to a fasta file
-ardca_dir = joinpath("reconstructions", "ardca", "potts", "5000", family)
-outfasta = joinpath(ardca_dir, "reconstructed.fasta")
-# make sure the output directory exists
 if !isdir(ardca_dir)
     mkpath(ardca_dir)
 end
 begin
-	FASTAWriter(open(outfasta, "w")) do writer
+	FASTAWriter(open(reconstruct_fasta, "w")) do writer
 		for (name, seq) in reconstructed_sequences
 			write(writer, FASTARecord(name, seq))
 		end

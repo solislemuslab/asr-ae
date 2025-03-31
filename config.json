@@ -1,17 +1,27 @@
 {
-    "MSA_id": "COG438-s3.0-pottsPF00076",
-    "data_path": "msas/potts/processed/5000/COG438-pottsPF00076",
-    "weigh_seqs": false,
-    "use_transformer": false,
-    "num_epochs": 160,
-    "num_hidden_units": [500],
-    "batch_size": 256,
-    "learning_rate": 0.001,
-    "weight_decay": 0,
-    "latent_dim": 20,
-    "validate": true,
-    "iwae_num_samples": 100,
-    "verbose": false,
-    "save_model": true,
-    "plot_results": true 
+    "data_path": "msas/potts/processed/1250/COG154-s2.0-pottsPF00076",
+    "tree_path": "trees/fast_trees/1250/COG154.sim.trim.tree",
+    "training": {
+        "one_hot": true,
+        "weigh_seqs": false,
+        "use_transformer": false,
+        "dim_aa_embed": 2, 
+        "num_hidden_units": [500],
+        "latent_dim": 20,
+        "num_epochs": 160,
+        "learning_rate": 0.001,
+        "weight_decay": 0.01,
+        "batch_size": 512,
+        "validate": true,
+        "iwae_num_samples": 100,
+        "verbose": false,
+        "save_model": true,
+        "plot_results": true 
+    },
+    "embeddings": {
+        "plot": true
+    },
+    "decoding": {
+        "plot": true
+    }
 }

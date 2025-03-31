@@ -9,10 +9,9 @@ import sys
 import torch
 from torch.utils.data import DataLoader
 import torch.optim as optim
-from autoencoder.model import VAE, TVAE
-from autoencoder.data import load_data
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from utilities.paths import get_directory
+from autoencoder.model import VAE, TVAE, EmbedVAE
+from utilities.vae import load_data
+from utilities.utils import get_directory
 
 def train(model, device, train_loader, optimizer, epoch, verbose):
     """
@@ -67,58 +66,50 @@ def eval(model, device, valid_loader, n_samples = 100):
     return elbos, log_pxgzs, elbo_iwaes, accs
 
 def main():
-    name_script = sys.argv[0]
-    name_json = sys.argv[1]
-    print("-" * 50)
-    print("Executing " + name_script + " following " + name_json, flush=True)
-    print("-" * 50)
 
     # opening Json file
-    json_file = open(name_json)
-    data_json = json.load(json_file)
+    name_json = sys.argv[1]
+    with open(name_json, 'r') as json_file:
+        data_json = json.load(json_file)
     # loading the input data from the json file
-    MSA_id = data_json["MSA_id"]
     data_path = data_json["data_path"]
-    weigh_seqs = data_json["weigh_seqs"]
-    use_transformer = data_json["use_transformer"]
-    num_epochs = data_json["num_epochs"]
-    num_hidden_units = data_json["num_hidden_units"]
-    batch_size = data_json["batch_size"]
-    lr = data_json["learning_rate"]
-    wd = data_json["weight_decay"]
-    latent_dim = data_json["latent_dim"]
-    validate = data_json["validate"]
-    iwae_num_samples = data_json["iwae_num_samples"]
-    verbose = data_json["verbose"]
-    save_model = data_json["save_model"]
-    plot_results = data_json["plot_results"]
-    # close the json file   
-    json_file.close()
-    
-    # print the information for training
-    print("MSA_id: ", MSA_id)
-    print("data_path: ", data_path)
-    print("weigh_seqs?", weigh_seqs)
-    print("use_transformer: ", use_transformer)
-    print("num_epochs: ", num_epochs)
-    print("batch_size: ", batch_size)
-    # print("learning_rate: ", learning_rate)
-    print("weight_decay: ", wd)
-    print("num_hidden_units: ", num_hidden_units)
-    print("latent_dim: ", latent_dim)
-    print("validate: ", validate)
-    print("iwae_num_samples: ", iwae_num_samples)
-    print("verbose: ", verbose)
-    print("save_model: ", save_model)
-    print("plot_results: ", plot_results)
-    print("-" * 50)
-
-    # create the directory to save the model
-    model_dir = get_directory(data_path, MSA_id, "saved_models")
+    training_config = data_json["training"]
+    one_hot = training_config["one_hot"]
+    weigh_seqs = training_config["weigh_seqs"]
+    use_transformer = training_config["use_transformer"]
+    dim_aa_embed = training_config["dim_aa_embed"] # only relevant if one_hot is False
+    num_epochs = training_config["num_epochs"]
+    num_hidden_units = training_config["num_hidden_units"]
+    batch_size = training_config["batch_size"]
+    lr = training_config["learning_rate"]
+    wd = training_config["weight_decay"]
+    latent_dim = training_config["latent_dim"]
+    validate = training_config["validate"]
+    iwae_num_samples = training_config["iwae_num_samples"]
+    verbose = training_config["verbose"]
+    save_model = training_config["save_model"]
+    plot_results = training_config["plot_results"]  
+  
+    # create model path
+    today = date.today()
+    layers_str = "-".join([str(l) for l in num_hidden_units])
+    aa_embed_str = f"aaembed{dim_aa_embed}_" if not one_hot else ""
+    model_configs=f"model_{aa_embed_str}layers{layers_str}_ld{latent_dim}_wd{wd}_epoch{num_epochs}"
+    model_name = f"{model_configs}_{today}.pt"
+    model_dir = get_directory(data_path, "saved_models")
     os.makedirs(model_dir, exist_ok=True)
-
+    model_path = os.path.join(model_dir, model_name)
+    
+    # check if model with same configs (ignoring date) already exists and only proceed if it doesn't
+    existing_models = [f for f in os.listdir(model_dir) if f.startswith(model_configs)]
+    if existing_models:
+        print(f"Model has already been trained and is saved at {model_dir} with name\n{existing_models[0]}")
+        return
+    else:
+        print("Beginning training...", flush=True)
+    
     # load the dataset
-    data, nl, nc = load_data(data_path, weigh_seqs)
+    data, nl, nc = load_data(data_path, weigh_seqs=weigh_seqs, one_hot=one_hot)
 
     # device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -128,12 +119,16 @@ def main():
     # initialize the model
     if use_transformer:
         model = TVAE(nl=nl, nc=nc, 
-                     num_hidden_units=num_hidden_units, 
-                     dim_latent_vars=latent_dim).to(device)
-    else:
+                     dim_latent_vars=latent_dim,
+                     num_hidden_units=num_hidden_units).to(device)
+    elif one_hot:
         model = VAE(nl=nl, nc=nc, 
-                    num_hidden_units=num_hidden_units, 
-                    dim_latent_vars=latent_dim).to(device)
+                    dim_latent_vars=latent_dim,
+                    num_hidden_units=num_hidden_units).to(device)
+    else:
+        model = EmbedVAE(nl=nl, nc=nc, dim_aa_embed=dim_aa_embed,
+                        dim_latent_vars=latent_dim,
+                        num_hidden_units=num_hidden_units).to(device)
 
     # optimizer
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
@@ -170,12 +165,10 @@ def main():
         print(f"Training elbo {epoch}: {epoch_train_elbo}", flush=True)
 
     # save the model
-    today = date.today()
-    layers = "-".join([str(l) for l in num_hidden_units])
-    model_name = f"model_layers{layers}_ld{latent_dim}_wd{wd}_epoch{num_epochs}_{today}.pt"
     if save_model:
         model.cpu()
-        torch.save(model.state_dict(), f"{model_dir}/{model_name}")
+        torch.save(model.state_dict(), model_path)
+        print(f"Model saved at {model_dir} with name\n{model_name}")
 
     # plot learning curve
     if plot_results:
@@ -189,7 +182,7 @@ def main():
 
         #save figure
         plot_name = os.path.splitext(model_name)[0] + ".png"
-        plot_dir = get_directory(data_path, MSA_id, "plots")
+        plot_dir = get_directory(data_path, "plots")
         os.makedirs(plot_dir, exist_ok=True)
         plt.savefig(f"{plot_dir}/{plot_name}", bbox_inches='tight')
 

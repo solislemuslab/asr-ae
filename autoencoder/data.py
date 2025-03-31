@@ -1,54 +1,38 @@
 import torch
 from torch.utils.data import Dataset
-import numpy as np
-import pickle
 
+# TODO: Change this so that it only stores MSAs with integer index encodings of amino acids,
+# implementing a transform in the __getitem__ method to do one-hot encoding on the fly
 class MSA_Dataset(Dataset):
     """
     Dataset class for multiple sequence alignment.
     """
-
-    def __init__(self, seq_msa_binary, seq_weight, seq_keys):
+    def __init__(self, msa, seq_weight, seq_keys):
         """
-        seq_msa_binary: a three-dimensional tensor.
-                        size: [num_of_sequences, length_of_msa, num_amino_acid_types]
-        seq_weight: one dimensional tensor.
-                    size: [num_sequences].
-                    Weights for sequences in a MSA.
-                    The sum of seq_weight has to be equal to 1 when training latent space models using VAE
-        seq_keys: name of sequences in MSA
+        msa: either a three-dimensional numpy array (num_sequences, length_of_sequences, num_amino_acid_types) 
+        with one-hot encodings of amino acids or a two-dinensional numpy array (num_sequences, length_of_sequences)
+        of integer index encodings of amino acids 
+        
+        seq_weight: array of weights of sequences in MSA. The sum should equal 1.
+        
+        seq_keys: array of names of sequences in MSA
         """
         super(MSA_Dataset).__init__()
-        self.seq_msa_binary = seq_msa_binary.to(torch.float32)  # for training
+        assert (len(msa.shape) == 2 or len(msa.shape) == 3)
+        if len(msa.shape) == 3:
+            assert (msa.shape[2] in [20, 21])  # 20 for natural amino acids, 21 for natural amino acids + gap
+        assert (msa.shape[0] == len(seq_weight))
+        assert (msa.shape[0] == len(seq_keys))
+        if len(msa.shape) == 3:
+            self.msa= torch.tensor(msa).to(torch.float32)  # We matrix multiply one-hot encodings so we need them as floats
+        else:
+            self.msa = torch.tensor(msa).to(torch.int64)  # We index with these so we need them as ints
         self.seq_weight = seq_weight
         self.seq_keys = seq_keys
 
     def __len__(self):
-        assert (self.seq_msa_binary.shape[0] == len(self.seq_weight))
-        assert (self.seq_msa_binary.shape[0] == len(self.seq_keys))
-        return self.seq_msa_binary.shape[0]
+        return self.msa.shape[0]
 
     def __getitem__(self, idx):
-        return self.seq_msa_binary[idx, :, :], self.seq_weight[idx], self.seq_keys[idx]
+        return self.msa[idx], self.seq_weight[idx], self.seq_keys[idx]
 
-def load_data(data_path, weigh_seqs):
-    """
-    Load the sequence data from the data path as an MSA_Dataset object.
-    """
-    with open(f"{data_path}/seq_msa_binary.pkl", 'rb') as file_handle:
-        msa_binary = torch.tensor(pickle.load(file_handle))
-    nl = msa_binary.shape[1]
-    nc = msa_binary.shape[2]
-
-    with open(f"{data_path}/seq_names.pkl", 'rb') as file_handle:
-        seq_names = pickle.load(file_handle)
-    if weigh_seqs:
-        with open(f"{data_path}/seq_weight.pkl", 'rb') as file_handle:
-            seq_weight = pickle.load(file_handle)
-    else:
-        seq_weight = np.ones(len(seq_names)) / len(seq_names)
-    seq_weight = seq_weight.astype(np.float32) 
-    assert np.abs(seq_weight.sum() - 1) < 1e-6
-    data = MSA_Dataset(msa_binary, seq_weight, seq_names)
-
-    return data, nl, nc

@@ -1,20 +1,5 @@
 import pickle
-from Bio import SeqIO
 from utilities import constants
-
-def filter_fasta(og_path, new_path, keep):
-    """
-    Writes a new fasta file that only includes the sequences in the keep list.
-    If og_path is the same as new_path, the file will be overwritten.
-    """
-    records_to_keep = []
-    with open(og_path, 'r') as og:
-        for record in SeqIO.parse(og, "fasta"):
-            if record.id in keep:
-                records_to_keep.append(record)
-    
-    with open(new_path, 'w') as new:
-        SeqIO.write(records_to_keep, new, "fasta")
 
 def aa_to_int(main_aa_symbols, unknown_aa_symbols):
     """
