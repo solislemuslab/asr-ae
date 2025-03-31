@@ -1,54 +1,47 @@
 #!/bin/bash
 TMP_FILE="tmp_config.json"
 
-#######################################################
-###### Retrieve values from main config file ##########
-#######################################################
+# main config file
 if [ -z "$1" ]; then
   config="config.json"
 else
   config=$1
 fi
 # family information
-msa_id=$(jq -r '.MSA_id' $config)
 data_path=$(jq -r '.data_path' $config)
+msa_id=$(basename "$data_path")
 msa_path="${data_path/processed/raw}_msa.dat"
-# model information
-latent_dim=$(jq -r '.latent_dim' $config)
-layers=$(jq -r '.num_hidden_units | join("-")' $config)
-weight_decay=$(jq -r '.weight_decay' $config)
-epochs=$(jq -r '.num_epochs' $config)
-model_id="model_layers${layers}_ld${latent_dim}_wd${weight_decay}_epoch${epochs}_$(date +%F)"
-model_name="${model_id}.pt"
+tree_path=$(jq -r '.tree_path' $config)
 
 ########################################################
 #################### Train model #######################
 ########################################################
+# Train
 echo "Training autoencoder for MSA $msa_id (data located at $data_path)"
-python train.py config.json
+model_name=$(python train.py config.json | tee /dev/tty | awk 'END{print}')
 
 #######################################################
 #########  Generate embeddings ########################
 #######################################################
-# Update embeddings/config_gen.json
-config_gen_file="embeddings/config_gen.json"
-jq  --arg MSA_id "$msa_id" \
-    --arg data_path "$data_path" \
-    --arg model_name "$model_name" \
-    '.MSA_id = $MSA_id | .data_path = $data_path | .model_name = $model_name' \
-    "$config_gen_file" | jq --indent 4 > "$TMP_FILE" 2> /dev/null
-if [ $? -ne 0 ]; then
-    echo "Error: Invalid input. embeddings/config_gen.json not updated."
-    rm -f "$TMP_FILE"  # Remove the temporary file if there was an error
-    exit 1
-fi
-mv $TMP_FILE $config_gen_file
-python embeddings/gen_embeddings.py $config_gen_file
+echo "Using trained VAE to generate embeddings for sequences at the tips of the tree"
+plot_embeddings=$(jq '.embeddings.plot' $config)
+python embeddings/gen_embeddings.py $data_path $model_name --plot $plot_embeddings
 
 #########################################################
 # Reconstruct ancestral embeddings with brownian motion #
 #########################################################
-Rscript embeddings/embeddings_asr.R $data_path $model_id
+#TODO: change so that Rscript accepts model_name (with extension) instead of model_id (without extension)
+echo "Reconstructing ancestral embeddings with brownian motion"
+model_id=$(basename "$model_name" .pt)
+Rscript embeddings/embeddings_asr.R $data_path $model_id 
+
+# Note ArDCA based ASR has to wait for the above R script to run as it modifies the tree and MSA
+#######################################################
+#########  Run ArDCA  #################################
+#######################################################
+echo "Running ancestral sequence reconstruction with ArDCA"
+tree_path="${tree_path/trim/fully_trim}"
+julia --project=msas msas/scripts/ar_reconstruct.jl $data_path $tree_path
 
 #########################################################
 ## Decode to ancestral sequences and evaluate accuracy ##
@@ -67,6 +60,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 mv $TMP_FILE $config_decode_file
+echo "Decoding ancestral embeddings to sequences and evaluating all methods"
 python embeddings/decode_recon_embeds.py $config_decode_file
 
 

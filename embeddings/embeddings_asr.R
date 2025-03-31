@@ -3,12 +3,23 @@
 # It's not yet implemented for the real data, but it works for the simulated data.
 
 suppressPackageStartupMessages({
-    library(fs)
+    library(Biostrings) # for reading and writing fasta 
+    library(fs) # make sure this is loaded after Biostrings to keep path() function from fs
     library(tidyverse)
     library(Rphylopars) # automatically loads ape
     library(phytools)
     library(network) # for plotting the tree as a network in embedding space
 })
+
+## Function to filter fasta file #####
+filter_fasta <- function(og_path, new_path, keep) {
+    # Read the original fasta file
+    fasta <- readAAStringSet(og_path, format = "fasta")
+    # Filter sequences based on the 'keep' list
+    filtered_fasta <- fasta[names(fasta) %in% keep]
+    # Write the filtered sequences to a new fasta file
+    writeXStringSet(filtered_fasta, new_path, format = "fasta")
+}
 
 # get command line arguments
 data_path <- commandArgs(trailingOnly = TRUE)[1]
@@ -69,10 +80,8 @@ embeds <- read.csv(embed_path) |>
     dplyr::rename(species = id)
 
 # Before running phylopars() to fit a Brownian motion model and perform ASR, 
-# we trim our tree to get rid of extremely short external branches, which cause problems for the function and update the embeddings dataframe accordingly. 
-# We save our new tree to disk
-# We will later update the MSA of sequences (at the leaves) that we have saved as a fasta file on disk, 
-# removing sequences to match our updated tree. This is done by the script `decode_recon_embeds.py`
+# we trim our tree to get rid of extremely short external branches, which cause problems for the function 
+# This effectively removes some leaf nodes
 thresh <- 0.001
 # get ids of the tips of the short external branches
 twig_ids <- tree$edge[tree$edge.length < thresh & tree$edge[, 2] <= Ntip(tree), 2] 
@@ -83,11 +92,15 @@ embeds <- embeds[match(trimmed_tree$tip.label, embeds$species), ]
 # print number of tips and internal nodes in the pruned tree
 cat("Pruned tree has ", Ntip(trimmed_tree), " tips and ", Nnode(trimmed_tree), " internal nodes.\n")
 ntips_trimmed <- Ntip(trimmed_tree)
-# Save the final tree and the names of sequences that appear in it
-trimmed_tree_path <- str_replace(tree_path, "trim", "fully_trim") #fix this for real trees
+# Save names of leaves in the final data set
 names_path <- path(data_path, "final_seq_names.txt")
-write.tree(trimmed_tree, trimmed_tree_path)
 write(trimmed_tree$tip.label, names_path)
+# Save filtered tree
+trimmed_tree_path <- str_replace(tree_path, "trim", "fully_trim") #fix this for real trees
+write.tree(trimmed_tree, trimmed_tree_path)
+# Save filtered MSA
+fasta_path <- path(data_path, "seq_msa_char.fasta")
+filter_fasta(fasta_path, fasta_path, trimmed_tree$tip.label)
 
 
 ## Perform ancestral state reconstruction

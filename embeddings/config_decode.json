@@ -1,8 +1,8 @@
 {
-    "MSA_id": "COG438-pottsPF00076",
-    "msa_path": "msas/potts/raw/5000/COG438-pottsPF00076_msa.dat",
-    "data_path": "msas/potts/processed/5000/COG438-pottsPF00076",
-    "model_name": "model_layers500_ld20_wd0_epoch160_2025-03-26.pt",
+    "MSA_id": "COG154-s2.0-pottsPF00076",
+    "msa_path": "msas/potts/raw/1250/COG154-s2.0-pottsPF00076_msa.dat",
+    "data_path": "msas/potts/processed/1250/COG154-s2.0-pottsPF00076",
+    "model_name": "model_layers500_ld20_wd0.01_epoch160_2025-03-31.pt",
     "plot": true,
     "redo_iqtree": false
 }
