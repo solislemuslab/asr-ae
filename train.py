@@ -141,6 +141,7 @@ def main():
         pickle.dump(valid_idx, file_handle)
 
     # training the model
+    # TODO: Implement early stopping based on either val_accs or val_log_pxgzs
     train_elbos, val_elbos, val_log_pxgzs, val_iwae_elbos, val_accs = [], [], [], [], []
     for epoch in range(num_epochs):
         # Validation metrics
