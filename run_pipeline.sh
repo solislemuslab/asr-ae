@@ -10,7 +10,7 @@ fi
 # family information
 data_path=$(jq -r '.data_path' $config)
 msa_id=$(basename "$data_path")
-msa_path="${data_path/processed/raw}_msa.dat"
+msa_path="${data_path/processed/raw}_msa.phy"
 tree_path=$(jq -r '.tree_path' $config)
 
 ########################################################
@@ -18,14 +18,14 @@ tree_path=$(jq -r '.tree_path' $config)
 ########################################################
 # Train
 echo "Training autoencoder for MSA $msa_id (data located at $data_path)"
-model_name=$(python train.py config.json | tee /dev/tty | awk 'END{print}')
+model_name=$(python scripts/train.py config.json | tee /dev/tty | awk 'END{print}')
 
 #######################################################
 #########  Generate embeddings ########################
 #######################################################
 echo "Using trained VAE to generate embeddings for sequences at the tips of the tree"
 plot_embeddings=$(jq '.embeddings.plot' $config)
-python embeddings/gen_embeddings.py $data_path $model_name --plot $plot_embeddings
+python scripts/gen_embeddings.py $data_path $model_name --plot $plot_embeddings
 
 #########################################################
 # Reconstruct ancestral embeddings with brownian motion #
@@ -33,15 +33,14 @@ python embeddings/gen_embeddings.py $data_path $model_name --plot $plot_embeddin
 #TODO: change so that Rscript accepts model_name (with extension) instead of model_id (without extension)
 echo "Reconstructing ancestral embeddings with brownian motion"
 model_id=$(basename "$model_name" .pt)
-Rscript embeddings/embeddings_asr.R $data_path $model_id 
+Rscript scripts/embeddings_asr.R $data_path $model_id 
 
-# Note ArDCA based ASR has to wait for the above R script to run as it modifies the tree and MSA
 #######################################################
 #########  Run ArDCA  #################################
 #######################################################
 echo "Running ancestral sequence reconstruction with ArDCA"
 tree_path="${tree_path/trim/fully_trim}"
-julia --project=msas msas/scripts/ar_reconstruct.jl $data_path $tree_path
+julia --project=. scripts/ar_reconstruct.jl $data_path $tree_path
 
 #########################################################
 ## Decode to ancestral sequences and evaluate accuracy ##
@@ -61,7 +60,7 @@ if [ $? -ne 0 ]; then
 fi
 mv $TMP_FILE $config_decode_file
 echo "Decoding ancestral embeddings to sequences and evaluating all methods"
-python embeddings/decode_recon_embeds.py $config_decode_file
+python scripts/decode_recon_embeds.py $config_decode_file
 
 
 

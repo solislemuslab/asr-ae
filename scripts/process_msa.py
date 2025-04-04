@@ -7,7 +7,7 @@ from os import path, makedirs
 import numpy as np
 import pandas as pd
 from Bio import SeqIO
-sys.path.insert(1, os.path.join(sys.path[0], '../..'))
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilities import constants
 from utilities.seq import aa_to_int, invert_dict
 

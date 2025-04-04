@@ -51,7 +51,8 @@ end
 begin
 	FASTAWriter(open(reconstruct_fasta, "w")) do writer
 		for (name, seq) in reconstructed_sequences
-			write(writer, FASTARecord(name, seq))
+            # for some reason, package adds weird suffixes to the names of internal nodes
+			write(writer, FASTARecord(split(name, "__")[1], seq))
 		end
 	end
 end

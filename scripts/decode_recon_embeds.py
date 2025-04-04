@@ -39,10 +39,10 @@ def get_real_seqs(msa_path, anc_id, aa_index, pos_preserved=None):
     real_seqs_int = [[aa_index[aa] for aa in seq] for seq in real_seqs]
     return np.array(real_seqs_int)
 
-def get_prior_seqs(model, n_seqs):
+def get_prior_seqs(model, n_anc):
     dim_latent_space = model.dim_latent_vars
     # sample from standard normal
-    z = torch.randn(n_seqs, dim_latent_space)
+    z = torch.randn(n_anc, dim_latent_space)
     # decode to amino acid probabilities
     with torch.no_grad():
         log_p = model.decoder(z)
@@ -58,16 +58,16 @@ def get_recon_ancseqs(model, recon_embeds):
     max_prob_idx = torch.argmax(log_p, -1)
     return max_prob_idx.numpy()
 
-def get_modal_seq(data_path, n_seqs):
+def get_modal_seq(data_path, n_anc):
     with open(f"{data_path}/seq_msa_int.pkl", 'rb') as file_handle:
         real_seq_leaves= pickle.load(file_handle)
     mod_seq = []
     for i in range(real_seq_leaves.shape[1]):
         col = real_seq_leaves[:, i]
         mod_seq.append(np.bincount(col).argmax())
-    return np.tile(np.array(mod_seq), (n_seqs, 1))
+    return np.tile(np.array(mod_seq), (n_anc, 1))
 
-def get_iqtree_ancseqs(iqtree_dir, anc_id, aa_index):
+def get_iqtree_ancseqs(iqtree_dir, anc_id, aa_index, n_seq):
     """
     Note that for some reason, IQTree does not reconstruct the sequence at the root node. Not sure why...
     Usually, our trees will be unrooted, but occassionally, the trimming of extremely short external branches 
@@ -84,24 +84,22 @@ def get_iqtree_ancseqs(iqtree_dir, anc_id, aa_index):
     seq_length = iq_df_sk["Site"].max()
     placeholder = [-1] * seq_length # placeholder for missing reconstructions
     iq_seqs = []
-    for k in anc_id:
-        node_id = f"Node{k}"
-        if node_id not in iq_df_sk.index:
-            print(f"Reconstructions for {node_id} not found in IQTree output because it is the root node in the trimmed tree, "
+    for id in anc_id:
+        if id not in iq_df_sk.index:
+            print(f"Reconstructions for Node {id} not found in IQTree output because it is the root node in the cleaned tree, "
                   "and for some reason, IQTree does not reconstruct the sequence at the root node.")
             iq_seqs.append(placeholder)
             continue
-        recon_seq_df = iq_df_sk.loc[node_id]
+        recon_seq_df = iq_df_sk.loc[id]
         recon_seq = [aa_index[char] for char in recon_seq_df.State.values]
         iq_seqs.append(recon_seq)
     return np.array(iq_seqs)
 
 def get_finch_ancseqs(recon_fitch_dict, anc_id, aa_index):
     finch_seqs = []
-    for k in anc_id:
-        node_id = f"Node{k}"
-        assert node_id in recon_fitch_dict, f"Reconstruction for {node_id} not found in Fitch output"
-        recon_seq = [aa_index[char] for char in recon_fitch_dict[node_id]]
+    for id in anc_id:
+        assert id in recon_fitch_dict, f"Reconstruction for Node {id} not found in Fitch output"
+        recon_seq = [aa_index[char] for char in recon_fitch_dict[id]]
         finch_seqs.append(recon_seq)
     return np.array(finch_seqs)
 
@@ -112,7 +110,7 @@ def get_ardca_ancseqs(ardca_dir, anc_id, aa_index):
         for record in SeqIO.parse(msa, "fasta"):
             recon_seqs_dict[record.id] = str(record.seq)
     # order true ancestral sequences according to the order of the reconstructed embeddings
-    recon_seqs = [recon_seqs_dict[f"Node{id}"] for id in anc_id]
+    recon_seqs = [recon_seqs_dict[id] for id in anc_id]
     # convert to integers for comparison with reconstructed sequences
     recon_seqs_int = [[aa_index[aa] for aa in seq] for seq in recon_seqs]
     return np.array(recon_seqs_int)
@@ -162,7 +160,7 @@ def main():
     # Get global variables
     n_seq = int(msa_path.split("/")[-2]) # number of sequences
     family = MSA_id.split("-")[0] # family name 
-    tree_path = f"trees/fast_trees/{n_seq}/{family}.sim.fully_trim.tree" # path to tree
+    tree_path = f"trees/fast_trees/{n_seq}/{family}.clean.tree" # path to tree
     # sequence length will be present in the MSA_id if it is not a Potts-simulated MSA 
     nl_match = re.search(r'l(\d+)', MSA_id)
     if nl_match:
@@ -200,14 +198,13 @@ def main():
     os.makedirs(iqtree_dir, exist_ok=True)
     print("Running IQTree...")
     run_iqtree(data_path, tree_path, iqtree_dir, redo=config.redo_iqtree)
-
     # Retrieve sequences
     real_seqs = get_real_seqs(msa_path, anc_id, aa_index, pos_preserved)
     # TODO: embed the real ancestral sequences and visually compare them with the reconstructed embeddings
     mod_seqs = get_modal_seq(data_path, n_anc)
     prior_seqs = get_prior_seqs(model, n_anc)
     recon_ancseqs = get_recon_ancseqs(model, recon_embeds)
-    iqtree_seqs = get_iqtree_ancseqs(iqtree_dir, anc_id, aa_index)
+    iqtree_seqs = get_iqtree_ancseqs(iqtree_dir, anc_id, aa_index, n_seq=n_seq)
     finch_seqs = get_finch_ancseqs(recon_fitch_dict, anc_id, aa_index)
     ardca_dir = get_directory(data_path, "reconstructions/ardca")
     ardca_seqs = get_ardca_ancseqs(ardca_dir, anc_id, aa_index)
@@ -237,7 +234,7 @@ def main():
 
     # Plot reconstruction accuracy as a function of distance from root
     depths = get_depths(tree_path)
-    ordered_depths = [depths[f"Node{int(k)}"] for k in anc_id]
+    ordered_depths = [depths[id] for id in anc_id]
     plot_error_vs_depth(mod_seqs, real_seqs, ordered_depths)
     plot_error_vs_depth(prior_seqs, real_seqs, ordered_depths)
     plot_error_vs_depth(finch_seqs, real_seqs, ordered_depths)

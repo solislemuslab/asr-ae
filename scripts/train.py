@@ -9,6 +9,7 @@ import sys
 import torch
 from torch.utils.data import DataLoader
 import torch.optim as optim
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from autoencoder.model import VAE, TVAE, EmbedVAE
 from utilities.vae import load_data
 from utilities.utils import get_directory

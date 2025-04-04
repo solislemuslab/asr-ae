@@ -12,7 +12,7 @@ import glob
 import sys
 import os
 import re 
-sys.path.insert(1, os.path.join(sys.path[0], '../..'))
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilities import constants
 from utilities.rate_matrix import (
     read_params_from_PAML, 
@@ -213,6 +213,6 @@ if __name__ == "__main__":
             # convert MSA to list of SeqRecord objects and write to file
             seq_records = [SeqRecord(Seq(sequence), id=seq_id, description="") for seq_id, sequence in msa.items()]
             fam_name = os.path.basename(tree_file).split('.')[0]
-            output_file = f"{output_dir}/{fam_name}-l{msa_length}-s{scaling_factor}-a{rate_het}_msa.dat"
+            output_file = f"{output_dir}/{fam_name}-l{msa_length}-s{scaling_factor}-a{rate_het}_msa.phy"
             with open(output_file, 'w') as new:
                 SeqIO.write(seq_records, new, "phylip-relaxed")

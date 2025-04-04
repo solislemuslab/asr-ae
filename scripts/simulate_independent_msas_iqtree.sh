@@ -1,0 +1,80 @@
+#!/bin/bash
+
+helpFunction() {
+    echo ""
+    echo "Usage: $0 [-l parameterL] [-s parameterS] [-h parameterH]"
+    echo -e "\t-l Sequence length (default 100)"
+    echo -e "\t-s Branch length scaling factor (default 1)"
+    echo -e "\t-a Gamma rate heterogeneity (either positive real number or \"None\")"
+    exit 1 # Exit script after printing help
+}
+
+# Get options
+while getopts "l:s:a:" opt; do
+    case "$opt" in
+        l ) seq_length="$OPTARG" ;;
+        s ) scale="$OPTARG" ;;
+        a ) het="$OPTARG" ;;
+        ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
+    esac
+done
+
+# Set non-provided options to default values
+if [ -z "$seq_length" ]; then
+    echo "Default sequence length of 100 will be used"
+    seq_length=100
+fi
+
+if [ -z "$scale" ]; then
+    echo "Default branch length scaling factor of 1 will be used"
+    scale=1
+fi
+
+if [ -z "$het" ]; then
+    echo "No rate heterogeneity will be used"
+    het="None"
+fi
+
+if [ "$het" = "None" ]; then
+    include_het=""
+else
+    include_het="+GC{$het}"
+fi
+
+if [ "$scale" = "1" ]; then
+    include_scale=""
+else
+    include_scale="--branch-scale $scale"
+fi 
+
+
+param_string="l${seq_length}-s${scale}-a${het}"
+
+# Directory containing tree files (which are separated into subdirectories based on the number of taxa, either 5000 or 1250)
+tree_files_dir="trees/fast_trees"
+
+# Iterate through each .tree file in the directory
+seed=770 # random seed for simulating MSA
+for n_seq in "5000" "1250"; do
+    # Create output directory if it doesn't exist
+    output_dir="msas/independent/raw/$n_seq"
+    if [ ! -d "$output_dir" ]; then
+        mkdir -p "$output_dir"
+    fi
+    for tree_file in $tree_files_dir/$n_seq/COG*.clean.tree; do
+        fam_name=$(basename "$tree_file" .clean.tree)
+        output_file="${output_dir}/${fam_name}-${param_string}_msa"
+        iqtree_command="iqtree/bin/iqtree2 --alisim $output_file -m LG$include_het \
+                        -seed $seed \ 
+                        --length $seq_length \
+                        $include_scale \
+                        --write-all \
+                        -quiet \
+                        -t $tree_file"
+        $iqtree_command
+        # Edit header of phylip output file to reflect total number of sequences in MSA (2*n_leaves-1)
+        awk 'NR==1 {print 2*$1-1, $2} NR>1' "$output_file.phy" > "${output_file}.tmp" && mv "${output_file}.tmp" "$output_file.phy"
+        # Increment the random seed for simulating MSA for the next tree
+        seed=$((seed+1))
+    done
+done

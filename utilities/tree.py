@@ -120,9 +120,25 @@ def run_iqtree(data_path, tree_path, iqtree_dir, redo):
     # Run IQTree if analysis has not yet been done or redo is true
     # TODO: make iqtree also consider gaps for reconstructed sequences
     # TODO: use model search instead of assuming LG model when run on Potts-simulated data
+    # blfix is used to fix branch lengths
     redo = " -redo" if redo else ""
-    os.system(f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fasta -m LG -te {tree_path} -asr -quiet {redo} -pre {iqtree_dir}/results")
+    os.system(f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fasta -m LG -te {tree_path} -asr -quiet {redo} -blfix -pre {iqtree_dir}/results")
     
+    # Now we need to get the mapping since IQ-TREE will rename the internal nodes
+
+    # Load original tree with correct internal node names
+    # original_tree = Tree(tree_path, format=1)
+
+    # # Load IQ-TREE output tree with renamed internal nodes
+    # iqtree_tree = Tree(f"{iqtree_dir}/results.treefile", format=1)
+
+    # # mapping = {}
+    # # for node_iq, node_og in zip(iqtree_tree.traverse(), original_tree.traverse()):
+    # #     if not node_iq.is_leaf():
+    # #         print(node_iq.name)
+    # #         assert not node_og.is_leaf()
+    # #         mapping[node_og.name] = node_iq.name
+    # # return mapping
 
 def run_autoasr():
     pass 
