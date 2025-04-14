@@ -181,6 +181,8 @@ if __name__ == "__main__":
         states = constants.AA
     assert np.allclose(Q @ np.ones_like(pi), 0, atol=1e-6)
     assert np.allclose(pi @ Q, 0, atol=1e-6)
+    print(compute_scale(Q, pi))
+    sys.exit(0)
     
     # set seed
     random.seed(770)
