@@ -20,6 +20,11 @@ def get_directory(data_path, folder, data_subfolder = False):
 def parse_model_name(model_name):
 
     # Latent dimension of VAE
+    # use re to check if model name starts with "trans"
+    if re.match(r'^trans', model_name):
+        is_transformer = True
+    else:
+        is_transformer = False
     ld = int(re.search(r'ld(\d+)', model_name).group(1))
     # Number of hidden units in VAE
     layers_match = re.search(r'layers(\d+(\-\d+)*)', model_name)
@@ -29,4 +34,4 @@ def parse_model_name(model_name):
     dim_aa_embed = int(aa_embed_match.group(1)) if aa_embed_match else None
     one_hot = not aa_embed_match
 
-    return ld, num_hidden_units, dim_aa_embed, one_hot
+    return is_transformer, ld, num_hidden_units, dim_aa_embed, one_hot

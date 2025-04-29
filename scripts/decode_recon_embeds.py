@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+from statsmodels.nonparametric.smoothers_lowess import lowess
 import pandas as pd
 import torch
 import pickle
@@ -17,13 +18,7 @@ from utilities.utils import get_directory, parse_model_name
 from utilities.tree import get_depths, run_fitch, run_iqtree
 
 def get_real_seqs(msa_path, anc_id, aa_index, pos_preserved=None):
-    sim_type = msa_path.split(os.sep)[1]
-    format = {
-        'potts': "fasta",
-        'real' : "fasta",
-        'coupled' : "phylip-relaxed",
-        'independent' : "phylip-relaxed" 
-    }[sim_type]
+    format = "fasta"
     real_seqs_dict = {}
     with open(msa_path, 'r') as msa:
         for record in SeqIO.parse(msa, format):
@@ -129,15 +124,69 @@ def evaluate_seqs(est_seqs, real_seqs):
 def plot_error_vs_depth(est_seqs, real_seqs, depths):
     ham_errors = []
     for (est_seq, real_seq) in zip(est_seqs, real_seqs):
-        if all(est_seq == -1): # handle missing reconstructions (iqtree)
-            ham_errors.append(None) 
+        if all(est_seq == -1):  # handle missing reconstructions (iqtree)
+            ham_errors.append(None)
             continue
         ham_errors.append(np.mean(est_seq != real_seq))
-    plt.scatter(depths, ham_errors)
+    
+    # Scatter plot
+    plt.scatter(depths, ham_errors, label="Hamming Error", alpha=0.5)
+    
+    # Add LOESS smooth
+    valid_data = [(d, e) for d, e in zip(depths, ham_errors) if e is not None]
+    if valid_data:
+        valid_depths, valid_errors = zip(*valid_data)
+        smoothed = lowess(valid_errors, valid_depths, frac=0.3)
+        plt.plot(smoothed[:, 0], smoothed[:, 1], color="red", label="LOESS Smooth")
+    
+    # Plot settings
     plt.xlabel("Node depth")
     plt.ylabel("Hamming reconstruction error")
     plt.title("Accuracy of reconstructed sequences vs. depth in tree")
+    plt.legend()
     plt.show()
+
+
+def plot_all_errors(all_est_seqs_dict, real_seqs, depths, output):
+    """
+    Plot the errors for all the sequences in all_est_seqs_dict.
+    """
+    colors = {
+        "modal": "blue",
+        "fitch": "green",
+        "iqtree": "orange",
+        "ardca": "purple"
+    }
+    for name, est_seqs in all_est_seqs_dict.items():
+        ham_errors = []
+        for (est_seq, real_seq) in zip(est_seqs, real_seqs):
+            if all(est_seq == -1):  # handle missing reconstructions (iqtree)
+                ham_errors.append(None)
+                continue
+            ham_errors.append(np.mean(est_seq != real_seq))
+            # Add LOESS smooth
+            valid_data = [(d, e) for d, e in zip(depths, ham_errors) if e is not None]
+        if valid_data:
+            valid_depths, valid_errors = zip(*valid_data)
+            try:
+                smoothed = lowess(valid_errors, valid_depths, frac=0.3)
+                # Set color and linestyle based on the name
+                color = colors.get(name, "red")  # Default to red for our VAE-based approach
+                linestyle = None
+                if name.startswith("model"):
+                    linestyle = "--"
+                if name.endswith("prior"):
+                    linestyle = "-."
+                plt.plot(smoothed[:, 0], smoothed[:, 1], label=name, color=color, linestyle=linestyle)
+            except Exception as e:
+                print(f"Error while smoothing and plotting for {name}: {e}")
+    # Plot settings
+    plt.xlabel("Node depth")
+    plt.ylabel("Hamming reconstruction error")
+    plt.title("Accuracy of reconstructed sequences vs. depth in tree")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.savefig(output, bbox_inches='tight')
+
 
 def main():
     parser = argparse.ArgumentParser(description='Decode \'ancestral\' embeddings into reconstructed ancestral sequences and evaluate accuracy')
@@ -151,11 +200,11 @@ def main():
     print("MSA_id: ", config.MSA_id)
     print("msa_path: ", config.msa_path)
     print("data_path: ", config.data_path)
-    print("model_name: ", config.model_name)
+    print("model_name: ", config.model_names)
     print("plot: ", config.plot)
     print("redo_iqtree:", config.redo_iqtree)
     print("-" * 50)
-    MSA_id, msa_path, data_path, model_name = config.MSA_id, config.msa_path, config.data_path, config.model_name
+    MSA_id, msa_path, data_path, model_names = config.MSA_id, config.msa_path, config.data_path, config.model_names
 
     # Get global variables
     n_seq = int(msa_path.split("/")[-2]) # number of sequences
@@ -170,25 +219,34 @@ def main():
         with open(f"{data_path}/pos_preserved.pkl", 'rb') as file:
             pos_preserved = pickle.load(file) # positions preserved in processed MSA (only relevant for Potts)
         nl = len(pos_preserved)
-    ld, num_hidden_units, dim_aa_embed, one_hot = parse_model_name(model_name)
-
+    
     # load mappling from integer to amino acid and vice versa
     aa_index = aa_to_int_from_path(data_path)
 
-    # load the model
-    model_dir = get_directory(data_path, "saved_models")
-    model_path = os.path.join(model_dir, model_name)
-    model = load_model(model_path, nl=nl, nc=21,
-                           num_hidden_units=num_hidden_units, nlatent=ld,
-                           one_hot=one_hot, dim_aa_embed=dim_aa_embed)  
-    
-    # Get our reconstructed ancestral embeddings
+    # location of reconstructed embeddings of ancestral sequences
     embeds_dir = get_directory(data_path, "embeddings", data_subfolder=True)
-    embeds_path = os.path.join(embeds_dir,
-                               model_name.replace(".pt", "_anc-embeddings.csv"))
-    recon_embeds = pd.read_csv(embeds_path, index_col=0)
-    n_anc = recon_embeds.shape[0]
-    anc_id = [str(id) for id in recon_embeds.index]
+    
+    # if model name is an empty list, then run with all models that have been fit to the given family
+    model_dir = get_directory(data_path, "saved_models")
+    if not model_names:
+        model_names = [name for name in os.listdir(model_dir) if name.endswith(".pt")]
+    model_dict = {} 
+    for name in model_names:
+        is_trans, ld, num_hidden_units, dim_aa_embed, one_hot = parse_model_name(name)
+        model_path = os.path.join(model_dir, name)
+        model = load_model(model_path, nl=nl, nc=21,
+                            num_hidden_units=num_hidden_units, nlatent=ld,
+                            one_hot=one_hot, dim_aa_embed=dim_aa_embed, trans=is_trans)
+        embeds_path = os.path.join(embeds_dir,
+                               name.replace(".pt", "_anc-embeddings.csv"))
+        embeds = pd.read_csv(embeds_path, index_col=0)
+        model_dict[name] = {
+            "path": model_path,
+            "model": model,
+            "embeds": embeds
+            }
+    n_anc = model_dict[model_names[0]]["embeds"].shape[0] # number of ancestral sequences
+    anc_id = [str(id) for id in model_dict[model_names[0]]["embeds"].index] # order of ancestral sequences
     
     # Run Fitch
     print("Running Fitch...")
@@ -197,13 +255,19 @@ def main():
     iqtree_dir = get_directory(data_path, "reconstructions/iqtree")
     os.makedirs(iqtree_dir, exist_ok=True)
     print("Running IQTree...")
+    # TODO: use a different model and/or branch length optimization depending on the simulation type
     run_iqtree(data_path, tree_path, iqtree_dir, redo=config.redo_iqtree)
-    # Retrieve sequences
+    # Retrieve real sequences
     real_seqs = get_real_seqs(msa_path, anc_id, aa_index, pos_preserved)
     # TODO: embed the real ancestral sequences and visually compare them with the reconstructed embeddings
     mod_seqs = get_modal_seq(data_path, n_anc)
-    prior_seqs = get_prior_seqs(model, n_anc)
-    recon_ancseqs = get_recon_ancseqs(model, recon_embeds)
+    # Our approach
+    for name in model_names:
+        model = model_dict[name]["model"]
+        recon_embeds = model_dict[name]["embeds"]
+        model_dict[name]["prior_seqs"] = get_prior_seqs(model, n_anc)
+        model_dict[name]["recon_seqs"] = get_recon_ancseqs(model, recon_embeds)
+    # Other approaches
     iqtree_seqs = get_iqtree_ancseqs(iqtree_dir, anc_id, aa_index, n_seq=n_seq)
     finch_seqs = get_finch_ancseqs(recon_fitch_dict, anc_id, aa_index)
     ardca_dir = get_directory(data_path, "reconstructions/ardca")
@@ -215,32 +279,49 @@ def main():
     #print(maj_seq)
     evaluate_seqs(mod_seqs, real_seqs)
     print("-" * 50)
-    print("Evaluating sequences sampled under the prior of trained VAE")
-    evaluate_seqs(prior_seqs, real_seqs)
-    print("-" * 50)    
+    for name in model_names:
+        print(f"Evaluating sequences sampled under the prior of {name}")
+        prior_spiky_seqs = model_dict[name]["prior_seqs"]
+        evaluate_seqs(prior_spiky_seqs, real_seqs)
+        print("-" * 50) 
+        print(f"Evaluating decoded reconstructed embeddings of {name} (our approach)")
+        recon_seqs = model_dict[name]["recon_seqs"]
+        evaluate_seqs(recon_seqs, real_seqs)
+        print("-" * 50)
     print("Evaluating Fitch reconstructed sequences")
     evaluate_seqs(finch_seqs, real_seqs)
     print("-" * 50)
     print("Evaluating iqtree ancestral sequences")
+    print(iqtree_seqs.shape, " ", real_seqs.shape)
     evaluate_seqs(iqtree_seqs, real_seqs)
     print("-" * 50)
     print("Evaluating ArDCA reconstructed sequences")
+    print(ardca_seqs.shape, " ", real_seqs.shape)
     evaluate_seqs(ardca_seqs, real_seqs)
-    print("-" * 50)
-    print("Evaluating decoded reconstructed embeddings (our approach)")
-    evaluate_seqs(recon_ancseqs, real_seqs)
-    print("-" * 50)
     
 
     # Plot reconstruction accuracy as a function of distance from root
     depths = get_depths(tree_path)
     ordered_depths = [depths[id] for id in anc_id]
-    plot_error_vs_depth(mod_seqs, real_seqs, ordered_depths)
-    plot_error_vs_depth(prior_seqs, real_seqs, ordered_depths)
-    plot_error_vs_depth(finch_seqs, real_seqs, ordered_depths)
-    plot_error_vs_depth(iqtree_seqs, real_seqs, ordered_depths)
-    plot_error_vs_depth(ardca_seqs, real_seqs, ordered_depths)
-    plot_error_vs_depth(recon_ancseqs, real_seqs, ordered_depths)
+    all_est_seqs = {
+        "modal": mod_seqs,
+        "fitch": finch_seqs,
+        "iqtree": iqtree_seqs,
+        "ardca": ardca_seqs,
+    }
+    for name in model_names:
+        all_est_seqs[name] = model_dict[name]["recon_seqs"]
+        all_est_seqs[f"{name}_prior"] = model_dict[name]["prior_seqs"]
+    plot_dir = get_directory(data_path, "plots")
+    os.makedirs(plot_dir, exist_ok=True)
+    # plot_error_vs_depth(mod_seqs, real_seqs, ordered_depths)
+    # plot_error_vs_depth(prior_seqs, real_seqs, ordered_depths)
+    # plot_error_vs_depth(finch_seqs, real_seqs, ordered_depths)
+    # plot_error_vs_depth(iqtree_seqs, real_seqs, ordered_depths)
+    # plot_error_vs_depth(ardca_seqs, real_seqs, ordered_depths)
+    # plot_error_vs_depth(recon_ancseqs, real_seqs, ordered_depths)
+    plot_all_errors(all_est_seqs, real_seqs, ordered_depths, os.path.join(plot_dir, config.plot_name))
+    
  
 if __name__ == "__main__":
     main()

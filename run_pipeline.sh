@@ -10,7 +10,7 @@ fi
 # family information
 data_path=$(jq -r '.data_path' $config)
 msa_id=$(basename "$data_path")
-msa_path="${data_path/processed/raw}_msa.phy"
+msa_path="${data_path/processed/raw}.fa"
 tree_path=$(jq -r '.tree_path' $config)
 
 ########################################################
@@ -50,8 +50,9 @@ config_decode_file="embeddings/config_decode.json"
 jq  --arg MSA_id "$msa_id" \
     --arg msa_path "$msa_path" \
     --arg data_path "$data_path" \
-    --arg model_name "$model_name" \
-    '.MSA_id = $MSA_id | .msa_path = $msa_path | .data_path = $data_path | .model_name = $model_name' \
+    --arg model_names "$model_name" \
+    --arg plot_name "${model_name/.pt/_eval.png}" \
+    '.MSA_id = $MSA_id | .msa_path = $msa_path | .data_path = $data_path | .model_names = [$model_names] | .plot_name = $plot_name' \
     "$config_decode_file" | jq --indent 4 > "$TMP_FILE" 2> /dev/null
 if [ $? -ne 0 ]; then
     echo "Error: Invalid input. embeddings/config_decode.json not updated."

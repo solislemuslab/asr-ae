@@ -2,7 +2,7 @@
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "8051769407df77ab6d55ba174f011adf42b30168"
+project_hash = "8ae128018b45cab5c5d47f882749eceed354cc8e"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -74,6 +74,12 @@ version = "0.6.6"
 git-tree-sha1 = "680b3b8759bd4c54052ada14e52355ab69e07876"
 uuid = "dce04be8-c92d-5529-be00-80e4d2c0e197"
 version = "2.4.0"
+
+[[deps.ArgParse]]
+deps = ["Logging", "TextWrap"]
+git-tree-sha1 = "22cf435ac22956a7b45b0168abbc871176e7eecc"
+uuid = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
+version = "1.2.0"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -1610,6 +1616,11 @@ deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 version = "1.11.0"
 
+[[deps.TextWrap]]
+git-tree-sha1 = "43044b737fa70bc12f6105061d3da38f881a3e3c"
+uuid = "b718987f-49a8-5099-9789-dcd902bef87d"
+version = "1.0.2"
+
 [[deps.ThreadingUtilities]]
 deps = ["ManualMemory"]
 git-tree-sha1 = "eda08f7e9818eb53661b3deb74e3159460dfbc27"
@@ -1893,6 +1904,14 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "446b23e73536f84e8037f5dce465e92275f6a308"
 uuid = "3161d3a3-bdf6-5164-811a-617609db77b4"
 version = "1.5.7+1"
+
+[[deps.adabmDCA]]
+deps = ["ArgParse", "Distances", "Distributions", "LinearAlgebra", "Logging", "Pkg", "Plots", "Printf", "Random", "StatsBase"]
+git-tree-sha1 = "3a859a75f10f20b976da0a037f6ca1e95402f107"
+repo-rev = "main"
+repo-url = "https://github.com/spqb/adabmDCA.jl"
+uuid = "b9b858a2-6fc5-45ba-8004-395fe95964a1"
+version = "0.0.0"
 
 [[deps.eudev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "gperf_jll"]

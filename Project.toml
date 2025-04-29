@@ -1,6 +1,7 @@
 [deps]
 AncestralSequenceReconstruction = "1d4f28ef-5432-422a-9dec-15ed9a8d60be"
 ArDCA = "fc7e833f-a3b9-439d-ae82-c6ad11a3e54b"
+ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
 BioSequenceMappings = "a84bc454-70cc-4f51-8a9d-ca76a5a82222"
 FASTX = "c2308a5c-f048-11e8-3e8a-31650f418d12"
 FreqTables = "da1fdf0e-e0ff-5433-a45f-9bb5ff651cb1"
@@ -14,3 +15,4 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 TreeTools = "62f0eae3-8c0e-4032-a621-7756092209e5"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
+adabmDCA = "b9b858a2-6fc5-45ba-8004-395fe95964a1"
