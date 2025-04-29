@@ -17,7 +17,7 @@ class VAE(nn.Module):
         This model accepts (batches of) sequences represented as matrices, with each row of the matrix given by
         a one-hot encoding of the aa at the corresponding position. The first thing the encoder does is concatenate the one-hot vectors.
         This in turn means that the weight matrix of the first hidden layer contains vectors corresponding to each aa-position combination
-        and the output of the first hidden layer is the sum of the vectors representing the aa-position combinations in the input sequence.
+        and the output of the first hidden layer is the sum of the vectors representing the specific aa-position combinations in the input sequence.
     
         Both the encoder and decoder have the same number of hidden layers and the same number of neurons in each layer.
         """

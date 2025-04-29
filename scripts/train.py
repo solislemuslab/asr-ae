@@ -20,7 +20,7 @@ def train(model, device, train_loader, optimizer, epoch, verbose):
     """
     model.train()
     running_elbo = []
-
+    accs = []
     for batch_idx, (msa, weight, _) in enumerate(train_loader):
         msa, weight = msa.to(device), weight.to(device)
         optimizer.zero_grad()
@@ -33,8 +33,12 @@ def train(model, device, train_loader, optimizer, epoch, verbose):
             print("Epoch: {:>4}, Step: {:>4}, loss: {:>4.2f}".format(epoch, batch_idx, elbo_scalar),
                   flush=True)
         running_elbo.append(elbo_scalar)
+        # compute reconstruction accuracy
+        all_accs = model.compute_acc(msa)
+        ave_acc = torch.mean(all_accs).item()
+        accs.append(ave_acc)
 
-    return running_elbo
+    return running_elbo, accs
 
 def eval(model, device, valid_loader, n_samples = 100):
     """
@@ -75,6 +79,7 @@ def main():
     # loading the input data from the json file
     data_path = data_json["data_path"]
     training_config = data_json["training"]
+    rerun = training_config["rerun"]
     one_hot = training_config["one_hot"]
     weigh_seqs = training_config["weigh_seqs"]
     use_transformer = training_config["use_transformer"]
@@ -90,12 +95,13 @@ def main():
     verbose = training_config["verbose"]
     save_model = training_config["save_model"]
     plot_results = training_config["plot_results"]  
-  
+    
     # create model path
     today = date.today()
     layers_str = "-".join([str(l) for l in num_hidden_units])
     aa_embed_str = f"aaembed{dim_aa_embed}_" if not one_hot else ""
-    model_configs=f"model_{aa_embed_str}layers{layers_str}_ld{latent_dim}_wd{wd}_epoch{num_epochs}"
+    trans_str = "trans-" if use_transformer else ""
+    model_configs=f"{trans_str}model_{aa_embed_str}layers{layers_str}_ld{latent_dim}_wd{wd}_epoch{num_epochs}"
     model_name = f"{model_configs}_{today}.pt"
     model_dir = get_directory(data_path, "saved_models")
     os.makedirs(model_dir, exist_ok=True)
@@ -103,8 +109,8 @@ def main():
     
     # check if model with same configs (ignoring date) already exists and only proceed if it doesn't
     existing_models = [f for f in os.listdir(model_dir) if f.startswith(model_configs)]
-    if existing_models:
-        print(f"Model has already been trained and is saved at {model_dir} with name\n{existing_models[0]}")
+    if existing_models and not rerun:
+        print(f"Model with same configs has already been trained and is saved at {model_dir} with name\n{existing_models[0]}")
         return
     else:
         print("Beginning training...", flush=True)
@@ -135,11 +141,11 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
 
     # initialize the data loader
-    train_idx, valid_idx = train_test_split(range(len(data)), test_size=0.1, random_state=42)
-    train_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(train_idx))
-    valid_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(valid_idx))
-    with open(f"{model_dir}/valid_idx.pkl", 'wb') as file_handle:
-        pickle.dump(valid_idx, file_handle)
+    #train_idx, valid_idx = train_test_split(range(len(data)), test_size=0.1, random_state=42)
+    train_loader = DataLoader(data, batch_size=batch_size, shuffle=True)
+    # valid_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(valid_idx))
+    # with open(f"{model_dir}/valid_idx.pkl", 'wb') as file_handle:
+    #     pickle.dump(valid_idx, file_handle)
 
     # training the model
     # TODO: Implement early stopping based on either val_accs or val_log_pxgzs
@@ -161,10 +167,12 @@ def main():
             print(f"Validation elbo: {epoch_val_elbo}", end=', ', flush=True)
             print(f"Validation accuracy: {epoch_val_acc}", end=', ', flush=True)
         # Training metrics
-        batch_elbos = train(model, device, train_loader, optimizer, epoch, verbose)
+        batch_elbos, batch_accs = train(model, device, train_loader, optimizer, epoch, verbose)
         epoch_train_elbo = np.mean(batch_elbos)
+        epoch_train_acc = np.mean(batch_accs)
         train_elbos.append(epoch_train_elbo)
         print(f"Training elbo {epoch}: {epoch_train_elbo}", flush=True)
+        print(f"Training accuracy {epoch}: {epoch_train_acc}", flush=True)
 
     # save the model
     if save_model:

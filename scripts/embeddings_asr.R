@@ -1,6 +1,7 @@
 # This R script performs ancestral state reconstruction (ASR) of the sequence embeddings in a given MSA, and writes the
 # "reconstructed" embeddings of the internal nodes of the tree to a CSV file. It also plots the tree in the embedding space.
 # It's not yet implemented for the real data, but it works for the simulated data.
+# TODO: implement for real data
 
 suppressPackageStartupMessages({
     library(fs) # make sure this is loaded after Biostrings to keep path() function from fs

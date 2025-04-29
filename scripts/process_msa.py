@@ -11,8 +11,8 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilities import constants
 from utilities.seq import aa_to_int, invert_dict
 
-## Define global variables for gap-based filtering (relevant for real MSAs)
-MAX_GAPS_IN_SEQ = constants.MAX_GAPS_IN_SEQ 
+## Define global variables for gap-based filtering 
+MAX_GAPS_IN_SEQ = constants.MAX_GAPS_IN_SEQ #(relevant for real MSAs)
 MAX_GAPS_IN_POS = constants.MAX_GAPS_IN_POS
 
 def parse_commands():
@@ -70,12 +70,7 @@ def get_seqs(msa_file_path, sim_type):
     This needs to get fixed to deal with the fact that the format output by SeqGen is currently not being parsed correctly by SeqIO
     """
     seq_dict = {} # sequence id -> sequence
-    format = {
-        'potts': "fasta",
-        'real' : "fasta",
-        'coupled' : "phylip-relaxed",
-        'independent' : "phylip-relaxed" 
-    }[sim_type]
+    format = "fasta"
     with open(msa_file_path, 'r') as file_handle:
         if sim_type != "real": #simulated data 
             for record in SeqIO.parse(file_handle, format):
@@ -102,8 +97,10 @@ def remove_seqs(seq_dict, max_gaps_in_seq = MAX_GAPS_IN_SEQ):
     """
     Remove sequences with too many remaining gaps (called after removing positions that are gaps in the query sequences)
     """
+    nl = len(list(seq_dict.values())[0])
+    max_gaps = max_gaps_in_seq * nl
     for k in list(seq_dict.keys()):
-        if len([char for char in seq_dict[k] if char in constants.UNKNOWN]) > max_gaps_in_seq:
+        if len([char for char in seq_dict[k] if char in constants.UNKNOWN]) > max_gaps:
             seq_dict.pop(k)
 
 def to_numpy(seq_dict, aa_index):
@@ -116,7 +113,7 @@ def to_numpy(seq_dict, aa_index):
     for k in seq_dict.keys():
         seq_ary.append([aa_index[s] for s in seq_dict[k]])
         seq_names.append(k)    
-    seq_ary = np.array(seq_ary)
+    seq_ary = np.array(seq_ary, dtype=np.uint8)
     return seq_ary, seq_names
 
 def remove_sparse_positions(seq_ary, max_gaps_in_pos = MAX_GAPS_IN_POS):
@@ -153,10 +150,10 @@ def one_hot_encode(seq_ary):
     Convert the integer encoded array to a binary (one-hot) encoding
     """
     K = len(constants.AA) + 1 ## num of classes of aa
-    D = np.identity(K)
+    D = np.identity(K, dtype=np.uint8)
     num_seq = seq_ary.shape[0]
     len_seq = seq_ary.shape[1]
-    seq_ary_binary = np.zeros((num_seq, len_seq, K)) # Binary encoded array representing the processed MSA
+    seq_ary_binary = np.zeros((num_seq, len_seq, K), dtype=np.uint8) # Binary encoded array representing the processed MSA
     for i in range(num_seq):
         seq_ary_binary[i,:,:] = D[seq_ary[i]]
     return seq_ary_binary
@@ -189,7 +186,7 @@ def main():
     # Load the sequences from the MSA file
     if fam_name == "PF00565":
         metadata_file_path = f"msas/real/raw/PF00565_eukaryotes.tsv"
-        seq_dict, euk_ids = get_euk_seqs(msa_file_path, metadata_file_path, args.outgroup_acc)
+        seq_dict, euk_ids = get_euk_seqs(msa_file_path, metadata_file_path)
         with open(f"{processed_directory}/label_accession_mapping.pkl", 'wb') as file_handle:
             pickle.dump(euk_ids, file_handle)
     else: 
@@ -197,16 +194,14 @@ def main():
     
     # ensure that the query accession is in the MSA
     if args.real:
-        assert args.query_seq_id in seq_dict, f"Query accession {args.query_seq_id} not found in MSA"
+        assert args.query in seq_dict, f"Query accession {args.query} not found in MSA"
 
     #### Preprocessing #####
-    # Step 1: remove all positions that are gaps in the query sequences
+    # Step 1 and 2, if real: remove all positions that are gaps in the query sequences and the subsequently remove sequences with too many gaps
     if args.real:
-        is_not_query_gap = remove_gaps(seq_dict, args.query_seq_id) 
+        is_not_query_gap = remove_gaps(seq_dict, args.query)
+        remove_seqs(seq_dict) 
 
-    # Step 2: Remove sequences with too many gaps
-    remove_seqs(seq_dict)
-    
     # Step 3: Convert to an integer encoding
     seq_ary_int, seq_names = to_numpy(seq_dict, aa_index)
     

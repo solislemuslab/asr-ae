@@ -31,7 +31,7 @@ def aa_to_int_from_path(data_path, is_pevae=False):
             aa_index = pickle.load(file_handle)
     return aa_index
 
-def invert_dict(aa_index, unknown_symbol = '.'):
+def invert_dict(aa_index, unknown_symbol = '-'):
     """
     Takes: dictionary mapping amino acid symbols to integer indices
     Returns: Inverse dictionary that maps integers to amino acid symbols.

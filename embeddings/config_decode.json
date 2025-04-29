@@ -1,8 +1,11 @@
 {
-    "MSA_id": "COG438-l60-s1-a0.5",
-    "msa_path": "msas/independent/raw/5000/COG438-l60-s1-a0.5_msa.phy",
-    "data_path": "msas/independent/processed/5000/COG438-l60-s1-a0.5",
-    "model_name": "model_layers500_ld20_wd0.01_epoch200_2025-04-03.pt",
+    "MSA_id": "COG28-l20-s1-a0.5",
+    "msa_path": "msas/independent/raw/1250/COG28-l20-s1-a0.5.fa",
+    "data_path": "msas/independent/processed/1250/COG28-l20-s1-a0.5",
+    "model_names": [
+        "model_layers256-256_ld10_wd0_epoch800_2025-04-24.pt"
+    ],
     "plot": true,
+    "plot_name": "model_layers256-256_ld10_wd0_epoch800_2025-04-24_eval.png",
     "redo_iqtree": true
 }

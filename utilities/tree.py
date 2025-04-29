@@ -108,7 +108,8 @@ def run_fitch(data_path, tree_path):
         recon_seqs[node.name] = _fitch2(profile_seqs[node.name], recon_seqs[parent.name])
     return recon_seqs
 
-def run_iqtree(data_path, tree_path, iqtree_dir, redo):
+def run_iqtree(data_path, tree_path, iqtree_dir, 
+               model="LG+G", optimize_branch_lengths=False, redo=False):
     # If you want to scale the tree:
     # scaled_tree_path = f"{tree_path}_scaled{scaling_factor}"
     # with open(tree_path, 'r') as tree_file:
@@ -121,8 +122,10 @@ def run_iqtree(data_path, tree_path, iqtree_dir, redo):
     # TODO: make iqtree also consider gaps for reconstructed sequences
     # TODO: use model search instead of assuming LG model when run on Potts-simulated data
     # blfix is used to fix branch lengths
-    redo = " -redo" if redo else ""
-    os.system(f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fasta -m LG -te {tree_path} -asr -quiet {redo} -blfix -pre {iqtree_dir}/results")
+    redo_flag = " -redo" if redo else ""
+    blfix_flag = " -blfix" if not optimize_branch_lengths else ""
+    os.system(f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fasta -m {model} \
+               -te {tree_path} -asr -quiet {redo_flag} {blfix_flag} -pre {iqtree_dir}/results")
     
     # Now we need to get the mapping since IQ-TREE will rename the internal nodes
 

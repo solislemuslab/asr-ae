@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from torch.utils.data import Dataset
 
@@ -27,7 +28,9 @@ class MSA_Dataset(Dataset):
             self.msa= torch.tensor(msa).to(torch.float32)  # We matrix multiply one-hot encodings so we need them as floats
         else:
             self.msa = torch.tensor(msa).to(torch.int64)  # We index with these so we need them as ints
-        self.seq_weight = seq_weight
+        assert np.abs(seq_weight.sum() - 1) < 1e-6 
+        self.seq_weight = torch.tensor(seq_weight).to(torch.float32)
+        assert (len(seq_weight) == len(seq_keys) == len(self.msa))
         self.seq_keys = seq_keys
 
     def __len__(self):

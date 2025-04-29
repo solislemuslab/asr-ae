@@ -73,13 +73,13 @@ def main():
     plot = args.plot
     model_dir = get_directory(data_path, "saved_models")
     model_path = os.path.join(model_dir, model_name)
-    ld, num_hidden_units, dim_aa_embed, one_hot = parse_model_name(model_name)
+    is_trans, ld, num_hidden_units, dim_aa_embed, one_hot = parse_model_name(model_name)
     # load data
     data, nl, nc = load_data(data_path, one_hot=one_hot)
     # load model
     model = load_model(model_path, nl=nl, nc=nc,
                            num_hidden_units=num_hidden_units, nlatent=ld,
-                           one_hot=one_hot, dim_aa_embed=dim_aa_embed)  
+                           one_hot=one_hot, dim_aa_embed=dim_aa_embed, trans=is_trans)  
     # get embeddings
     with torch.no_grad():
         mu, _ = model.encoder(data.msa)

@@ -11,10 +11,10 @@ parser = argparse.ArgumentParser(description='This script downloads from the Int
 parser.add_argument('pfam_acc', type=str, help='PFAM accession (e.g. PF00565')
 args = parser.parse_args()
 
-
-pfam_acc = args.pfam_acc
 # 2759 corresponds to eukaryote taxon
-BASE_URL = f"https://www.ebi.ac.uk:443/interpro/api/protein/UniProt/entry/pfam/{pfam_acc}/taxonomy/uniprot/2759/?page_size=200"
+euk_id = 2759
+pfam_acc = args.pfam_acc
+BASE_URL = f"https://www.ebi.ac.uk:443/interpro/api/protein/UniProt/entry/pfam/{pfam_acc}/taxonomy/uniprot/{euk_id}/?page_size=200"
 output_file_path = f"real/raw/{pfam_acc}_eukaryotes.tsv"
 with open(output_file_path, "w") as file:
     file.write("accession\tsource_database\tname\ttaxId\tscientificName\tlength\tentry_accession\tentry_protein_locations\n")
