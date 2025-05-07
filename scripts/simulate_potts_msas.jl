@@ -19,7 +19,7 @@ end
 # Factor by which we scale the branch lengths of the trees
 scale=[1., 2.]
 # Get the potts model object
-potts = read_graph("msas/potts/parameters_PF00076.dat")
+potts = read_graph("msas/potts/pf000565_params.dat")
 # Get tree files that we will simulate MSAs along
 tree_files = glob("*/*.clean.tree", "trees/fast_trees")
 @assert length(tree_files) == 14
@@ -51,6 +51,6 @@ for s in scale
         # Write the MSA to file
         output_dir = "msas/potts/raw/$num_seq"
         mkpath(output_dir)
-        write("$output_dir/$msa_id-s$s-pottsPF00076.fa", all_sequences)
+        write("$output_dir/$msa_id-s$s-pottsPF00565.fa", all_sequences)
     end
 end
