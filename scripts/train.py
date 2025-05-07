@@ -99,9 +99,10 @@ def main():
     # create model path
     today = date.today()
     layers_str = "-".join([str(l) for l in num_hidden_units])
+    weight_str = "weighted_" if weigh_seqs else ""
     aa_embed_str = f"aaembed{dim_aa_embed}_" if not one_hot else ""
     trans_str = "trans-" if use_transformer else ""
-    model_configs=f"{trans_str}model_{aa_embed_str}layers{layers_str}_ld{latent_dim}_wd{wd}_epoch{num_epochs}"
+    model_configs=f"{trans_str}model_{weight_str}{aa_embed_str}layers{layers_str}_ld{latent_dim}_wd{wd}_epoch{num_epochs}"
     model_name = f"{model_configs}_{today}.pt"
     model_dir = get_directory(data_path, "saved_models")
     os.makedirs(model_dir, exist_ok=True)
@@ -141,11 +142,11 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
 
     # initialize the data loader
-    #train_idx, valid_idx = train_test_split(range(len(data)), test_size=0.1, random_state=42)
-    train_loader = DataLoader(data, batch_size=batch_size, shuffle=True)
-    # valid_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(valid_idx))
-    # with open(f"{model_dir}/valid_idx.pkl", 'wb') as file_handle:
-    #     pickle.dump(valid_idx, file_handle)
+    train_idx, valid_idx = train_test_split(range(len(data)), test_size=0.1, random_state=42)
+    train_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(train_idx))
+    valid_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(valid_idx))
+    with open(f"{model_dir}/valid_idx.pkl", 'wb') as file_handle:
+        pickle.dump(valid_idx, file_handle)
 
     # training the model
     # TODO: Implement early stopping based on either val_accs or val_log_pxgzs
