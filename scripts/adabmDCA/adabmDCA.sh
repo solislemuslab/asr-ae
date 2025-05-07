@@ -77,10 +77,9 @@ case "$COMMAND" in
     exit 1
     ;;
 esac
-
-export JULIA_NUM_THREADS=32
+#echo "Executing command: $exec with sub-command: $SUBCOMMAND" "$@"
 # Run the corresponding Julia script with the remaining optional arguments
-julia execute.jl -m "$exec" "$SUBCOMMAND""$@" & disown  # > test.out 
+julia --project=. scripts/adabmDCA/execute.jl -m "$exec" "$SUBCOMMAND""$@" & disown # > test.out 
 # export JULIA_NUM_THREADS=32
 # Run the corresponding Julia script with the remaining optional arguments, loading a module first
 # julia -e 'include("src/adabmDCA.jl"); using adamDCA' $train_script "$SUBCOMMAND" "$@" & disown  # > test.out
