@@ -4,7 +4,7 @@ For PFAM protein family PF00144 (beta-lactamase), which was analyzed by [Detlefs
 
 Finally, for PF02033 (Ribosome-binding factor A), we download an alignment the alignment found at `aln/1josA.aln` of `http://bioinf.cs.ucl.ac.uk/downloads/PSICOV/suppdata/`, which was published with the [PSICOV paper](https://academic.oup.com/bioinformatics/article/28/2/184/198108). We don't have meaningful sequence labels for this family.
 
-To each of these MSAs, we then applied the pre-processing steps from the Ding paper by running the script `scripts/process_msa.py`, which requires specifying a "query" or "target" sequence (an older version of this script, used to generate older versions of the pre-processed data is made available as `scripts/process_msa-og.py`). For each family, the output of this pre-processing includes the data objects that our VAE can process and is placed in the `processed` directory.
+To each of these MSAs, we then applied the pre-processing steps from the Ding paper by running the script `scripts/process_msa.py`, which requires specifying a "query" or "target" sequence (an older version of this script, used to generate older versions of the pre-processed data is made available as `scripts/process_msa-og.py`). For each family, the output of this pre-processing includes the data objects that our VAE can process placed in a family-specific subdirectory of `msas/real/processed`.
 
 | PFAM ID | Query sequence 
 |---------|---------|
