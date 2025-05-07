@@ -82,7 +82,7 @@ def get_seqs(msa_file_path, sim_type):
                 seq_dict[record.id] = str(record.seq).upper()
     return seq_dict
 
-def remove_gaps(seq_dict, query_seq_id, aa_symbols = constants.REAL_AA):
+def remove_query_gaps(seq_dict, query_seq_id, aa_symbols = constants.REAL_AA):
     """
     Modifies seq_dict, removing from all sequences the positions that are gaps in the query sequences
     Returns the indices of the preserved positions 
@@ -199,7 +199,7 @@ def main():
     #### Preprocessing #####
     # Step 1 and 2, if real: remove all positions that are gaps in the query sequences and the subsequently remove sequences with too many gaps
     if args.real:
-        is_not_query_gap = remove_gaps(seq_dict, args.query)
+        is_not_query_gap = remove_query_gaps(seq_dict, args.query)
         remove_seqs(seq_dict) 
 
     # Step 3: Convert to an integer encoding
