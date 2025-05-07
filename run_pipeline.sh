@@ -30,10 +30,7 @@ python scripts/gen_embeddings.py $data_path $model_name --plot $plot_embeddings
 #########################################################
 # Reconstruct ancestral embeddings with brownian motion #
 #########################################################
-#TODO: change so that Rscript accepts model_name (with extension) instead of model_id (without extension)
-echo "Reconstructing ancestral embeddings with brownian motion"
-model_id=$(basename "$model_name" .pt)
-Rscript scripts/embeddings_asr.R $data_path $model_id 
+Rscript scripts/embeddings_asr.R $data_path $model_name 
 
 #######################################################
 #########  Run ArDCA  #################################
