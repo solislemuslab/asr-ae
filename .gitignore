@@ -8,4 +8,6 @@ notebooks/
 *__pycache__/
 .RData
 container
+config.json
+embeddings/config_decode.json
 

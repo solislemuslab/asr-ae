@@ -7,4 +7,6 @@ real/raw
 real/processed/PF*
 potts/raw
 potts/processed
+potts/pf00565_resampled_chains.fasta
+potts/pf00565_weights.dat
 
