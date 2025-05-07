@@ -21,4 +21,3 @@ MAX_GAPS_IN_POS = 0.2
 
 # Sequence from an Archaea that is used for outgroup rooting for the pf00565 family
 outgroup_pf00565_id = "A0A060HE43_9ARCH/86-213"
-outgroup_pf00565_seq = "..........................KTAVIPTGEDRYGRMLAYISPWRKTFNLEMVETGWAASFPIYPGNDDMNRLIAGAEDAWNGKKGMWA"
