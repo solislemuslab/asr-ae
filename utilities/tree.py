@@ -124,8 +124,11 @@ def run_iqtree(data_path, tree_path, iqtree_dir,
     # blfix is used to fix branch lengths
     redo_flag = " -redo" if redo else ""
     blfix_flag = " -blfix" if not optimize_branch_lengths else ""
-    os.system(f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fasta -m {model} \
-               -te {tree_path} -asr -quiet {redo_flag} {blfix_flag} -pre {iqtree_dir}/results")
+    os.system(
+        f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fasta "
+        f"-m {model} -te {tree_path} -asr -quiet {redo_flag} {blfix_flag} "
+        f"-pre {iqtree_dir}/results"
+    )
     
     # Now we need to get the mapping since IQ-TREE will rename the internal nodes
 
