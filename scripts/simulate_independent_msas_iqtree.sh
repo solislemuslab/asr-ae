@@ -69,6 +69,7 @@ for n_seq in "5000" "1250"; do
                         --length $seq_length \
                         $include_scale \
                         --write-all \
+                        -nt AUTO \
                         --out-format fasta \
                         -quiet \
                         -t $tree_file"
