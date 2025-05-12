@@ -1,13 +1,18 @@
-*.DS_Store
-*.Rhistory
+# R stuff
+**/*.RData
+**/*.Rhistory
+# vscode
 .vscode/
-*.tar.gz
-*icloud
-notebooks/
 # cache
-*__pycache__/
-.RData
+**/__pycache__/
+# Docker
 container
+# config files
 config.json
 embeddings/config_decode.json
-
+# OS
+**/*.icloud
+**/*.DS_Store
+#Other
+notebooks/
+**/*.tar.gz
