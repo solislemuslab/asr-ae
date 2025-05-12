@@ -151,8 +151,7 @@ plot.network(net,
     edge.lwd = .3,
     edge.col = scales::alpha("black", .2),
     usearrows = FALSE,
-    displaylabels = T,
-    label = vert_label,
+    displaylabels = F,
     #label.cex = 1,
     # boxed.labels = T,
     # label.pos = 5,
@@ -188,8 +187,8 @@ if ("ham_errors" %in% colnames(all_embeds)) {
         cex = 2,
         border = "black",
         bty = "n",
-        col = color_pal,
-        legend = names(color_pal),
+        col = color_palette,
+        legend = names(color_palette),
         inset = c(.05, .05)
     )
 }
