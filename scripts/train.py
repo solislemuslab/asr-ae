@@ -51,7 +51,7 @@ def eval(model, device, valid_loader, n_samples = 100):
     accs = []
     with torch.no_grad():
         for (msa, weight, _) in valid_loader:
-            msa = msa.to(device)
+            msa, weight = msa.to(device), weight.to(device)
             # compute elbo loss with normal elbo
             elbo, log_pxgz = model.compute_weighted_elbo(msa, weight)
             elbos.append(elbo.item())
