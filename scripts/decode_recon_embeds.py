@@ -178,7 +178,7 @@ def plot_error_vs_depth(est_seqs: NDArray[np.integer], real_seqs: NDArray[np.int
     return ham_errors
 
 def plot_all_errors(all_est_seqs_dict: NDArray[np.integer], real_seqs: NDArray[np.integer], 
-                    depths: List[int], output: str) -> None:
+                    depths: List[int], output: str=None) -> None:
     """
     Plot the errors for all the sequences in all_est_seqs_dict, saving the plot to output.
     """
@@ -216,7 +216,10 @@ def plot_all_errors(all_est_seqs_dict: NDArray[np.integer], real_seqs: NDArray[n
     plt.ylabel("Hamming reconstruction error")
     plt.title("Accuracy of reconstructed sequences vs. depth in tree")
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-    plt.savefig(output, bbox_inches='tight')
+    if output:
+        plt.savefig(output, bbox_inches='tight')
+    else:
+        plt.show()
 
 
 def main():
