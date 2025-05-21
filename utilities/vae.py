@@ -23,7 +23,7 @@ def load_model(model_path, nl, nc=21,
                          num_hidden_units=num_hidden_units, 
                          dim_latent_vars=nlatent,
                          dim_aa_embed=dim_aa_embed)
-    model_state_dict = torch.load(model_path)
+    model_state_dict = torch.load(model_path, map_location=torch.device('cpu'))
     model.load_state_dict(model_state_dict)
     return model
 
