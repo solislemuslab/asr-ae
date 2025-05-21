@@ -16,3 +16,5 @@ embeddings/config_decode.json
 #Other
 notebooks/
 **/*.tar.gz
+#Figrues
+figures/*

@@ -1,5 +1,9 @@
+# This script midpoint roots and cleans the unrooted FastTree benchmark study trees
+# by removing short branches and replacing bootstrap support values with internal node identifiers.
+
 suppressPackageStartupMessages({
     library(ape) 
+    library(phytools)
     library(stringr)
 })
 trimming_thresh = 0.001
@@ -12,8 +16,10 @@ for (n_seq in c(1250, 5000)) {
         all(sort(paste0("N", 1:n_seq)) == sort(tree$tip.label)),
         tree$Nnode == n_seq-2
         )
+        # midpoint root
+        tree <- midpoint_root(tree)
         # Replace bootstrap supports with number which identify the internal nodes
-        tree$node.label = paste0("A",(n_seq+1):(2*n_seq-2)) #e.g.A5001 -> A9998
+        tree$node.label = paste0("A",(n_seq+1):(2*n_seq-1)) #e.g.A5001 -> A9999
         # Replace all negative branch lengths with 0
         tree$edge.length[tree$edge.length < 0] <- 0
         # Trim extremely short external branches 
@@ -23,5 +29,5 @@ for (n_seq in c(1250, 5000)) {
         cat("Cleaned tree has ", Ntip(cleaned_tree), " tips and ", Nnode(cleaned_tree), " internal nodes.\n")
         cleaned_tree_path <- str_replace(tree_file, "sim.trim", "clean") #fix this for real trees
         write.tree(cleaned_tree, cleaned_tree_path)
-    }
+     }
 }
