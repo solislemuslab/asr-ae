@@ -102,8 +102,8 @@ def main():
     weight_str = "weighted_" if weigh_seqs else ""
     aa_embed_str = f"aaembed{dim_aa_embed}_" if not one_hot else ""
     trans_str = "trans-" if use_transformer else ""
-    model_configs=f"{trans_str}model_{weight_str}{aa_embed_str}layers{layers_str}_ld{latent_dim}_wd{wd}_epoch{num_epochs}"
-    model_name = f"{model_configs}_{today}.pt"
+    model_configs=f"{trans_str}model_{weight_str}{aa_embed_str}layers{layers_str}_ld{latent_dim}_wd{wd}_epoch{num_epochs}_"
+    model_name = f"{model_configs}{today}.pt"
     model_dir = get_directory(data_path, "saved_models")
     os.makedirs(model_dir, exist_ok=True)
     model_path = os.path.join(model_dir, model_name)

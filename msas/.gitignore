@@ -9,4 +9,5 @@ potts/raw
 potts/processed
 potts/pf00565_resampled_chains.fasta
 potts/pf00565_weights.dat
-
+vae/raw
+vae/processed
