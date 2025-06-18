@@ -9,6 +9,7 @@ suppressPackageStartupMessages({
 trimming_thresh = 0.001
 for (n_seq in c(1250, 5000)) {
     for (tree_file in list.files(path = file.path("trees", "fast_trees", n_seq), pattern = "\\.sim.trim.tree$", full.names = TRUE)) {
+        cat("Processing tree file: ", basename(tree_file), "\n")
         # read the tree
         tree <- read.tree(tree_file)
         # check that tree is what we expect
