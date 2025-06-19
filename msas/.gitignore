@@ -11,3 +11,6 @@ potts/pf00565_resampled_chains.fasta
 potts/pf00565_weights.dat
 vae/raw
 vae/processed
+ardca/raw
+ardca/processed
+ardca/pf00565_model.jld2

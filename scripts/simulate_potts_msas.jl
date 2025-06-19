@@ -22,7 +22,6 @@ scale=[1., 2.]
 potts = read_graph("msas/potts/pf00565_params.dat")
 # Get tree files that we will simulate MSAs along
 tree_files = glob("*/*.clean.tree", "trees/fast_trees")
-@assert length(tree_files) == 14
 # Iterate over trees
 for s in scale
     for tree_file in tree_files
@@ -47,10 +46,10 @@ for s in scale
         # for some reason, sampling adds weird suffixes to the names of internal nodes
         #internal_sequences.names = map(x -> split(x, "__")[1], internal_sequences.names)
         all_sequences = cat(leaf_sequences, internal_sequences)
-        @assert length(all_sequences) in [2*length(tree.lleaves) - 1, 2*length(tree.lleaves) - 2] 
+        @assert length(all_sequences) == length(tree.lnodes) 
         # Write the MSA to file
         output_dir = "msas/potts/raw/$num_seq"
         mkpath(output_dir)
-        write("$output_dir/$msa_id-s$s-pottsPF00565.fa", all_sequences)
+        write(joinpath(output_dir, "$msa_id-s$s-pottsPF00565.fa"), all_sequences) #Method from BioSequencesMappings package
     end
 end
