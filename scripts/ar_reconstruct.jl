@@ -9,6 +9,7 @@ msa_file = joinpath(data_dir, "seq_msa_char.fasta") # make sure this file has ex
 
 # Where will reconstructed sequences be written
 ardca_dir = joinpath("reconstructions", "ardca", splitpath(data_dir)[[2,4,5]]...)
+mkpath(ardca_dir)	
 reconstruct_fasta = joinpath(ardca_dir, "reconstructed.fasta")
 if isfile(reconstruct_fasta)
     @info "$reconstruct_fasta already exists with reconstructed sequences. ArDCA reconstruction has already been performed"
@@ -38,21 +39,15 @@ strategy = strategy = ASRMethod(;
     optimize_branch_scale = false, # (default) - optimizes the branches while keeping their relative lengths fixed. Incompatible with the previous. 
     repetitions = 1 # (default) - for Bayesian reconstruction, multiple repetitions of the reconstruction process can be done to sample likely ancestors
 )
-
 # Run ASR
 opt_tree, reconstructed_sequences = infer_ancestral(
 	tree_file, msa_file, ar_model, strategy
-)	
+)
 
 # Write reconstructed sequences to a fasta file
-if !isdir(ardca_dir)
-    mkpath(ardca_dir)
-end
-begin
-	FASTAWriter(open(reconstruct_fasta, "w")) do writer
-		for (name, seq) in reconstructed_sequences
-            # for some reason, package adds weird suffixes to the names of internal nodes
-			write(writer, FASTARecord(split(name, "__")[1], seq))
-		end
+FASTAWriter(open(reconstruct_fasta, "w")) do writer
+	for (name, seq) in reconstructed_sequences
+        # for some reason, package adds weird suffixes to the names of internal nodes
+		write(writer, FASTARecord(split(name, "__")[1], seq))
 	end
 end

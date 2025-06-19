@@ -58,9 +58,7 @@ version = "1.1.3"
 
 [[deps.AncestralSequenceReconstruction]]
 deps = ["Accessors", "ArDCA", "DelimitedFiles", "FASTX", "LinearAlgebra", "NLopt", "Printf", "Random", "StatsBase", "SubstitutionModels", "TreeTools"]
-git-tree-sha1 = "3d04431128205c169f02b118463ab537b19e0dc5"
-repo-rev = "master"
-repo-url = "https://github.com/PierreBarrat/AncestralSequenceReconstruction.jl"
+path = "/Users/evangorstein/.julia/dev/AncestralSequenceReconstruction"
 uuid = "1d4f28ef-5432-422a-9dec-15ed9a8d60be"
 version = "1.0.0-DEV"
 
@@ -181,9 +179,9 @@ version = "0.1.5"
 
 [[deps.BioSymbols]]
 deps = ["PrecompileTools"]
-git-tree-sha1 = "e32a61f028b823a172c75e26865637249bb30dff"
+git-tree-sha1 = "41e42d326ff01d12167f3f8a218b318bf7429d0f"
 uuid = "3c28c6f8-a34d-59c4-9654-267d177fcfa9"
-version = "5.1.3"
+version = "5.2.0"
 
 [[deps.BitFlags]]
 git-tree-sha1 = "0691e34b3bb8be9307330f88d1a3c3f25466c24d"
@@ -1238,9 +1236,7 @@ version = "0.2.2"
 
 [[deps.PottsEvolver]]
 deps = ["Accessors", "ArgCheck", "BioSequenceMappings", "Logging", "LoggingExtras", "PoissonRandom", "ProgressMeter", "Random", "StaticArrays", "StatsBase", "TreeTools", "UnPack"]
-git-tree-sha1 = "accfc53d8e6d5c185954d233fafec63a30be8862"
-repo-rev = "master"
-repo-url = "git@github.com:evangorstein/PottsEvolver.jl.git"
+path = "/Users/evangorstein/.julia/dev/PottsEvolver"
 uuid = "288ebb56-9d8a-405a-a2d6-6ed6f22c6052"
 version = "1.0.0-DEV"
 
@@ -1269,9 +1265,9 @@ version = "1.11.0"
 
 [[deps.ProgressMeter]]
 deps = ["Distributed", "Printf"]
-git-tree-sha1 = "8f6bc219586aef8baf0ff9a5fe16ee9c70cb65e4"
+git-tree-sha1 = "13c5103482a8ed1536a54c08d0e742ae3dca2d42"
 uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
-version = "1.10.2"
+version = "1.10.4"
 
 [[deps.PtrArrays]]
 git-tree-sha1 = "1d36ef11a9aaf1e8b74dacc6a731dd1de8fd493d"
