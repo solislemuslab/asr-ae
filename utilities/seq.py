@@ -7,8 +7,8 @@ def aa_to_int(main_aa_symbols, unknown_aa_symbols):
     and a list of symbols representing ambiguous residues,
     generates a dictionary mapping amino acid symbols to integer indices.
 
-    main_aas: list of amino acids to include in the dictionary
-    unknown_aas: list of amino acids to map to 0, representing either gaps or other amino acids with ambiguity
+    - main_aas: list of amino acids to include in the dictionary
+    - unknown_aas: list of amino acids to map to 0, representing either gaps or other amino acids with ambiguity
     """
     aa_index = {}
     for i, aa in enumerate(main_aa_symbols):
@@ -38,8 +38,8 @@ def invert_dict(aa_index, unknown_symbol = '-'):
 
     Many characters may get mapped to 0 in aa_index, so we have to choose one of these to map 0 to in our inverse dictionary.
     This is specified by the argument `unknown_symbol`.
-    The function makes lasting changes to the input dictionary aa_index passed in so that after function call, only `unknown_symbol` is mapped to 0.
     """
+    aa_index = aa_index.copy()
     keys_to_delete = [s for s in constants.UNKNOWN if s != unknown_symbol]
     for symbol in keys_to_delete:
         if symbol in aa_index:

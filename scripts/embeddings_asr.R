@@ -19,7 +19,7 @@ if (str_detect(model, "\\.pt$")) {
 }
 msa_id <- path_file(data_path)
 family <- str_extract(msa_id, "^[a-zA-Z0-9]+")
-sim <- str_detect(msa_id, "COG")
+sim <- !str_detect(data_path, "real")
 sim_type <- path_split(data_path)[[1]][2]
 n_seq <- as.integer(path_file(path_dir(data_path)))
 plot_dir <- if (sim) path("plots", sim_type, n_seq, msa_id) else path("plots", "real", msa_id)
@@ -53,12 +53,15 @@ if (sim) {
         paste0(model, "_embeddings.csv")
     )
 }
-embeds <- read_csv(embed_path, show_col_types = FALSE)
-# check that tree tip labels match the species in the embeddings
+embeds <- read_csv(embed_path, show_col_types = FALSE) 
+# check that tree labels match the labels in the embeddings dataframe
 stopifnot(
-    sort(embeds$id) == sort(tree$tip.label)
+    sort(str_subset(embeds$id, "^N")) == sort(tree$tip.label),
+    sort(str_subset(embeds$id, "^A")) == sort(tree$node.label)
     )
-ntips = nrow(embeds)
+embeds <- embeds |>
+    mutate(vert_type = if_else(str_detect(id, "^N"), "tip", "internal"))
+ntips = length(str_subset(embeds$id, "^N"))
 
 ## Check if path to ancestral embeddings exists, meaning ancestral reconstruction has already been done
 anc_embed_path <- str_match(embed_path, "^(.*)embeddings.csv")[2] |>
@@ -71,80 +74,70 @@ if (file.exists(anc_embed_path)) {
     anc_exists <- FALSE
 }
 
-## Reconstruct the ancestral embeddings #####
+## Get estimates of the ancestral embeddings by fitting BM model to tip embeddings only #####
 if (!anc_exists) {
-    # phylopars() requires the column of label names to be called "species"
-    embeds <- embeds |>
-        dplyr::rename(species = id)
-    ## Perform ancestral state reconstruction with Brownian motion model
-    p_BM <- phylopars(trait_data = embeds, tree = tree)
-    #Data frame with embeddings of tips and reconstructions of internal node embeddings based on model
-    all_embeds <- p_BM$anc_recon
-    # Tips appear first, followed by the internal nodes (and the ordering of internal nodes should be the same as tree$node.label)
-    rownames(all_embeds)[(ntips + 1):nrow(all_embeds)] <- tree$node.label
-    # Turn into tibble
-    all_embeds <- all_embeds |>
-        as_tibble(rownames = "id") |>
-        mutate(vert_type = ifelse(id %in% tree$node.label, "internal", "tip"))
-    # save reconstructed ancestral embeddings
-    anc_embeds <- all_embeds |>
-        filter(vert_type == "internal")
-    anc_embeds |> select(-vert_type) |>
-        write_csv(anc_embed_path)
+    # phylopars() requires the column of label names to be called "species" and all other columns to be numeric
+    tip_embeds <- embeds |>
+        dplyr::rename(species = id) |>
+        filter(vert_type == "tip") |>
+        select(-vert_type)
+    p_BM <- phylopars(trait_data = tip_embeds, tree = tree) # brownian motion model
+    anc_recon_embeds <- p_BM$anc_recon[(ntips+1):nrow(embeds),] #reconstructions of internal node embeddings based on model
+    anc_recon_embeds <- as_tibble(anc_recon_embeds) |>
+        mutate(id = tree$node.label) 
+    write_csv(anc_recon_embeds, anc_embed_path)
 } else { # read in already existing ancestral embeddings
-    anc_embeds <- read_csv(anc_embed_path, show_col_types = FALSE)
-    all_embeds <- bind_rows(list(
-        tip = embeds,
-        internal = anc_embeds
-    ), .id = "vert_type")
+    anc_recon_embeds <- read_csv(anc_embed_path, show_col_types = FALSE)
 }
 
 ## Plot tree in embedding space #####
-# Perform PCA to reduce dimensionality to 2D if there are more than 2 dimensions in embedding space
-if (sum(str_detect(colnames(all_embeds), "dim")) > 2) {
-    pca <- all_embeds |>
-        filter(vert_type == "tip") |>
-        select(starts_with("dim")) |>
+# First perform PCA to reduce dimensionality to 2D if there are more than 2 dimensions in embedding space
+if (sum(str_detect(colnames(embeds), "dim[0-9]+")) > 2) {
+    # Fit the pca to the actual embeddings, not the ancestral reconstructions
+    pca <- embeds |>
+        select(matches("dim[0-9]+")) |>
         prcomp()
-    plotted_coords <- predict(pca, all_embeds)[, 1:2]
+    plotted_actual <- predict(pca)[, 1:2]
+    plotted_recon <- predict(pca, newdata = anc_recon_embeds)[,1:2]
+    xdim = "PC1"
+    ydim = "PC2"
+    xdim_recon = "PC1_recon"
+    ydim_recon = "PC2_recon"
 } else {
-    plotted_coords <- all_embeds %>%
-        select(starts_with("dim")) |>
+    plotted_actual <- embeds %>%
+        select(matches("dim[0-9]+")) |>
         as.matrix()
+    plotted_recon <- anc_recon_embeds %>%
+        select(matches("dim[0-9]+")) |>
+        as.matrix()
+    xdim = "dim0"
+    ydim = "dim1"
+    xdim_recon = "dim0_recon"
+    ydim_recon = "dim1_recon"
 }
+rownames(plotted_actual) <- embeds$id
+rownames(plotted_recon) <- anc_recon_embeds$id
 
 # Aesthetics of points
-if ("ham_errors" %in% colnames(all_embeds)) {
-    colorbar_labels <- pretty(range(all_embeds$ham_errors, na.rm = TRUE), n = 5)
-    color_palette <- scales::col_numeric(
-        palette = "viridis",
-        domain = range(colorbar_labels)
+color_palette <- c(
+    internal = scales::alpha("red", .4),
+    tip = scales::alpha("blue", .4)
     )
-    vert_col <- if_else(all_embeds$vert_type == "internal", color_palette(all_embeds$ham_errors), NA)
-    vert_bord <- if_else(all_embeds$vert_type == "internal", NA, "black")
-} else {
-   color_palette <- c(
-    internal = scales::alpha("blue", .4),
-    tip = scales::alpha("red", .4)
-    )
-    vert_col <- color_palette[all_embeds$vert_type]
-    vert_bord = NA
-}
-
+vert_col <- color_palette[embeds$vert_type]
+vert_bord = NA
 vert_size <- c(
     internal = .3,
     tip = .3
-)[all_embeds$vert_type]
-
+)[embeds$vert_type]
 # Plot whole tree
 net <- as.network(tree)
 stopifnot( # check that correct order is preserved
-  all(all_embeds$id == (net %v% "vertex.names"))
+  all(embeds$id == (net %v% "vertex.names"))
 )
 png(file = path(plot_dir, paste0(model, "_network.png")), width = 1200, height = 1200)
 par(mar=c(0,0,0,0)+.01)
 plot.network(net,
-    coord = plotted_coords,
+    coord = plotted_actual,
     vertex.col = vert_col,
     vertex.border = vert_bord,
     vertex.cex = vert_size,
@@ -158,41 +151,89 @@ plot.network(net,
     suppress.axes = TRUE,
 )
 # highlight the root, which should be the first row of the internal nodes in all_embeds
-#root_index <- ntips + 1
-# points(plotted_coords[root_index, 1], plotted_coords[root_index, 2],
-#        col = "green", pch = 16, cex = 1)
+root_name <- paste0("A", as.integer(path_split(tree_dir)[[1]][3])+1)
+root_index <- which(embeds$id == root_name)
+points(plotted_actual[root_index, 1], plotted_actual[root_index, 2],
+       col = "green", pch = 16, cex = 3)
+legend("bottomleft",
+    pch = 16,
+    cex = 2,
+    border = "black",
+    bty = "n",
+    col = color_palette,
+    legend = names(color_palette),
+    inset = c(.05, .05))
 
-# Add legend
-if ("ham_errors" %in% colnames(all_embeds)) {
-    legend("topleft",
-        pch = 16,
-        cex = 2,
-        bty = "n",
-        col = color_palette(colorbar_labels),
-        legend = colorbar_labels,
-        title = "Ham Errors",
-        inset = c(.05, .05)
-    )
-    legend("topleft",
-        pch = 1,
-        cex = 2,
-        bty = "n",
-        col = "black",
-        legend = "Tips",
-        inset = c(.15, .08)
-    )
-} else {
-    legend("bottomleft",
-        pch = 16,
-        cex = 2,
-        border = "black",
-        bty = "n",
-        col = color_palette,
-        legend = names(color_palette),
-        inset = c(.05, .05)
-    )
-}
 invisible(dev.off())
+
+# Now let's plot the reconstructed ancestral embeddings and connect them to what they are targeting
+plotted_recon <- as_tibble(plotted_recon, rownames = "id")
+plotted_all <- as_tibble(plotted_actual, rownames = "id") |>
+    left_join(plotted_recon, by = "id", suffix = c("", "_recon")) |>
+    left_join(select(anc_recon_embeds, -starts_with("dim")), by = "id") |>
+    mutate(vert_type = if_else(str_detect(id, "^N"), "tip", "internal"))
+
+errors_recorded = ("ham_errors" %in% colnames(plotted_all))
+p <- filter(plotted_all, vert_type == "internal") |>
+    ggplot(aes(
+        x = .data[[xdim_recon]], y = .data[[ydim_recon]],
+        color = if (errors_recorded).data[["ham_errors"]] else "black",
+    )) +
+    geom_point(size = .5) +
+    geom_segment(aes(xend = .data[[xdim]], yend = .data[[ydim]]),
+        arrow = arrow(length = unit(0.2, "cm")), linewidth = .5
+    ) +
+    {if (errors_recorded) scale_color_viridis_c()} +
+    theme_bw() +
+    labs(
+        title = paste0("Embeddings of ancestral sequences for ", msa_id, ",\n", model),
+        subtitle = "Arrow starts at estimated embeddings based on Brownian motion model\nand ends at the embedding of the actual sequence",
+        color = "Hamming error",
+        x = xdim,
+        y = ydim
+    ) +
+    theme(
+        legend.position = if (errors_recorded) "bottom" else "none",
+        plot.title = element_text(size = 8),
+        plot.subtitle = element_text(size = 5)
+    )
+ggsave(
+    paste0(model, "_internal_embedding_estimation.png"), 
+    path=plot_dir,
+    unit = "px",
+    width = 1200,
+    height = 1200
+    )
+
+# if ("ham_errors" %in% colnames(anc_recon_embeds)) {
+#     colorbar_labels <- pretty(range(anc_recon_embeds$ham_errors, na.rm = TRUE), n = 5)
+#     color_palette <- scales::col_numeric(
+#         palette = "viridis",
+#         domain = range(colorbar_labels)
+#     )
+#     vert_col <- if_else(str_detect(embeds$id, "^A"), color_palette(all_embeds$ham_errors), NA)
+#     vert_bord <- if_else(all_embeds$vert_type == "internal", NA, "black")
+# }
+
+# if ("ham_errors" %in% colnames(all_embeds)) {
+#     legend("topleft",
+#         pch = 16,
+#         cex = 2,
+#         bty = "n",
+#         col = color_palette(colorbar_labels),
+#         legend = colorbar_labels,
+#         title = "Ham Errors",
+#         inset = c(.05, .05)
+#     )
+#     legend("topleft",
+#         pch = 1,
+#         cex = 2,
+#         bty = "n",
+#         col = "black",
+#         legend = "Tips",
+#         inset = c(.15, .08)
+#     )
+# } 
 
 
 

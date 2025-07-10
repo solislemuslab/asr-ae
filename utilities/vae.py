@@ -54,3 +54,5 @@ def load_data(data_path, weigh_seqs=False, one_hot=True):
     data = MSA_Dataset(msa, seq_weight, seq_names)
 
     return data, nl, nc
+
+

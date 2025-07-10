@@ -17,26 +17,9 @@ from Bio import SeqIO
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilities.seq import aa_to_int_from_path, invert_dict
 from utilities.vae import load_model
-from utilities.utils import get_directory, parse_model_name
+from utilities.utils import get_directory, parse_model_name, get_real_internals
 from utilities.tree import get_depths, run_fitch, run_iqtree
 
-def get_real_seqs(msa_path: str, anc_id: List[str], 
-                  aa_index: dict[str, int], pos_preserved: List[int] = None) -> NDArray[np.integer]:
-    format = "fasta"
-    real_seqs_dict = {}
-    with open(msa_path, 'r') as msa:
-        for record in SeqIO.parse(msa, format):
-            if record.id[0] == "N":  # exclude leaf sequences
-                continue
-            seq = str(record.seq)
-            if pos_preserved: # keep only positions that were preserved in the processed MSA
-                seq = "".join([seq[pos] for pos in pos_preserved])
-            real_seqs_dict[record.id] = seq
-    # order true ancestral sequences according to the order of the reconstructed embeddings
-    real_seqs = [real_seqs_dict[id] for id in anc_id]
-    # convert to integers for comparison with reconstructed sequences
-    real_seqs_int = [[aa_index[aa] for aa in seq] for seq in real_seqs]
-    return np.array(real_seqs_int)
 
 def get_prior_seqs(model: nn.Module, n_anc: int) -> NDArray[np.integer]:
     dim_latent_space = model.dim_latent_vars
@@ -46,6 +29,9 @@ def get_prior_seqs(model: nn.Module, n_anc: int) -> NDArray[np.integer]:
     with torch.no_grad():
         log_p = model.decoder(z)
     max_prob_idx = torch.argmax(log_p, -1)
+    if log_p.shape[-1] == 20:
+       # The model was trained without gaps, so we need to convert indices from 0-19 back to 1-20
+       max_prob_idx = max_prob_idx + 1
     return max_prob_idx.numpy()
 
 def get_recon_ancseqs(model: nn.Module, recon_embeds: pd.DataFrame) -> NDArray[np.integer]:
@@ -55,6 +41,9 @@ def get_recon_ancseqs(model: nn.Module, recon_embeds: pd.DataFrame) -> NDArray[n
     with torch.no_grad():
       log_p = model.decoder(mu)
     max_prob_idx = torch.argmax(log_p, -1)
+    if log_p.shape[-1] == 20:
+        # The model was trained without gaps, so we need to convert indices from 0-19 back to 1-20
+        max_prob_idx = max_prob_idx + 1
     return max_prob_idx.numpy()
 
 def get_modal_seq(data_path: str, n_anc: int) -> NDArray[np.integer]:
@@ -66,8 +55,8 @@ def get_modal_seq(data_path: str, n_anc: int) -> NDArray[np.integer]:
         mod_seq.append(np.bincount(col).argmax())
     return np.tile(np.array(mod_seq), (n_anc, 1))
 
-def get_iqtree_ancseqs(iqtree_dir: str, anc_id: List[str], 
-                       aa_index: dict[str, int]) -> NDArray[np.integer]:
+def get_iqtree_ancseqs(iqtree_dir: str, aa_index: dict[str, int], 
+                       anc_id: List[str]) -> NDArray[np.integer]:
     """
     Note that for some reason, IQTree does not reconstruct the sequence at the root node. Not sure why...
     Usually, our trees will be unrooted, but occassionally, the trimming of extremely short external branches 
@@ -95,8 +84,8 @@ def get_iqtree_ancseqs(iqtree_dir: str, anc_id: List[str],
         iq_seqs.append(recon_seq)
     return np.array(iq_seqs)
 
-def get_finch_ancseqs(recon_fitch_dict: dict[str, List[str]], anc_id: List[str],
-                      aa_index: dict[str, int]) -> NDArray[np.integer]:
+def get_finch_ancseqs(recon_fitch_dict: dict[str, List[str]], aa_index: dict[str, int], 
+                      anc_id: List[str]) -> NDArray[np.integer]:
     finch_seqs = []
     for id in anc_id:
         assert id in recon_fitch_dict, f"Reconstruction for Node {id} not found in Fitch output"
@@ -104,8 +93,8 @@ def get_finch_ancseqs(recon_fitch_dict: dict[str, List[str]], anc_id: List[str],
         finch_seqs.append(recon_seq)
     return np.array(finch_seqs)
 
-def get_ardca_ancseqs(ardca_dir: str, anc_id: List[str], 
-                      aa_index: dict[str, int]) -> NDArray[np.integer]:
+def get_ardca_ancseqs(ardca_dir: str, aa_index: dict[str, int], 
+                      anc_id: List[str]) -> NDArray[np.integer]:
     fasta_path = os.path.join(ardca_dir, "reconstructed.fasta")
     recon_seqs_dict = {}
     with open(fasta_path, 'r') as msa:
@@ -244,20 +233,15 @@ def main():
     n_seq = int(msa_path.split("/")[-2]) # number of sequences
     family = MSA_id.split("-")[0] # family name 
     tree_path = f"trees/fast_trees/{n_seq}/{family}.clean.tree" # path to tree
-    # sequence length will be present in the MSA_id if it is not a Potts-simulated MSA 
-    nl_match = re.search(r'l(\d+)', MSA_id)
-    if nl_match:
-        nl = int(nl_match.group(1))
-        pos_preserved = None
-    else:  
-        with open(f"{data_path}/pos_preserved.pkl", 'rb') as file:
-            pos_preserved = pickle.load(file) # positions preserved in processed MSA (only relevant for Potts)
-        nl = len(pos_preserved)
+    # The raw MSA may have more positions than the processed due to dropping of positions with excessive gaps 
+    with open(f"{data_path}/pos_preserved.pkl", 'rb') as file:
+        pos_preserved = pickle.load(file) 
+    nl = len(pos_preserved)
     
     # load mappling from integer to amino acid and vice versa
     aa_index = aa_to_int_from_path(data_path)
-    aa_index_unique = aa_index.copy()
-    index_aa = invert_dict(aa_index_unique, unknown_symbol='-')
+    index_aa = invert_dict(aa_index, unknown_symbol='-')
+    nc = len(index_aa) # 20 or 21, depending on whether there are gaps in the MSA
 
     # location of reconstructed embeddings of ancestral sequences
     embeds_dir = get_directory(data_path, "embeddings", data_subfolder=True)
@@ -271,13 +255,13 @@ def main():
         # Load model
         is_trans, ld, num_hidden_units, dim_aa_embed, one_hot = parse_model_name(name)
         model_path = os.path.join(model_dir, name)
-        model = load_model(model_path, nl=nl, nc=21,
+        model = load_model(model_path, nl=nl, nc=nc,
                             num_hidden_units=num_hidden_units, nlatent=ld,
                             one_hot=one_hot, dim_aa_embed=dim_aa_embed, trans=is_trans)
         # Read in embedding dataframe and retain only the columns that are embedding dimensions
         embeds_path = os.path.join(embeds_dir,
                                name.replace(".pt", "_anc-embeddings.csv"))
-        embeds = pd.read_csv(embeds_path, index_col=0)
+        embeds = pd.read_csv(embeds_path, index_col="id")
         embeds = embeds.loc[:, embeds.columns.str.startswith("dim")]
         # Save model data
         model_dict[name] = {
@@ -310,9 +294,9 @@ def main():
     print("Running IQTree...")
     # TODO: use a different model and/or branch length optimization depending on the simulation type
     run_iqtree(data_path, tree_path, iqtree_dir, redo=config.redo_iqtree)
-    # Retrieve real sequences
-    real_seqs = get_real_seqs(msa_path, anc_id, aa_index, pos_preserved)
-    # TODO: embed the real ancestral sequences and visually compare them with the reconstructed embeddings
+    # Retrieve real internal sequences
+    real_seqs, _ = get_real_internals(msa_path, aa_index, anc_id, pos_preserved)
+    # Retrieve a sequence that is a consensus of the real leaf sequences
     mod_seqs = get_modal_seq(data_path, n_anc)
     # Our approach
     for name in model_names:
@@ -321,10 +305,10 @@ def main():
         model_dict[name]["prior_seqs"] = get_prior_seqs(model, n_anc)
         model_dict[name]["recon_seqs"] = get_recon_ancseqs(model, recon_embeds)
     # Other approaches
-    iqtree_seqs = get_iqtree_ancseqs(iqtree_dir, anc_id, aa_index)
-    finch_seqs = get_finch_ancseqs(recon_fitch_dict, anc_id, aa_index)
+    iqtree_seqs = get_iqtree_ancseqs(iqtree_dir, aa_index, anc_id)
+    finch_seqs = get_finch_ancseqs(recon_fitch_dict, aa_index, anc_id)
     ardca_dir = get_directory(data_path, "reconstructions/ardca")
-    ardca_seqs = get_ardca_ancseqs(ardca_dir, anc_id, aa_index)
+    ardca_seqs = get_ardca_ancseqs(ardca_dir, aa_index, anc_id)
 
     # Evaluate accuracy of different approaches
     print("-" * 50)

@@ -9,6 +9,7 @@ import pandas as pd
 from Bio import SeqIO
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilities import constants
+from utilities.utils import one_hot_encode
 from utilities.seq import aa_to_int, invert_dict
 
 ## Define global variables for gap-based filtering 
@@ -145,19 +146,6 @@ def weight_seqs(seq_ary):
     seq_weight = seq_weight.sum(1) / tot_weight 
     return seq_weight
 
-def one_hot_encode(seq_ary):
-    """
-    Convert the integer encoded array to a binary (one-hot) encoding
-    """
-    K = len(constants.AA) + 1 ## num of classes of aa
-    D = np.identity(K, dtype=np.uint8)
-    num_seq = seq_ary.shape[0]
-    len_seq = seq_ary.shape[1]
-    seq_ary_binary = np.zeros((num_seq, len_seq, K), dtype=np.uint8) # Binary encoded array representing the processed MSA
-    for i in range(num_seq):
-        seq_ary_binary[i,:,:] = D[seq_ary[i]]
-    return seq_ary_binary
-
 def main():
     #### Preliminary steps and loading in the unprocessed MSA ########
     args = parse_commands()
@@ -181,8 +169,6 @@ def main():
         aa_index = aa_to_int(constants.REAL_AA, constants.UNKNOWN)
     else:
         aa_index = aa_to_int(constants.AA, constants.UNKNOWN)
-    with open(f"{processed_directory}/aa_index.pkl", 'wb') as file_handle:
-        pickle.dump(aa_index, file_handle)
     # Load the sequences from the MSA file
     if fam_name == "PF00565":
         metadata_file_path = f"msas/real/raw/PF00565_eukaryotes.tsv"
@@ -216,8 +202,14 @@ def main():
 
     # Step 6: Convert to a binary (one-hot) encoding
     seq_ary_binary = one_hot_encode(seq_ary_int)
+    if seq_ary_binary.shape[2] == 20: # this means that there are no gaps in the MSA, so we delete the gap keys from the aa_index
+        for symbol in constants.UNKNOWN:
+            del aa_index[symbol]
 
     #### Saving results ####
+    # Save the amino acid to integer mapping
+    with open(f"{processed_directory}/aa_index.pkl", 'wb') as file_handle:
+        pickle.dump(aa_index, file_handle)
     # save the sequence labels
     with open(f"{processed_directory}/seq_names.pkl", 'wb') as file_handle:
         pickle.dump(seq_names, file_handle)
@@ -234,7 +226,7 @@ def main():
     with open(f"{processed_directory}/seq_msa_binary.pkl", 'wb') as file_handle:
         pickle.dump(seq_ary_binary, file_handle)
     # Save a character version of our processed MSA (fasta format) 
-    index_aa = invert_dict(aa_index, unknown_symbol = '-') #all unknown characters will be represented by '-'
+    index_aa = invert_dict(aa_index, unknown_symbol = '-') #any gap characters will be represented by '-' in this fasta file
     with open(f"{processed_directory}/seq_msa_char.fasta", "w") as f:
         for seq_id, seq in zip(seq_names, seq_ary_int.tolist()):
             decoded_seq = "".join([index_aa[i] for i in seq])

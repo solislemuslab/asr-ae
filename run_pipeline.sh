@@ -25,7 +25,7 @@ model_name=$(python scripts/train.py config.json | tee /dev/tty | awk 'END{print
 #######################################################
 echo "Using trained VAE to generate embeddings for sequences at the tips of the tree"
 plot_embeddings=$(jq '.embeddings.plot' $config)
-python scripts/gen_embeddings.py $data_path $model_name --plot $plot_embeddings
+python scripts/gen_embeddings.py $data_path $msa_path $model_name --plot $plot_embeddings
 
 #########################################################
 # Reconstruct ancestral embeddings with brownian motion #
