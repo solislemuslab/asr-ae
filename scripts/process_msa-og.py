@@ -5,7 +5,7 @@ from os import path, makedirs
 import numpy as np
 import pandas as pd
 from Bio import SeqIO
-from sys import exit
+from utilities.utils import one_hot_encode
 
 MAX_SEQS = 50_000
 MAX_GAPS_IN_SEQ = 50
@@ -184,18 +184,6 @@ def weight_seqs(seq_ary):
     seq_weight = seq_weight.sum(1) / tot_weight 
     return seq_weight
 
-def one_hot_encode(seq_ary):
-    """
-    Convert the integer encoded array to a binary (one-hot) encoding
-    """
-    K = len(AA) + 1 ## num of classes of aa
-    D = np.identity(K)
-    num_seq = seq_ary.shape[0]
-    len_seq = seq_ary.shape[1]
-    seq_ary_binary = np.zeros((num_seq, len_seq, K)) # Binary encoded array representing the processed MSA
-    for i in range(num_seq):
-        seq_ary_binary[i,:,:] = D[seq_ary[i]]
-    return seq_ary_binary
 
 def main():
     
