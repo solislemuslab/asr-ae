@@ -63,7 +63,7 @@ embeds <- embeds |>
     mutate(vert_type = if_else(str_detect(id, "^N"), "tip", "internal"))
 ntips = length(str_subset(embeds$id, "^N"))
 
-## Check if path to ancestral embeddings exists, meaning ancestral reconstruction has already been done
+# Check if path to ancestral embeddings exists, meaning ancestral reconstruction has already been done
 anc_embed_path <- str_match(embed_path, "^(.*)embeddings.csv")[2] |>
     str_c("anc-embeddings.csv")
 if (file.exists(anc_embed_path)) {
@@ -118,22 +118,27 @@ if (sum(str_detect(colnames(embeds), "dim[0-9]+")) > 2) {
 rownames(plotted_actual) <- embeds$id
 rownames(plotted_recon) <- anc_recon_embeds$id
 
+# Get tree as network object for plotting
+net <- as.network(tree)
+
+# make sure order of embebeddings matches the order of the vertex names in the network
+if (!all(rownames(plotted_actual) == (net %v% "vertex.names"))) {
+    stopifnot(nrow(plotted_actual) == length(net %v% "vertex.names"))
+    plotted_actual <- plotted_actual[net %v% "vertex.names", ]
+}
+
 # Aesthetics of points
 color_palette <- c(
     internal = scales::alpha("red", .4),
     tip = scales::alpha("blue", .4)
     )
-vert_col <- color_palette[embeds$vert_type]
+vert_col <- color_palette[embeds$vert_type[match(rownames(plotted_actual), embeds$id)]]
 vert_bord = NA
 vert_size <- c(
     internal = .3,
     tip = .3
-)[embeds$vert_type]
-# Plot whole tree
-net <- as.network(tree)
-stopifnot( # check that correct order is preserved
-  all(embeds$id == (net %v% "vertex.names"))
-)
+)[embeds$vert_type[match(rownames(plotted_actual), embeds$id)]]
+
 png(file = path(plot_dir, paste0(model, "_network.png")), width = 1200, height = 1200)
 par(mar=c(0,0,0,0)+.01)
 plot.network(net,
@@ -152,7 +157,7 @@ plot.network(net,
 )
 # highlight the root, which should be the first row of the internal nodes in all_embeds
 root_name <- paste0("A", as.integer(path_split(tree_dir)[[1]][3])+1)
-root_index <- which(embeds$id == root_name)
+root_index <- which(rownames(plotted_actual) == root_name)
 points(plotted_actual[root_index, 1], plotted_actual[root_index, 2],
        col = "green", pch = 16, cex = 3)
 legend("bottomleft",
@@ -166,7 +171,7 @@ legend("bottomleft",
 
 invisible(dev.off())
 
-# Now let's plot the reconstructed ancestral embeddings and connect them to what they are targeting
+## Plot reconstructed ancestral embeddings with arrows connecting them to true ancestral embeddings ####
 plotted_recon <- as_tibble(plotted_recon, rownames = "id")
 plotted_all <- as_tibble(plotted_actual, rownames = "id") |>
     left_join(plotted_recon, by = "id", suffix = c("", "_recon")) |>
@@ -176,13 +181,15 @@ plotted_all <- as_tibble(plotted_actual, rownames = "id") |>
 errors_recorded = ("ham_errors" %in% colnames(plotted_all))
 p <- filter(plotted_all, vert_type == "internal") |>
     ggplot(aes(
-        x = .data[[xdim_recon]], y = .data[[ydim_recon]],
-        color = if (errors_recorded).data[["ham_errors"]] else "black",
-    )) +
-    geom_point(size = .5) +
-    geom_segment(aes(xend = .data[[xdim]], yend = .data[[ydim]]),
-        arrow = arrow(length = unit(0.2, "cm")), linewidth = .5
-    ) +
+            x = .data[[xdim_recon]], 
+            y = .data[[ydim_recon]])
+            ) +
+    {if (errors_recorded) aes(color = ham_errors)} +
+    geom_segment(aes(
+        xend = .data[[xdim]], 
+        yend = .data[[ydim]]),
+        arrow = arrow(length = unit(0.2, "cm")), linewidth = 0.2
+        ) +
     {if (errors_recorded) scale_color_viridis_c()} +
     theme_bw() +
     labs(

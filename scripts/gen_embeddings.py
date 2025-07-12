@@ -1,6 +1,6 @@
 import sys
 import os 
-import re
+import json
 import argparse
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -75,20 +75,19 @@ def save_embeddings(mu_leaves, mu_internal, all_ids, data_path, model_name):
     embeddings.to_csv(f"{embeddings_dir}/{embeddings_name}", index=False)
 
 def main():
-    # Set up argument parser
-    parser = argparse.ArgumentParser(description="Generate embeddings for sequences at the tips of the tree.")
-    parser.add_argument("data_path", type=str, help="Path to the data directory.")
-    parser.add_argument("msa_path", type=str, help="Path to the raw MSA")
-    parser.add_argument("model_name", type=str, help="Name of the model file.")
-    parser.add_argument("--plot", type=bool, default=True, help="Whether to plot the embeddings (default: True).")
-    # Parse arguments
+    # Get config parameters
+    parser = argparse.ArgumentParser(description='Generate embeddings of all ancestral and leaf sequences with trained VAE model.')
+    parser.add_argument('config_file', nargs='?', default='config.json', 
+                    help='Path to configuration file specifying details, such as which family reconstructions are for, etc.')
     args = parser.parse_args()
-    data_path = args.data_path
-    msa_path = args.msa_path
-    model_name = args.model_name
-    plot = args.plot
-    model_dir = get_directory(data_path, "saved_models")
-    model_path = os.path.join(model_dir, model_name)
+    print(f"Executing {sys.argv[0]} following {args.config_file}")
+    with open(args.config_file, 'r') as f:
+        config = json.load(f)
+    msa_path, data_path = config["msa_path"], config["data_path"]
+    model_name = config["generate"]["model_name"]
+    plot = config["generate"]["plot"]
+    model_gapped_data_not = config["generate"]["model_gapped_data_not"]
+    # Get model hyperparameters from name
     is_trans, ld, num_hidden_units, dim_aa_embed, one_hot = parse_model_name(model_name)
     # load leaf sequence data
     leaf_data, nl, nc = load_data(data_path, one_hot=one_hot)
@@ -97,10 +96,12 @@ def main():
     aa_index = aa_to_int_from_path(data_path)
     with open(f"{data_path}/pos_preserved.pkl", 'rb') as file:
         pos_preserved = pickle.load(file)    
-    internal_int, internal_ids  = get_real_internals(msa_path, aa_index, 
-                                      pos_preserved=pos_preserved,)
-    internal_onehot= torch.tensor(one_hot_encode(internal_int)).to(torch.float32) 
+    internal_int, internal_ids  = get_real_internals(msa_path, aa_index, pos_preserved=pos_preserved)
+    internal_onehot = one_hot_encode(internal_int, force_gap=model_gapped_data_not)
+    internal_onehot= torch.tensor(internal_onehot).to(torch.float32) 
     # load model
+    model_dir = get_directory(data_path, "saved_models")
+    model_path = os.path.join(model_dir, model_name)
     model = load_model(model_path, nl=nl, nc=nc,
                        num_hidden_units=num_hidden_units, nlatent=ld,
                        one_hot=one_hot, dim_aa_embed=dim_aa_embed, trans=is_trans)  
