@@ -78,20 +78,23 @@ def get_real_internals(
     real_seqs_int = np.array([[aa_index[aa] for aa in seq] for seq in real_seqs])
     return real_seqs_int, ids
 
-def one_hot_encode(seq_ary: NDArray[np.int_]) -> NDArray[np.uint8]: 
+def one_hot_encode(seq_ary: NDArray[np.int_], force_gap=False) -> NDArray[np.uint8]: 
     """
     Convert the integer encoded array to a binary (one-hot) encoding
+    By default, this will check if there are any 0 indices, assumed to represent gap characters, 
+    in the array and will use 21 amino acid classes only if there are any. Otherwise, it will use 20 classes.
+    force_gap = True if you want to force 21 classes
     """
     # Gaps are represented by 0. If there are no gaps, we can use 20 classes for amino acids.
-    gapped = np.any(seq_ary == 0) 
-    nc = 21 if gapped else 20
+    include_gap = force_gap or np.any(seq_ary == 0) 
+    nc = 21 if include_gap else 20
     D = np.identity(nc, dtype=np.uint8)
     num_seq = seq_ary.shape[0]
     len_seq = seq_ary.shape[1]
     seq_ary_binary = np.zeros((num_seq, len_seq, nc), dtype=np.uint8) 
     for i in range(num_seq):
         idx_aas = seq_ary[i]
-        if not gapped: # convert from 1-20 to 0-19
+        if not include_gap: # convert from 1-20 to 0-19
             idx_aas = idx_aas - 1
         seq_ary_binary[i,:,:] = D[idx_aas]
     return seq_ary_binary

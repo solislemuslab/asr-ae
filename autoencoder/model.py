@@ -14,11 +14,19 @@ import torch.nn.functional as F
 class VAE(nn.Module):
     def __init__(self, nl, nc=21, dim_latent_vars=10, num_hidden_units=[100]):
         """
-        This model accepts (batches of) sequences represented as matrices, with each row of the matrix given by
-        a one-hot encoding of the aa at the corresponding position. The first thing the encoder does is concatenate the one-hot vectors.
-        This in turn means that the weight matrix of the first hidden layer contains vectors corresponding to each aa-position combination
-        and the output of the first hidden layer is the sum of the vectors representing the aa-position combinations that are found in the input sequence.
-    
+        - nl: length of sequences in the MSA
+        - nc: number of amino acid types (default is 21, which includes the gap character)
+        - dim_latent_vars: dimension of latent space (default is 10)
+        - num_hidden_units: list of integers representing the number of neurons in each hidden layer of the encoder and decoder networks
+
+        This model accepts (batches of) sequences represented as matrices whose ith row is the one-hot encoding of the amino acid at the ith position in the sequence.
+        The first thing the encoder does is concatenate the one-hot vectors for each position in the sequence into a single vector of length nl*nc.
+        The rows of the weight matrix for the first encoder layer are therefore vectors representing each of the nl*nc aa-position combinations
+        and our representation of each sequence (in the first hidden layer) is (the component-wise RELU of) 
+        the sum of those nl rows in the weight matrix that represent aa-position combinations found in the sequence
+
+        Similarly, the columns of the last weight matrix in the decoder are vectors representing each of the nl*nc aa-position combinations.
+
         Both the encoder and decoder have the same number of hidden layers and the same number of neurons in each layer.
         """
         super(VAE, self).__init__()
