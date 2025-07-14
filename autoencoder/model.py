@@ -4,20 +4,23 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-## Currently VAE is a model that takes as input one hot encoded sequences, i.e. tensors of shape batch x nl x nc
-## where nl is the length of the sequence and nc is the number of amino acids (21)
-## On the other hand, EmbedVAE takes as input sequences of integers, i.e. tensors of shape batch x nl
-## TODO: Combine the two models into one, so that the user can choose between one-hot encoding and integer encoding
-## TODO: Refactor so that every specific VAE (e.g. TVAE, LVAE, etc.) is a subclass of a general VAE class
+# Currently VAE is a model that takes as input one hot encoded sequences, i.e. tensors of shape batch x nl x nc
+# where nl is the length of the sequence and nc is the number of amino acids (21)
+# On the other hand, EmbedVAE takes as input sequences of integers, i.e. tensors of shape batch x nl
+# TODO: Combine the two models into one, so that the user can choose between one-hot encoding and integer encoding
+# TODO: Refactor so that every specific VAE (e.g. TVAE, LVAE, etc.) is a subclass of a general VAE class
 
 
 class VAE(nn.Module):
-    def __init__(self, nl, nc=21, dim_latent_vars=10, num_hidden_units=[100]):
+    def __init__(self, nl, nc=21,
+                 dim_latent_vars=10,
+                 num_hidden_units=[100], ding=False):
         """
         - nl: length of sequences in the MSA
         - nc: number of amino acid types (default is 21, which includes the gap character)
         - dim_latent_vars: dimension of latent space (default is 10)
         - num_hidden_units: list of integers representing the number of neurons in each hidden layer of the encoder and decoder networks
+        - ding: If true, uses Ding's activation function (tanh) instead of ReLU
 
         This model accepts (batches of) sequences represented as matrices whose ith row is the one-hot encoding of the amino acid at the ith position in the sequence.
         The first thing the encoder does is concatenate the one-hot vectors for each position in the sequence into a single vector of length nl*nc.
@@ -46,30 +49,40 @@ class VAE(nn.Module):
         # num of hidden neurons in encoder and decoder networks
         self.num_hidden_units = num_hidden_units
 
+        # activation function
+        self.activation = F.tanh if ding else F.relu
+
         # encoder
         self.encoder_linears = nn.ModuleList()
-        self.encoder_linears.append(nn.Linear(self.dim_input, num_hidden_units[0]))
+        self.encoder_linears.append(
+            nn.Linear(self.dim_input, num_hidden_units[0]))
         for i in range(1, len(num_hidden_units)):
-            self.encoder_linears.append(nn.Linear(num_hidden_units[i - 1], num_hidden_units[i]))
+            self.encoder_linears.append(
+                nn.Linear(num_hidden_units[i - 1], num_hidden_units[i]))
         self.encoder_mu = nn.Linear(num_hidden_units[-1], dim_latent_vars)
-        self.encoder_logsigma = nn.Linear(num_hidden_units[-1], dim_latent_vars)
+        self.encoder_logsigma = nn.Linear(
+            num_hidden_units[-1], dim_latent_vars)
 
         # decoder
         self.decoder_linears = nn.ModuleList()
-        self.decoder_linears.append(nn.Linear(dim_latent_vars, num_hidden_units[-1]))
+        self.decoder_linears.append(
+            nn.Linear(dim_latent_vars, num_hidden_units[-1]))
         for i in range(1, len(num_hidden_units)):
-            self.decoder_linears.append(nn.Linear(num_hidden_units[-i], num_hidden_units[-(i+1)]))
-        self.decoder_linears.append(nn.Linear(num_hidden_units[0], self.dim_input))
+            self.decoder_linears.append(
+                nn.Linear(num_hidden_units[-i], num_hidden_units[-(i+1)]))
+        self.decoder_linears.append(
+            nn.Linear(num_hidden_units[0], self.dim_input))
 
     def encoder(self, x):
         """
         encoder transforms x into latent space z
         """
         # x is batch x nl x nc
-        h = torch.flatten(x, start_dim=-2)  # concatenates the nl one-hot vectors that represent each position in the sequence
+        # concatenates the nl one-hot vectors that represent each position in the sequence
+        h = torch.flatten(x, start_dim=-2)
         for T in self.encoder_linears:
             h = T(h)
-            h = F.relu(h)
+            h = self.activation(h)
         mu = self.encoder_mu(h)
         sigma = torch.exp(self.encoder_logsigma(h))
         return mu, sigma
@@ -81,11 +94,11 @@ class VAE(nn.Module):
         h = z
         for T in self.decoder_linears[:-1]:
             h = T(h)
-            h = F.relu(h)
-        h = self.decoder_linears[-1](h) # batch_shape x (nl*nc) 
-        batch_shape = tuple(h.shape[0:-1]) 
-        h = h.view(batch_shape + (self.nl, self.nc)) # batch_shape x nl x nc
-        log_p = F.log_softmax(h, dim=-1) # batch shape x nl x nc 
+            h = self.activation(h)
+        h = self.decoder_linears[-1](h)  # batch_shape x (nl*nc)
+        batch_shape = tuple(h.shape[0:-1])
+        h = h.view(batch_shape + (self.nl, self.nc))  # batch_shape x nl x nc
+        log_p = F.log_softmax(h, dim=-1)  # batch shape x nl x nc
         return log_p
 
     def forward(self, x):
@@ -103,25 +116,26 @@ class VAE(nn.Module):
         """
         # Assumes x is batch x nl x nc
         weight = weight / torch.sum(weight)
-        
-        ## sample z from q(z|x)
+
+        # sample z from q(z|x)
         mu, sigma = self.encoder(x)
         eps = torch.randn_like(sigma)
         z = mu + sigma*eps
 
-        ## compute log p(x|z)
-        log_p = self.decoder(z) # batch shape x nl x nc
-        log_PxGz = torch.sum(x*log_p, [-1, -2]) # sum over both site and character dims
+        # compute log p(x|z)
+        log_p = self.decoder(z)  # batch shape x nl x nc
+        # sum over both site and character dims
+        log_PxGz = torch.sum(x*log_p, [-1, -2])
         weighted_log_PxGz = log_PxGz * weight
 
-        ## compute kl
-        kl =  torch.sum(0.5*(sigma**2 + mu**2 - 2*torch.log(sigma) - 1), -1)
+        # compute kl
+        kl = torch.sum(0.5*(sigma**2 + mu**2 - 2*torch.log(sigma) - 1), -1)
         weighted_kl = kl*weight
 
-        ## compute elbo
+        # compute elbo
         weighted_elbo = weighted_log_PxGz - weighted_kl
-        
-        ## return averages
+
+        # return averages
         weighted_ave_elbo = torch.sum(weighted_elbo)
         weighted_ave_log_PxGz = torch.sum(weighted_log_PxGz)
         return weighted_ave_elbo, weighted_ave_log_PxGz
@@ -141,9 +155,11 @@ class VAE(nn.Module):
         mu, sigma = self.encoder(x)
         eps = torch.randn_like(mu)
         z = mu + sigma * eps
-        log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 * torch.log(2 * z.new_tensor(np.pi)), -1)
+        log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 *
+                           torch.log(2 * z.new_tensor(np.pi)), -1)
         log_p = self.decoder(z)
-        log_PxGz = torch.sum(x * log_p, [-1, -2])  # sum over both position and character dimension
+        # sum over both position and character dimension
+        log_PxGz = torch.sum(x * log_p, [-1, -2])
         log_Pxz = log_Pz + log_PxGz
         log_QzGx = torch.sum(-0.5 * (eps) ** 2 -
                              0.5 * torch.log(2 * z.new_tensor(np.pi))
@@ -155,7 +171,7 @@ class VAE(nn.Module):
         weight = torch.exp(log_weight)
         elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
         return elbo
-    
+
     @torch.no_grad()
     def compute_acc(self, x):
         '''
@@ -197,17 +213,22 @@ class EmbedVAE(nn.Module):
         # encoder
         self.aa_embed = nn.Embedding(nc, dim_aa_embed)
         self.encoder_linears = nn.ModuleList()
-        self.encoder_linears.append(nn.Linear(dim_aa_embed*nl, num_hidden_units[0]))
+        self.encoder_linears.append(
+            nn.Linear(dim_aa_embed*nl, num_hidden_units[0]))
         for i in range(1, len(num_hidden_units)):
-            self.encoder_linears.append(nn.Linear(num_hidden_units[i - 1], num_hidden_units[i]))
+            self.encoder_linears.append(
+                nn.Linear(num_hidden_units[i - 1], num_hidden_units[i]))
         self.encoder_mu = nn.Linear(num_hidden_units[-1], dim_latent_vars)
-        self.encoder_logsigma = nn.Linear(num_hidden_units[-1], dim_latent_vars)
+        self.encoder_logsigma = nn.Linear(
+            num_hidden_units[-1], dim_latent_vars)
 
         # decoder
         self.decoder_linears = nn.ModuleList()
-        self.decoder_linears.append(nn.Linear(dim_latent_vars, num_hidden_units[-1]))
+        self.decoder_linears.append(
+            nn.Linear(dim_latent_vars, num_hidden_units[-1]))
         for i in range(1, len(num_hidden_units)):
-            self.decoder_linears.append(nn.Linear(num_hidden_units[-i], num_hidden_units[-(i+1)]))
+            self.decoder_linears.append(
+                nn.Linear(num_hidden_units[-i], num_hidden_units[-(i+1)]))
         self.decoder_linears.append(nn.Linear(num_hidden_units[0], nc*nl))
 
     def encoder(self, x):
@@ -215,8 +236,9 @@ class EmbedVAE(nn.Module):
         encoder transforms x into latent space z
         """
         # Assumes x is batch x nl
-        h = self.aa_embed(x) # batch x nl x dim_aa_embed
-        h = torch.flatten(h, start_dim=-2)  # concatenates the nl embeddings of amino acids
+        h = self.aa_embed(x)  # batch x nl x dim_aa_embed
+        # concatenates the nl embeddings of amino acids
+        h = torch.flatten(h, start_dim=-2)
         for T in self.encoder_linears:
             h = T(h)
             h = F.relu(h)
@@ -232,10 +254,10 @@ class EmbedVAE(nn.Module):
         for T in self.decoder_linears[:-1]:
             h = T(h)
             h = F.relu(h)
-        h = self.decoder_linears[-1](h) # batch_shape x (nl*nc) 
-        batch_shape = tuple(h.shape[0:-1]) 
-        h = h.view(batch_shape + (self.nl, self.nc)) # batch_shape x nl x nc
-        log_p = F.log_softmax(h, dim=-1) # batch shape x nl x nc 
+        h = self.decoder_linears[-1](h)  # batch_shape x (nl*nc)
+        batch_shape = tuple(h.shape[0:-1])
+        h = h.view(batch_shape + (self.nl, self.nc))  # batch_shape x nl x nc
+        log_p = F.log_softmax(h, dim=-1)  # batch shape x nl x nc
         return log_p
 
     def forward(self, x):
@@ -253,27 +275,28 @@ class EmbedVAE(nn.Module):
         """
         # Assumes x is batch x nl
         weight = weight / torch.sum(weight)
-        
-        ## sample z from q(z|x)
+
+        # sample z from q(z|x)
         mu, sigma = self.encoder(x)
         eps = torch.randn_like(sigma)
         z = mu + sigma*eps
 
-        ## compute log p(x|z)
-        log_p = self.decoder(z) # (batch shape x nl x nc)
-        # we want to index log_p (batch shape x nl x nc) with x (batch_shape x nl) 
-        log_PxGz = torch.gather(log_p, -1, x.unsqueeze(-1)).squeeze() # batch_shape x nl 
-        log_PxGz = torch.sum(log_PxGz, -1) # sum over sites
+        # compute log p(x|z)
+        log_p = self.decoder(z)  # (batch shape x nl x nc)
+        # we want to index log_p (batch shape x nl x nc) with x (batch_shape x nl)
+        log_PxGz = torch.gather(
+            log_p, -1, x.unsqueeze(-1)).squeeze()  # batch_shape x nl
+        log_PxGz = torch.sum(log_PxGz, -1)  # sum over sites
         weighted_log_PxGz = log_PxGz * weight
 
-        ## compute kl
-        kl =  torch.sum(0.5*(sigma**2 + mu**2 - 2*torch.log(sigma) - 1), -1)
+        # compute kl
+        kl = torch.sum(0.5*(sigma**2 + mu**2 - 2*torch.log(sigma) - 1), -1)
         weighted_kl = kl*weight
 
-        ## compute elbo
+        # compute elbo
         weighted_elbo = weighted_log_PxGz - weighted_kl
-        
-        ## return averages
+
+        # return averages
         weighted_ave_elbo = torch.sum(weighted_elbo)
         weighted_ave_log_PxGz = torch.sum(weighted_log_PxGz)
         return weighted_ave_elbo, weighted_ave_log_PxGz
@@ -292,10 +315,12 @@ class EmbedVAE(nn.Module):
         mu, sigma = self.encoder(x)
         eps = torch.randn_like(mu)
         z = mu + sigma * eps
-        log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 * torch.log(2 * z.new_tensor(np.pi)), -1)
+        log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 *
+                           torch.log(2 * z.new_tensor(np.pi)), -1)
         log_p = self.decoder(z)
-        log_PxGz = torch.gather(log_p, -1, x.unsqueeze(-1)).squeeze() # batch_shape x nl 
-        log_PxGz = torch.sum(log_PxGz, -1) # sum over sites
+        log_PxGz = torch.gather(
+            log_p, -1, x.unsqueeze(-1)).squeeze()  # batch_shape x nl
+        log_PxGz = torch.sum(log_PxGz, -1)  # sum over sites
         log_Pxz = log_Pz + log_PxGz
         log_QzGx = torch.sum(-0.5 * (eps) ** 2 -
                              0.5 * torch.log(2 * z.new_tensor(np.pi))
@@ -307,7 +332,7 @@ class EmbedVAE(nn.Module):
         weight = torch.exp(log_weight)
         elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
         return elbo
-    
+
     @torch.no_grad()
     def compute_acc(self, x):
         '''
@@ -318,6 +343,7 @@ class EmbedVAE(nn.Module):
         pred_aa_idxs = torch.argmax(log_p, -1)
         recon_acc = torch.mean((x == pred_aa_idxs).float(), -1)
         return recon_acc
+
 
 class LVAE(nn.Module):
     def __init__(self, nl, nc=21, dim_latent_vars=10, num_hidden_units=[256, 256]):
@@ -343,15 +369,20 @@ class LVAE(nn.Module):
         self.num_hidden_units = num_hidden_units
 
         # encoder
-        self.encoder_lstm_mu = nn.LSTM(self.nc, dim_latent_vars, 1, batch_first=True)
-        self.encoder_lstm_sigma = nn.LSTM(self.nc, dim_latent_vars, 1, batch_first=True)
+        self.encoder_lstm_mu = nn.LSTM(
+            self.nc, dim_latent_vars, 1, batch_first=True)
+        self.encoder_lstm_sigma = nn.LSTM(
+            self.nc, dim_latent_vars, 1, batch_first=True)
 
         # decoder
         self.decoder_linears = nn.ModuleList()
-        self.decoder_linears.append(nn.Linear(dim_latent_vars, num_hidden_units[-1]))
+        self.decoder_linears.append(
+            nn.Linear(dim_latent_vars, num_hidden_units[-1]))
         for i in range(1, len(num_hidden_units)):
-            self.decoder_linears.append(nn.Linear(num_hidden_units[-i], num_hidden_units[-(i+1)]))
-        self.decoder_linears.append(nn.Linear(num_hidden_units[0], self.dim_input))
+            self.decoder_linears.append(
+                nn.Linear(num_hidden_units[-i], num_hidden_units[-(i+1)]))
+        self.decoder_linears.append(
+            nn.Linear(num_hidden_units[0], self.dim_input))
 
     def encoder(self, x):
         """
@@ -371,10 +402,10 @@ class LVAE(nn.Module):
         for i in range(len(self.decoder_linears) - 1):
             h = self.decoder_linears[i](h)
             h = F.relu(h)
-        h = self.decoder_linears[-1](h) # batch_shape x (nl*nc) 
-        batch_shape = tuple(h.shape[0:-1]) 
-        h = h.view(batch_shape + (self.nl, self.nc)) # batch_shape x nl x nc
-        log_p = F.log_softmax(h, dim=-1) # batch shape x nl x nc 
+        h = self.decoder_linears[-1](h)  # batch_shape x (nl*nc)
+        batch_shape = tuple(h.shape[0:-1])
+        h = h.view(batch_shape + (self.nl, self.nc))  # batch_shape x nl x nc
+        log_p = F.log_softmax(h, dim=-1)  # batch shape x nl x nc
         return log_p
 
     def compute_weighted_elbo(self, x, weight):
@@ -383,25 +414,26 @@ class LVAE(nn.Module):
         bound, we can use elbo to approximate log P(x).
         """
         weight = weight / torch.sum(weight)
-        
-        ## sample z from q(z|x)
+
+        # sample z from q(z|x)
         mu, sigma = self.encoder(x)
         eps = torch.randn_like(sigma)
         z = mu + sigma*eps
 
-        ## compute log p(x|z)
+        # compute log p(x|z)
         log_p = self.decoder(z)
-        log_PxGz = torch.sum(x*log_p, [-1, -2]) # sum over both site and character dims
+        # sum over both site and character dims
+        log_PxGz = torch.sum(x*log_p, [-1, -2])
         weighted_log_PxGz = log_PxGz * weight
 
-        ## compute kl
-        kl =  torch.sum(0.5*(sigma**2 + mu**2 - 2*torch.log(sigma) - 1), -1)
+        # compute kl
+        kl = torch.sum(0.5*(sigma**2 + mu**2 - 2*torch.log(sigma) - 1), -1)
         weighted_kl = kl*weight
 
-        ## compute elbo
+        # compute elbo
         weighted_elbo = weighted_log_PxGz - weighted_kl
-        
-        ## return averages
+
+        # return averages
         weighted_ave_elbo = torch.sum(weighted_elbo)
         weighted_ave_log_PxGz = torch.sum(weighted_log_PxGz)
         return weighted_ave_elbo, weighted_ave_log_PxGz
@@ -423,7 +455,8 @@ class LVAE(nn.Module):
         mu, sigma = self.encoder(x)
         eps = torch.randn_like(mu)
         z = mu + sigma * eps
-        log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 * torch.log(2 * z.new_tensor(np.pi)), -1)
+        log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 *
+                           torch.log(2 * z.new_tensor(np.pi)), -1)
         log_p = self.decoder(z)
         # log_p = log_p.reshape(x.shape)
         # sum over both position and character dimension
@@ -441,7 +474,7 @@ class LVAE(nn.Module):
         weight = torch.exp(log_weight)
         elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
         return elbo
-    
+
     @torch.no_grad()
     def compute_acc(self, x):
         '''
@@ -453,6 +486,7 @@ class LVAE(nn.Module):
         pred_aa_idxs = torch.argmax(log_p, -1)
         recon_acc = torch.mean((real_aa_idxs == pred_aa_idxs).float(), -1)
         return recon_acc
+
 
 class TVAE(nn.Module):
     def __init__(
@@ -491,19 +525,25 @@ class TVAE(nn.Module):
         )
         # original layers
         self.encoder_linears = nn.ModuleList()
-        self.encoder_linears.append(nn.Linear(self.dim_input, num_hidden_units[0]))
+        self.encoder_linears.append(
+            nn.Linear(self.dim_input, num_hidden_units[0]))
         for i in range(1, len(num_hidden_units)):
-            self.encoder_linears.append(nn.Linear(num_hidden_units[i - 1], num_hidden_units[i]))
+            self.encoder_linears.append(
+                nn.Linear(num_hidden_units[i - 1], num_hidden_units[i]))
         self.encoder_mu = nn.Linear(num_hidden_units[-1], dim_latent_vars)
-        self.encoder_logsigma = nn.Linear(num_hidden_units[-1], dim_latent_vars)
+        self.encoder_logsigma = nn.Linear(
+            num_hidden_units[-1], dim_latent_vars)
 
         # decoder
         # original layers
         self.decoder_linears = nn.ModuleList()
-        self.decoder_linears.append(nn.Linear(dim_latent_vars, num_hidden_units[-1]))
+        self.decoder_linears.append(
+            nn.Linear(dim_latent_vars, num_hidden_units[-1]))
         for i in range(1, len(num_hidden_units)):
-            self.decoder_linears.append(nn.Linear(num_hidden_units[-i], num_hidden_units[-(i+1)]))
-        self.decoder_linears.append(nn.Linear(num_hidden_units[0], self.dim_input))
+            self.decoder_linears.append(
+                nn.Linear(num_hidden_units[-i], num_hidden_units[-(i+1)]))
+        self.decoder_linears.append(
+            nn.Linear(num_hidden_units[0], self.dim_input))
         # transformer layers
         self.transformer_decoder = nn.TransformerEncoder(
             encoder_layer, num_layers=num_layers
@@ -515,7 +555,8 @@ class TVAE(nn.Module):
         Encoder transforms x into latent space z.
         """
         # convert from matrix to vector by concatenating rows (which are one-hot vectors)
-        h = torch.flatten(h, start_dim=-2)  # start_dim=-2 to maintain batch dimension
+        # start_dim=-2 to maintain batch dimension
+        h = torch.flatten(h, start_dim=-2)
         h = self.linear1(h)
         h = h.reshape([-1, self.nl, self.embed_dim])
         h = self.transformer_encoder(h)
@@ -537,7 +578,8 @@ class TVAE(nn.Module):
         for i in range(len(self.decoder_linears) - 1):
             h = self.decoder_linears[i](h)
             h = F.relu(h)
-        h = self.decoder_linears[-1](h)  # should now have dimension embed_dim*nl
+        # should now have dimension embed_dim*nl
+        h = self.decoder_linears[-1](h)
 
         h = h.reshape([-1, self.nl, self.embed_dim])
 
@@ -545,9 +587,9 @@ class TVAE(nn.Module):
         h = torch.flatten(h, start_dim=-2)
         h = self.linear2(h)
 
-        batch_shape = tuple(h.shape[0:-1]) 
-        h = h.view(batch_shape + (self.nl, self.nc)) # batch_shape x nl x nc
-        log_p = F.log_softmax(h, dim=-1) # batch shape x nl x nc 
+        batch_shape = tuple(h.shape[0:-1])
+        h = h.view(batch_shape + (self.nl, self.nc))  # batch_shape x nl x nc
+        log_p = F.log_softmax(h, dim=-1)  # batch shape x nl x nc
         return log_p
 
     def compute_weighted_elbo(self, x, weight):
@@ -556,29 +598,30 @@ class TVAE(nn.Module):
         bound, we can use elbo to approximate log P(x).
         """
         weight = weight / torch.sum(weight)
-        
-        ## sample z from q(z|x)
+
+        # sample z from q(z|x)
         mu, sigma = self.encoder(x)
         eps = torch.randn_like(sigma)
         z = mu + sigma*eps
 
-        ## compute log p(x|z)
+        # compute log p(x|z)
         log_p = self.decoder(z)
-        log_PxGz = torch.sum(x*log_p, [-1, -2]) # sum over both site and character dims
+        # sum over both site and character dims
+        log_PxGz = torch.sum(x*log_p, [-1, -2])
         weighted_log_PxGz = log_PxGz * weight
 
-        ## compute kl
-        kl =  torch.sum(0.5*(sigma**2 + mu**2 - 2*torch.log(sigma) - 1), -1)
+        # compute kl
+        kl = torch.sum(0.5*(sigma**2 + mu**2 - 2*torch.log(sigma) - 1), -1)
         weighted_kl = kl*weight
 
-        ## compute elbo
+        # compute elbo
         weighted_elbo = weighted_log_PxGz - weighted_kl
-        
-        ## return averages
+
+        # return averages
         weighted_ave_elbo = torch.sum(weighted_elbo)
         weighted_ave_log_PxGz = torch.sum(weighted_log_PxGz)
         return weighted_ave_elbo, weighted_ave_log_PxGz
-    
+
     @torch.no_grad()
     def compute_iwae_elbo(self, x, num_samples):
         """
@@ -593,7 +636,8 @@ class TVAE(nn.Module):
         mu, sigma = self.encoder(x)
         eps = torch.randn_like(mu)
         z = mu + sigma * eps
-        log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 * torch.log(2 * z.new_tensor(np.pi)), -1)
+        log_Pz = torch.sum(-0.5 * z ** 2 - 0.5 *
+                           torch.log(2 * z.new_tensor(np.pi)), -1)
         log_p = self.decoder(z)
         log_p = log_p.reshape(x.shape)
         # sum over both position and character dimension
@@ -611,12 +655,12 @@ class TVAE(nn.Module):
         weight = torch.exp(log_weight)
         elbo = torch.log(torch.mean(weight, 0)) + log_weight_max
         return elbo
-    
+
     @torch.no_grad()
     def compute_acc(self, x):
         '''
         Calculates the Hamming accuracy (i.e. percent residue identity)
-        '''  
+        '''
         real_aa_idxs = torch.argmax(x, -1)
         mu, _ = self.encoder(x)
         log_p = self.decoder(mu)
