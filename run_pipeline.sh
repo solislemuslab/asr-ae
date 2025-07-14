@@ -23,9 +23,9 @@ model_name=$(python scripts/train.py $config | tee /dev/tty | awk 'END{print}')
 #######################################################
 #########  Generate embeddings ########################
 #######################################################
-# Update config.json for decoding
+# Update config.json for generating embeddings
 jq --arg model_name "$model_name" \
-    '.generate.model_name = $model_name | .generate.model_gapped_data_not = true' \
+    '.generate.model_name = $model_name' \
     $config | jq --indent 4 > $TMP_FILE 2> /dev/null
 if [ $? -ne 0 ]; then
     echo "Error: Invalid input. config.json generate parameters not updated."

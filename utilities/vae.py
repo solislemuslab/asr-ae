@@ -4,7 +4,7 @@ import pickle
 from autoencoder.model import VAE, EmbedVAE, TVAE
 from autoencoder.data import MSA_Dataset
 
-def load_model(model_path, nl, nc=21, 
+def load_model(model_path, nl, nc=21, ding_model=False,
                num_hidden_units=[500, 100], nlatent=10, 
                one_hot=True, dim_aa_embed=None, trans=False):
     """
@@ -15,9 +15,9 @@ def load_model(model_path, nl, nc=21,
                      dim_latent_vars=nlatent,
                      num_hidden_units=num_hidden_units)
     elif one_hot:
-        model = VAE(nl=nl, nc = nc, 
+        model = VAE(nl=nl, nc=nc, 
                     num_hidden_units=num_hidden_units, 
-                    dim_latent_vars=nlatent)
+                    dim_latent_vars=nlatent, ding=ding_model)
     else:
         model = EmbedVAE(nl=nl, nc=nc, 
                          num_hidden_units=num_hidden_units, 

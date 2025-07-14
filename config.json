@@ -1,0 +1,39 @@
+{
+    "data_path": "msas/independent/processed/10000/pevae",
+    "msa_path": "msas/independent/raw/10000/pevae.fa",
+    "tree_path": "trees/fast_trees/10000/pevae.clean.tree",
+    "training": {
+        "ding": true,
+        "rerun": false,
+        "one_hot": true,
+        "weigh_seqs": false,
+        "use_transformer": false,
+        "dim_aa_embed": 2,
+        "num_hidden_units": [
+            500
+        ],
+        "latent_dim": 2,
+        "num_epochs": 500,
+        "learning_rate": 0.001,
+        "weight_decay": 0.005,
+        "batch_size": 128,
+        "validate": true,
+        "iwae_num_samples": 1,
+        "verbose": false,
+        "save_model": true,
+        "plot_results": true
+    },
+    "generate": {
+        "model_name": "ding_layers500_ld2_wd0.005_epoch500_2025-07-13.pt",
+        "plot": true,
+        "model_gapped_data_not": false
+    },
+    "decode": {
+        "redo_iqtree": false,
+        "model_names": [
+            "ding_layers500_ld2_wd0.005_epoch500_2025-07-13.pt"
+        ],
+        "plot_eval": true,
+        "plot_name": "ding_layers500_ld2_wd0.005_epoch500_2025-07-13_eval.png"
+    }
+}

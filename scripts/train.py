@@ -79,6 +79,7 @@ def main():
     # loading the input data from the json file
     data_path = data_json["data_path"]
     training_config = data_json["training"]
+    ding = training_config["ding"]
     rerun = training_config["rerun"]
     one_hot = training_config["one_hot"]
     weigh_seqs = training_config["weigh_seqs"]
@@ -102,12 +103,13 @@ def main():
     weight_str = "weighted_" if weigh_seqs else ""
     aa_embed_str = f"aaembed{dim_aa_embed}_" if not one_hot else ""
     trans_str = "trans-" if use_transformer else ""
-    model_configs=f"{trans_str}model_{weight_str}{aa_embed_str}layers{layers_str}_ld{latent_dim}_wd{wd}_epoch{num_epochs}_"
-    model_name = f"{model_configs}{today}.pt"
+    ding_str = "ding" if ding else "model"
+    model_configs=f"{trans_str}{ding_str}_{weight_str}{aa_embed_str}layers{layers_str}_ld{latent_dim}_wd{wd}_epoch{num_epochs}"
+    model_name = f"{model_configs}_{today}.pt"
     model_dir = get_directory(data_path, "saved_models")
     os.makedirs(model_dir, exist_ok=True)
     model_path = os.path.join(model_dir, model_name)
-    
+
     # check if model with same configs (ignoring date) already exists and only proceed if it doesn't
     existing_models = [f for f in os.listdir(model_dir) if f.startswith(model_configs)]
     if existing_models and not rerun:
@@ -130,9 +132,8 @@ def main():
                      dim_latent_vars=latent_dim,
                      num_hidden_units=num_hidden_units).to(device)
     elif one_hot:
-        model = VAE(nl=nl, nc=nc, 
-                    dim_latent_vars=latent_dim,
-                    num_hidden_units=num_hidden_units).to(device)
+        model = VAE(nl=nl, nc=nc, dim_latent_vars=latent_dim,
+                    num_hidden_units=num_hidden_units, ding=ding).to(device)
     else:
         model = EmbedVAE(nl=nl, nc=nc, dim_aa_embed=dim_aa_embed,
                         dim_latent_vars=latent_dim,

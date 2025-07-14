@@ -85,6 +85,7 @@ def main():
         config = json.load(f)
     msa_path, data_path = config["msa_path"], config["data_path"]
     model_name = config["generate"]["model_name"]
+    ding_model = model_name.startswith("ding")
     plot = config["generate"]["plot"]
     model_gapped_data_not = config["generate"]["model_gapped_data_not"]
     # Get model hyperparameters from name
@@ -102,7 +103,7 @@ def main():
     # load model
     model_dir = get_directory(data_path, "saved_models")
     model_path = os.path.join(model_dir, model_name)
-    model = load_model(model_path, nl=nl, nc=nc,
+    model = load_model(model_path, nl=nl, nc=nc, ding_model=ding_model,
                        num_hidden_units=num_hidden_units, nlatent=ld,
                        one_hot=one_hot, dim_aa_embed=dim_aa_embed, trans=is_trans)  
     # get embeddings 

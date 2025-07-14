@@ -191,7 +191,7 @@ def plot_all_errors(all_est_seqs_dict: NDArray[np.integer], real_seqs: NDArray[n
                 # Set color and linestyle based on the name
                 color = colors.get(name, "red")  # Default to red for our VAE-based approach
                 linestyle = None
-                if name.startswith("model"):
+                if name.startswith("model") or name.startswith("ding"):
                     linestyle = "--"
                 if name.endswith("prior"):
                     linestyle = "-."
@@ -246,9 +246,10 @@ def main():
     model_dict = {} # all models
     for name in model_names:
         # Load model
+        ding_model = name.startswith("ding")
         is_trans, ld, num_hidden_units, dim_aa_embed, one_hot = parse_model_name(name)
         model_path = os.path.join(model_dir, name)
-        model = load_model(model_path, nl=nl, nc=nc,
+        model = load_model(model_path, nl=nl, nc=nc, ding_model=ding_model,
                             num_hidden_units=num_hidden_units, nlatent=ld,
                             one_hot=one_hot, dim_aa_embed=dim_aa_embed, trans=is_trans)
         # Read in embedding dataframe and retain only the columns that are embedding dimensions

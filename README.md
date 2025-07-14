@@ -1,24 +1,2 @@
-# asr-ae
-
-## Training
-
-### Training Command
-```bash
-python train.py config.json
-```
-
-### Training Config Example
-```json
-{
-    "MSA_id": "COG28",
-    "data_path": "data/simulations/processed/COG28",
-    "use_transformer": false,
-    "num_epochs": 30,
-    "batch_size": 32,
-    "learning_rate": 0.001,
-    "latent_dim": 2,
-    "verbose": false,
-    "save_model": true,
-    "plot_results": true
-}
-```
+To do:
+- add check for being a Ding model to `parse_model_name`

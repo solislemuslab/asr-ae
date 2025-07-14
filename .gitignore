@@ -8,8 +8,7 @@
 # Docker
 container
 # config files
-config.json
-embeddings/config_decode.json
+config2.json
 # OS
 **/*.icloud
 **/*.DS_Store
