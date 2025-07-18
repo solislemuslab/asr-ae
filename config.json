@@ -12,28 +12,28 @@
         "num_hidden_units": [
             500
         ],
-        "latent_dim": 2,
-        "num_epochs": 500,
+        "latent_dim": 20,
+        "num_epochs": 100,
         "learning_rate": 0.001,
         "weight_decay": 0.005,
         "batch_size": 128,
         "validate": true,
-        "iwae_num_samples": 1,
+        "iwae_num_samples": 100,
         "verbose": false,
         "save_model": true,
         "plot_results": true
     },
     "generate": {
-        "model_name": "ding_layers500_ld2_wd0.005_epoch500_2025-07-13.pt",
+        "model_name": "ding_layers500_ld20_wd0.005_epoch100_2025-07-17.pt",
         "plot": true,
         "model_gapped_data_not": false
     },
     "decode": {
         "redo_iqtree": false,
         "model_names": [
-            "ding_layers500_ld2_wd0.005_epoch500_2025-07-13.pt"
+            "ding_layers500_ld20_wd0.005_epoch100_2025-07-17.pt"
         ],
         "plot_eval": true,
-        "plot_name": "ding_layers500_ld2_wd0.005_epoch500_2025-07-13_eval.png"
+        "plot_name": "ding_layers500_ld20_wd0.005_epoch100_2025-07-17_eval.png"
     }
 }
