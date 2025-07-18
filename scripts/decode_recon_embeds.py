@@ -358,14 +358,15 @@ def main():
         # plot_error_vs_depth(ardca_seqs, real_seqs, ordered_depths)
         plot_all_errors(all_est_seqs, real_seqs, ordered_depths, os.path.join(plot_dir, plot_name))
         print("Evaluation plot saved to", os.path.join(plot_dir, plot_name))
-        # Append to csv with the ancestral embeddings the depths and the hamming errors
-        for name, model_data in model_dict.items():
-            recon_seqs = model_data["recon_seqs"]
-            recon_embeds = model_data["embeds"]
-            recon_embeds["recon_seqs"] = np_to_str(recon_seqs, index_aa)
-            recon_embeds["depth"] = ordered_depths
-            recon_embeds["ham_errors"] = [np.mean(seq != real_seq) for seq, real_seq in zip(recon_seqs, real_seqs)]
-            recon_embeds.to_csv(os.path.join(embeds_dir, f"{name.replace('.pt', '_anc-embeddings.csv')}"), index=True)
     
+    ### Append to csv with the ancestral embeddings the depths and the hamming errors #####
+    for name, model_data in model_dict.items():
+        recon_seqs = model_data["recon_seqs"]
+        recon_embeds = model_data["embeds"]
+        recon_embeds["recon_seqs"] = np_to_str(recon_seqs, index_aa)
+        recon_embeds["depth"] = ordered_depths
+        recon_embeds["ham_errors"] = [np.mean(seq != real_seq) for seq, real_seq in zip(recon_seqs, real_seqs)]
+        recon_embeds.to_csv(os.path.join(embeds_dir, f"{name.replace('.pt', '_anc-embeddings.csv')}"), index=True)
+
 if __name__ == "__main__":
     main()
