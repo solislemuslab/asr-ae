@@ -107,7 +107,6 @@ def remove_seqs(seq_dict, max_gaps_in_seq = MAX_GAPS_IN_SEQ):
 def to_numpy(seq_dict, aa_index):
     """
     Convert the dictionary of sequences to a numpy array with integer encoding based on aa_index
-    We put the query sequence as the top row of the array
     Note that now we have to keep track of the labels separately
     """
     seq_ary, seq_names = [], []

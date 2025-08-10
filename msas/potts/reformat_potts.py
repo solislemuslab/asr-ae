@@ -1,6 +1,6 @@
 import sys
 
-def reformat_potts(input_file):
+def reformat_potts(input_file, output_file):
     char_to_index = {char: idx for idx, char in enumerate("-ACDEFGHIKLMNPQRSTVWY")}
     reformatted_lines = []
     
@@ -16,13 +16,13 @@ def reformat_potts(input_file):
                 parts[2] = str(char_to_index[parts[2]])
             reformatted_lines.append(" ".join(parts))
     
-    with open(input_file, 'w') as outfile:
+    with open(output_file, 'w') as outfile:
         outfile.write("\n".join(reformatted_lines) + "\n")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python reformat_potts.py <input_file>")
+    if len(sys.argv) != 3:
+        print("Usage: python reformat_potts.py <input_file> <output_file>")
         sys.exit(1)
     
-    input_file = sys.argv[1]
-    reformat_potts(input_file)
+    input_file, output_file = sys.argv[1], sys.argv[2]
+    reformat_potts(input_file, output_file)

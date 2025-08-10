@@ -17,7 +17,7 @@ if isfile(model_file)
     @info "ArDCA model files already exists. Skipping model fitting."
     arnet, arvar = load(model_file, "arnet", "arvar")
 else
-    arnet, arvar = ardca(msa_file)
+    arnet, arvar = ardca(msa_file, verbose=false)
     jldsave(model_file; arnet, arvar)
 end
 

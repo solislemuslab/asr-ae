@@ -2,7 +2,7 @@
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "8ae128018b45cab5c5d47f882749eceed354cc8e"
+project_hash = "c73d7fb1e954438dc5e5580a364db22c4113e434"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -1190,6 +1190,12 @@ weakdeps = ["REPL"]
     [deps.Pkg.extensions]
     REPLExt = "REPL"
 
+[[deps.PlmDCA]]
+deps = ["DCAUtils", "LinearAlgebra", "LoopVectorization", "NLopt", "PrecompileTools", "Printf", "Statistics"]
+git-tree-sha1 = "c0776946008be8f4d83dfc70f3609d35d9de0f4d"
+uuid = "06784e46-84fc-5582-b8de-0e984192b79e"
+version = "1.0.4"
+
 [[deps.PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
 git-tree-sha1 = "41031ef3a1be6f5bbbf3e8073f210556daeae5ca"
@@ -1902,10 +1908,8 @@ uuid = "3161d3a3-bdf6-5164-811a-617609db77b4"
 version = "1.5.7+1"
 
 [[deps.adabmDCA]]
-deps = ["ArgParse", "Distances", "Distributions", "LinearAlgebra", "Logging", "Pkg", "Plots", "Printf", "Random", "StatsBase"]
-git-tree-sha1 = "3a859a75f10f20b976da0a037f6ca1e95402f107"
-repo-rev = "main"
-repo-url = "https://github.com/spqb/adabmDCA.jl"
+deps = ["ArgParse", "DCAUtils", "Distances", "Distributions", "LinearAlgebra", "Logging", "Pkg", "Plots", "Printf", "Random", "StatsBase"]
+path = "/Users/evangorstein/.julia/dev/adabmDCA/"
 uuid = "b9b858a2-6fc5-45ba-8004-395fe95964a1"
 version = "0.0.0"
 
