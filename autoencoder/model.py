@@ -22,11 +22,11 @@ class VAE(nn.Module):
         - num_hidden_units: list of integers representing the number of neurons in each hidden layer of the encoder and decoder networks
         - ding: If true, uses Ding's activation function (tanh) instead of ReLU
 
-        This model accepts (batches of) sequences represented as matrices whose ith row is the one-hot encoding of the amino acid at the ith position in the sequence.
+        This model accepts (batches of) sequences that are represented as matrices whose ith row is the one-hot encoding of the amino acid at the ith position in the sequence.
         The first thing the encoder does is concatenate the one-hot vectors for each position in the sequence into a single vector of length nl*nc.
-        The rows of the weight matrix for the first encoder layer are therefore vectors representing each of the nl*nc aa-position combinations
-        and our representation of each sequence (in the first hidden layer) is (the component-wise RELU of) 
-        the sum of those nl rows in the weight matrix that represent aa-position combinations found in the sequence
+        The rows of the weight matrix for the first encoder layer are therefore vectors representing each of the nl*nc aa-position combinations,
+        and the representation of each sequence in the first hidden layer is (the component-wise RELU of) the sum of those nl rows in the weight matrix
+        that represent aa-position combinations found in the sequence
 
         Similarly, the columns of the last weight matrix in the decoder are vectors representing each of the nl*nc aa-position combinations.
 

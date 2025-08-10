@@ -184,23 +184,23 @@ p <- filter(plotted_all, vert_type == "internal") |>
             x = .data[[xdim_recon]], 
             y = .data[[ydim_recon]])
             ) +
-    {if (errors_recorded) aes(color = ham_errors)} +
+    #{if (errors_recorded) aes(color = ham_errors)} +
     geom_segment(aes(
         xend = .data[[xdim]], 
         yend = .data[[ydim]]),
-        arrow = arrow(length = unit(0.2, "cm")), linewidth = 0.2
+        arrow = arrow(length = unit(0.1, "cm")), linewidth = 0.2
         ) +
-    {if (errors_recorded) scale_color_viridis_c()} +
+    #{if (errors_recorded) scale_color_viridis_c()} +
     theme_bw() +
     labs(
-        title = paste0("Embeddings of ancestral sequences for ", msa_id, ",\n", model),
-        subtitle = "Arrow starts at estimated embeddings based on Brownian motion model\nand ends at the embedding of the actual sequence",
+        #title = paste0("Embeddings of ancestral sequences for ", msa_id, ",\n", model),
+        #subtitle = "Arrow starts at estimated embeddings based on Brownian motion model\nand ends at the embedding of the actual sequence",
         color = "Hamming error",
         x = xdim,
         y = ydim
     ) +
     theme(
-        legend.position = if (errors_recorded) "bottom" else "none",
+        legend.position = "bottom",
         plot.title = element_text(size = 8),
         plot.subtitle = element_text(size = 5)
     )

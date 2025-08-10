@@ -19,7 +19,7 @@ end
 # Factor by which we scale the branch lengths of the trees
 scale=[1., 2.]
 # Get the potts model object
-potts = read_graph("msas/potts/pf00565_params.dat")
+potts = read_graph("msas/potts/pf00565_params_intindex.dat")
 # Get tree files that we will simulate MSAs along
 tree_files = glob("*/*.clean.tree", "trees/fast_trees")
 # Iterate over trees

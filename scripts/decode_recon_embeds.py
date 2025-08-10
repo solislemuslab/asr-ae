@@ -148,7 +148,7 @@ def plot_error_vs_depth(est_seqs: NDArray[np.integer], real_seqs: NDArray[np.int
     # Scatter plot
     plt.scatter(depths, ham_errors, label="Hamming Error", alpha=0.5)
     
-    # Add LOESS smooth
+    # Add LOWESS smooth
     valid_data = [(d, e) for d, e in zip(depths, ham_errors) if e is not None]
     if valid_data:
         valid_depths, valid_errors = zip(*valid_data)

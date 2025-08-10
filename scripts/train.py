@@ -2,6 +2,7 @@ from datetime import date
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import re
 import os
 import pickle
 from sklearn.model_selection import train_test_split
@@ -110,8 +111,9 @@ def main():
     os.makedirs(model_dir, exist_ok=True)
     model_path = os.path.join(model_dir, model_name)
 
-    # check if model with same configs (ignoring date) already exists and only proceed if it doesn't
-    existing_models = [f for f in os.listdir(model_dir) if f.startswith(model_configs)]
+    # check if model with same configs already exists and only proceed if it doesn't
+    pattern = re.compile(re.escape(model_configs) + r"\D")
+    existing_models = [f for f in os.listdir(model_dir) if pattern.match(f)]
     if existing_models and not rerun:
         print(f"Model with same configs has already been trained and is saved at {model_dir} with name\n{existing_models[0]}")
         return
