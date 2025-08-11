@@ -14,8 +14,8 @@ from utilities.utils import get_directory
 
 
 # Edit paths appropriately
-data_path = "msas/independent/processed/10000/pevae"
-tree_path = "trees/fast_trees/10000/pevae.clean.tree"
+data_path = "msas/independent/processed/5000/COG2814-l100-s1-a0.5"
+tree_path = "trees/fast_trees/5000/COG2814.clean.tree"
 model_name = "ding_layers500_ld2_wd0.001_epoch500_2025-07-17.pt"
 save = True
 
@@ -72,10 +72,10 @@ for k in range(len(spec_leaves)):
     for anc in spec_leaves_ancs[leaf_name]:
         data.loc[anc, :] = (embed_data.loc[anc, "dim0"], embed_data.loc[anc, "dim1"], t.get_distance(t&anc))
 
-    plt.plot(data.loc[leaf_name,'mu1'], data.loc[leaf_name,'mu2'], '+r', markersize=20)
+    plt.plot(data.loc[leaf_name,'mu1'], data.loc[leaf_name,'mu2'], '+r', markersize=20, markeredgewidth=2)
     #plt.text(data.loc[leaf_name, 'mu1'], data.loc[leaf_name, 'mu2'], leaf_name, color='red', fontsize=8, ha='center', va='center', fontweight='bold')
+    plt.scatter(data.loc[:,'mu1'], data.loc[:,'mu2'], c = data.loc[:, 'depth'], s=50, cmap=plt.get_cmap('viridis'))
     plt.plot( data.loc[:, 'mu1'], data.loc[:, 'mu2'], color='gray', linestyle='-', linewidth=1.5)
-    plt.scatter(data.loc[:,'mu1'], data.loc[:,'mu2'], c = data.loc[:, 'depth'], s=20, cmap=plt.get_cmap('viridis'))
     
 
 # Plot all other embeddings in the background
