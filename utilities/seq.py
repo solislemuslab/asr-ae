@@ -17,18 +17,12 @@ def aa_to_int(main_aa_symbols, unknown_aa_symbols):
         aa_index[aa] = 0
     return aa_index
 
-def aa_to_int_from_path(data_path, is_pevae=False):
+def aa_to_int_from_path(data_path):
     """
     Load the amino acid to integer mapping from the family folder (the one that has the processed MSA files).
     """
-    if is_pevae:    
-            with open(f"{data_path}/LG_matrix.pkl", 'rb') as file_handle:
-                LG_matrix = pickle.load(file_handle)
-            amino_acids = LG_matrix['amino_acids']
-            aa_index = aa_to_int(amino_acids, constants.UNKNOWN)
-    else:
-        with open(f"{data_path}/aa_index.pkl", 'rb') as file_handle:
-            aa_index = pickle.load(file_handle)
+    with open(f"{data_path}/aa_index.pkl", 'rb') as file_handle:
+        aa_index = pickle.load(file_handle)
     return aa_index
 
 def invert_dict(aa_index, unknown_symbol = '-'):

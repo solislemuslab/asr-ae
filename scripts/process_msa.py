@@ -78,7 +78,7 @@ def get_seqs(msa_file_path, sim_type):
                 if not (record.id.startswith("N") and record.id[1:].isdigit()): # exclude ancestral sequences
                     continue
                 seq_dict[record.id] = str(record.seq).upper()
-        else: #real data (other than PF00565, see `get_euk_seqs`) is in fasta format and does not have ancestral sequences
+        else: #real data does not have ancestral sequences  
             for record in SeqIO.parse(file_handle, format):
                 seq_dict[record.id] = str(record.seq).upper()
     return seq_dict
@@ -157,7 +157,7 @@ def main():
         processed_directory = f"msas/{sim_type}/processed/{num_seqs}/{fam_name}"
     else:
         sim_type = "real"
-        processed_directory = f"msas/real/processed/{fam_name}"
+        processed_directory = f"msas/real/processed/{fam_name}_new"
     if not path.exists(processed_directory):
         makedirs(processed_directory)
     
@@ -201,7 +201,9 @@ def main():
 
     # Step 6: Convert to a binary (one-hot) encoding
     seq_ary_binary = one_hot_encode(seq_ary_int)
-    if seq_ary_binary.shape[2] == 20: # this means that there are no gaps in the MSA, so we delete the gap keys from the aa_index
+    # CRUCIAL INVARIANT THAT OTHER CODE DEPENDS ON:
+    # IF THE ONE HOT ENCODED MSA DOES NOT HAVE A GAP COLUMN, THEN THE DICTIONARY MAPPING AMINO ACIDS TO INTEGERS WILL NOT HAVE ANY GAP SYMBOLS 
+    if seq_ary_binary.shape[2] == 20: 
         for symbol in constants.UNKNOWN:
             del aa_index[symbol]
 

@@ -32,55 +32,101 @@ def get_prior_seqs(model: nn.Module, n_anc: int) -> NDArray[np.integer]:
        max_prob_idx = max_prob_idx + 1
     return max_prob_idx.numpy()
 
-def get_recon_ancseqs(model: nn.Module, recon_embeds: pd.DataFrame) -> NDArray[np.integer]:
-    # convert reconstructed embeddings to torch tensor
+def get_recon_ancseqs(model: nn.Module, recon_embeds: pd.DataFrame, return_probs: bool=False) -> np.ndarray:
+    """
+    Decode reconstructed embeddings into sequences.
+    - Returns np array with two axes (seq, position) of integers representing most like aa if return_probs=False (default).
+    - Returns np array of probabilities with three axes (seq, position, aa) if return_probs=True.
+    """
     mu = torch.tensor(recon_embeds.values , dtype=torch.float32)
-    # now we decode
     with torch.no_grad():
       log_p = model.decoder(mu)
+    # Return distribution
+    if return_probs:
+        return log_p.exp().numpy()
+    # Return most likely amino acid
     max_prob_idx = torch.argmax(log_p, -1)
-    if log_p.shape[-1] == 20:
-        # The model was trained without gaps, so we need to convert indices from 0-19 back to 1-20
+    if log_p.shape[-1] == 20: # No gap character was included in model's data (one-hot-encoded MSA). We need to convert indices from 0-19 to 1-20
         max_prob_idx = max_prob_idx + 1
     return max_prob_idx.numpy()
 
-def get_modal_seq(data_path: str, n_anc: int) -> NDArray[np.integer]:
+def get_profile_leaves(data_path: str, n_anc: int, return_probs: bool=False) -> np.ndarray:
+    """
+    Get distribution of aa's (return_probs=True) or consensus aa (return_probs=False) 
+    at each position in MSA of leaf sequences
+    
+    - If return_probs=False (default): Return numpy array with two axes (seq, position) of integers representing most common aa 
+    - If return_probs=True: Return numpy array of probabilities with three axes (seq, position, aa) 
+    
+    In the latter case, the "aa" dimension will be 21 *even if the MSA has no gaps*.
+    The "seq" dimension has length n_anc and just consists of repeating
+    """
     with open(f"{data_path}/seq_msa_int.pkl", 'rb') as file_handle:
-        real_seq_leaves= pickle.load(file_handle)
-    mod_seq = []
-    for i in range(real_seq_leaves.shape[1]):
+        real_seq_leaves = pickle.load(file_handle)
+    nl = real_seq_leaves.shape[1]
+
+    # Return consensus sequence
+    if not return_probs:
+        mod_seq = []
+        for i in range(nl):
+            col = real_seq_leaves[:, i]
+            mod_seq.append(np.bincount(col).argmax())
+        return np.tile(np.array(mod_seq, dtype=int), (n_anc, 1))
+    
+    # Return distribution 
+    probs = np.zeros((nl, 21), dtype=np.float32)
+    for i in range(nl):
         col = real_seq_leaves[:, i]
-        mod_seq.append(np.bincount(col).argmax())
-    return np.tile(np.array(mod_seq), (n_anc, 1))
+        counts = np.bincount(col, minlength=21).astype(np.float32)
+        probs[i] = counts / counts.sum()
+    return np.tile(probs, (n_anc, 1, 1))
+
 
 def get_iqtree_ancseqs(iqtree_dir: str, aa_index: dict[str, int], 
-                       anc_id: List[str]) -> NDArray[np.integer]:
+                       anc_id: List[str], return_probs: bool=False, index_aa=None) -> np.ndarray:
     """
     Note that for some reason, IQTree does not reconstruct the sequence at the root node. Not sure why...
-    Usually, our trees will be unrooted, but occassionally, the trimming of extremely short external branches 
-    (for the software that fits a Brownian motion on the embeddings to reconstruct ancestral embeddings)
-    results in a tree that is rooted. In this case, there will be one node (i.e. the root) for which we
-    are able to obtain a reconstructed embedding that we can convert to a sequence, but for which IQ won't produce an ancestral sequence. 
-    For now, this function just notifies the user of the lack of predictions from IQTree for this node.
-    In the future, we can try to change this so that we evaluate IQTree and our approach on precisely the same set of nodes.
+    
+
+    Returns numpy array with two axes (seq, position) of integers representing most like aa if return_probs=False (default).
+    Returns numpy array of probabilities with three axes (seq, position, aa) if return_probs=True.
     """
+    
+    message_template = """Reconstructions for Node {id} not found in IQTree output 
+    because it is the root node in the cleaned tree, and for some reason, 
+    IQTree does not reconstruct the sequence at the root node."""
     iq_df = pd.read_table(f'{iqtree_dir}/results.state', header=8)
-    iq_df_sk = iq_df[["Node", "Site", "State"]]
-    iq_df_sk = iq_df_sk.sort_values(by=["Node", "Site"])
-    iq_df_sk.set_index("Node", inplace=True) 
-    seq_length = iq_df_sk["Site"].max()
-    placeholder = [-1] * seq_length # placeholder for missing reconstructions
-    iq_seqs = []
+    iq_df = iq_df.sort_values(by=["Node", "Site"])
+    iq_df.set_index("Node", inplace=True) 
+    seq_length = iq_df["Site"].max()
+    
+    # Return most likely amino acid
+    if not return_probs:
+        iq_df_sk = iq_df[["Node", "Site", "State"]]
+        placeholder = [-1] * seq_length # placeholder for missing reconstructions
+        iq_seqs = []
+        for id in anc_id:
+            if id not in iq_df_sk.index:
+                print(message_template.format(id=id))
+                iq_seqs.append(placeholder)
+                continue
+            recon_seq_df = iq_df_sk.loc[id]
+            recon_seq = [aa_index[char] for char in recon_seq_df.State.values]
+            iq_seqs.append(recon_seq)
+        return np.array(iq_seqs)
+    
+    # Return distribution
+    dists = []
+    placeholder = np.full((seq_length, 20), -1, dtype=np.float32)
     for id in anc_id:
-        if id not in iq_df_sk.index:
-            print(f"Reconstructions for Node {id} not found in IQTree output because it is the root node in the cleaned tree, "
-                  "and for some reason, IQTree does not reconstruct the sequence at the root node.")
-            iq_seqs.append(placeholder)
+        if id not in iq_df.index:
+            print(message_template.format(id=id))
+            dists.append(placeholder)
             continue
-        recon_seq_df = iq_df_sk.loc[id]
-        recon_seq = [aa_index[char] for char in recon_seq_df.State.values]
-        iq_seqs.append(recon_seq)
-    return np.array(iq_seqs)
+        recon_seq_df = iq_df.loc[id]
+        dist = recon_seq_df[[f"p_{index_aa[i]}" for i in range(1, 21)]].values
+        dists.append(dist)
+    return np.array(dists)
 
 def get_finch_ancseqs(recon_fitch_dict: dict[str, List[str]], aa_index: dict[str, int], 
                       anc_id: List[str]) -> NDArray[np.integer]:
@@ -239,8 +285,9 @@ def main():
     # load mappling from integer to amino acid and vice versa
     aa_index = aa_to_int_from_path(data_path)
     index_aa = invert_dict(aa_index, unknown_symbol='-')
-    nc = len(index_aa) # 20 or 21, depending on whether there are gaps in the MSA
-    
+    nc = len(index_aa) # 20 or 21, should equal the last dimension of one-hot encoded MSA input to the model, based on processing script process_msa.py
+    processed_msa_path = os.path.join(data_path, "seq_msa_char.fasta")
+
     ### Read in all models and their embeddings ####
     embeds_dir = get_directory(data_path, "embeddings", data_subfolder=True)
     model_dict = {} # all models
@@ -252,6 +299,7 @@ def main():
         model = load_model(model_path, nl=nl, nc=nc, ding_model=ding_model,
                             num_hidden_units=num_hidden_units, nlatent=ld,
                             one_hot=one_hot, dim_aa_embed=dim_aa_embed, trans=is_trans)
+        model.eval()
         # Read in embedding dataframe and retain only the columns that are embedding dimensions
         embeds_path = os.path.join(embeds_dir,
                                name.replace(".pt", "_anc-embeddings.csv"))
@@ -283,17 +331,17 @@ def main():
     ### Get reconstructed ancestral sequences from different approaches ####
     # Run Fitch
     print("Running Fitch...")
-    recon_fitch_dict = run_fitch(data_path, tree_path)
+    recon_fitch_dict = run_fitch(processed_msa_path, tree_path)
     # Run IQTree
     iqtree_dir = get_directory(data_path, "reconstructions/iqtree")
     os.makedirs(iqtree_dir, exist_ok=True)
     print("Running IQTree...")
     # TODO: use a different model and/or branch length optimization depending on the simulation type
-    run_iqtree(data_path, tree_path, iqtree_dir, redo=redo_iqtree)
+    run_iqtree(processed_msa_path, tree_path, iqtree_dir, redo=redo_iqtree)
     # Retrieve real internal sequences
     real_seqs, _ = get_real_internals(msa_path, aa_index, anc_id, pos_preserved)
     # Retrieve a sequence that is a consensus of the real leaf sequences
-    mod_seqs = get_modal_seq(data_path, n_anc)
+    mod_seqs = get_profile_leaves(data_path, n_anc)
     # Our approach
     for name in model_names:
         model = model_dict[name]["model"]

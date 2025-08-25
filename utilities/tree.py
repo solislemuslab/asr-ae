@@ -1,12 +1,24 @@
 import os
 from ete3 import Tree
 from Bio import SeqIO
+
+def filter_msa_by_tree(tree_file, msa_input, msa_output, tree_format=1):
+    """
+    Filters a Multiple Sequence Alignment (MSA) in FASTA format to include
+    only the sequences corresponding to the leaves of a Newick tree.
+    """
+    tree = Tree(tree_file, format=tree_format) 
+    leaf_names = set(tree.get_leaf_names())
+    sequences_to_keep = (record for record in SeqIO.parse(msa_input, "fasta") if record.id in leaf_names)
+    SeqIO.write(sequences_to_keep, msa_output, "fasta")
+
+
 def get_depths(tree_path, tree_format=1):
     """
     Given path to tree, return dictionary mapping internal node names to their depth, i.e. their distance to nearest leaf.
     """
 
-    def compute_up(tree):
+    def _compute_up(tree):
         """ 
         Calling this function creates an attribute called `dists_below` for every node (including leaves) in the rooted tree,
         which stores the distance from the node to all leaves below the node.
@@ -20,7 +32,7 @@ def get_depths(tree_path, tree_format=1):
                     for leaf, d in child.dists_below.items():
                         node.dists_below[leaf] = d + child.dist
 
-    def compute_down(tree):
+    def _compute_down(tree):
         """
         tree must have attribute `dists_below` computed for every node
         Key idea: suppose that I'm some arbitrary node. For any leaf that's not in my subtree, the distance from me to it is 
@@ -36,8 +48,8 @@ def get_depths(tree_path, tree_format=1):
 
 
     tree = Tree(tree_path, format=tree_format)
-    compute_up(tree)
-    compute_down(tree)
+    _compute_up(tree)
+    _compute_down(tree)
     internal_depths = {}
     for node in tree.traverse():
         if node.is_leaf():
@@ -46,40 +58,39 @@ def get_depths(tree_path, tree_format=1):
     return internal_depths
 
 
-def _fitch1(profile_seq1, profile_seq2):
-    profile_seq = []
-    for prof1, prof2 in zip(profile_seq1, profile_seq2):
-        profile = prof1 & prof2 #intersection
-        if not profile: #if intersection empty
-            profile = prof1 | prof2 #union
-        profile_seq.append(profile)
-    return profile_seq
-
-
-def _fitch2(profile_seq, parent_seq):
-    seq = []
-    for prof, char in zip(profile_seq, parent_seq):
-        if char in prof:
-            seq.append(char) # use parent's state
-        else:
-            seq.append(list(prof)[0]) # choose randomly from child's profile
-    return seq
-
-def run_fitch(data_path, tree_path):
+def run_fitch(msa_path, tree_path):
     """
     Run Fitch algorithm to infer ancestral sequences. 
     Returns dictionary mapping internal node names to strings (reconstructed sequences)
     """
+
+    def _fitch1(profile_seq1, profile_seq2):
+        profile_seq = []
+        for prof1, prof2 in zip(profile_seq1, profile_seq2):
+            profile = prof1 & prof2 #intersection
+            if not profile: #if intersection empty
+                profile = prof1 | prof2 #union
+            profile_seq.append(profile)
+        return profile_seq
+    
+    def _fitch2(profile_seq, parent_seq):
+        seq = []
+        for prof, char in zip(profile_seq, parent_seq):
+            if char in prof:
+                seq.append(char) # use parent's state
+            else:
+                seq.append(list(prof)[0]) # choose randomly from child's profile
+        return seq
+    
     tree = Tree(tree_path, format=1)
     # Because the tree is unrooted, but Ete3 reads it as rooted, there is a polytomy at the root
     # We can convert the polytomy at the root by creating an arbitrary dicotomic structure 
     # This is necessary for the fitch algorithm to work, as it requires a rooted binary tree
     # Alternatively, we can midpoint root.
-    # I'm not sure if the ASR will be the same in both cases--my assumption is that the output of Fitch algorithm is sensitive to where root is placed.
+    # I'm not sure if the ASR will be the same in both cases--I think the output of Fitch algorithm may be sensitive to where root is placed.
     tree.resolve_polytomy(recursive=False) 
     profile_seqs = {}
     # get states at leaves from msa
-    msa_path = os.path.join(data_path, "seq_msa_char.fasta")
     with open(msa_path, 'r') as file_handle:
         for record in SeqIO.parse(file_handle, "fasta"):
             profile_seqs[record.id] = [{char} for char in str(record.seq)]
@@ -108,7 +119,7 @@ def run_fitch(data_path, tree_path):
         recon_seqs[node.name] = _fitch2(profile_seqs[node.name], recon_seqs[parent.name])
     return recon_seqs
 
-def run_iqtree(data_path, tree_path, iqtree_dir, 
+def run_iqtree(msa_path, tree_path, iqtree_dir, 
                model="LG+G", optimize_branch_lengths=False, redo=False):
     # If you want to scale the tree:
     # scaled_tree_path = f"{tree_path}_scaled{scaling_factor}"
@@ -125,7 +136,7 @@ def run_iqtree(data_path, tree_path, iqtree_dir,
     redo_flag = " -redo" if redo else ""
     blfix_flag = " -blfix" if not optimize_branch_lengths else ""
     os.system(
-        f"iqtree/bin/iqtree2 -s {data_path}/seq_msa_char.fasta "
+        f"iqtree/bin/iqtree2 -s {msa_path} "
         f"-m {model} -te {tree_path} -asr -quiet {redo_flag} {blfix_flag} "
         f"-pre {iqtree_dir}/results"
     )
