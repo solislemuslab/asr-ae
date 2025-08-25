@@ -1,22 +1,22 @@
 {
-    "data_path": "msas/ardca/processed/1250/COG28-PF00565",
-    "msa_path": "msas/ardca/raw/1250/COG28-PF00565.fa",
-    "tree_path": "trees/fast_trees/1250/COG28.clean.tree",
+    "data_path": "msas/real/processed/PF00565_og",
+    "msa_path": "msas/real/raw/PF00565.stk",
+    "tree_path": "trees/inferred_real_trees/PF00565.treefile",
     "training": {
-        "ding": true,
         "rerun": false,
-        "one_hot": true,
         "weigh_seqs": false,
         "use_transformer": false,
+        "one_hot": true,
         "dim_aa_embed": 2,
+        "ding": true,
         "num_hidden_units": [
             500
         ],
         "latent_dim": 20,
         "num_epochs": 500,
         "learning_rate": 0.001,
-        "weight_decay": 0.01,
-        "batch_size": 128,
+        "weight_decay": 0.005,
+        "batch_size": 64,
         "validate": true,
         "iwae_num_samples": 100,
         "verbose": false,
@@ -24,7 +24,7 @@
         "plot_results": true
     },
     "generate": {
-        "model_name": "ding_layers500_ld20_wd0.01_epoch500_2025-07-22.pt",
+        "model_name": "ding_layers500_ld2_wd0.001_epoch500_2025-08-18.pt",
         "plot": true,
         "model_gapped_data_not": false
     },

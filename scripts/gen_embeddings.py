@@ -59,7 +59,7 @@ def plot_embeddings(mu_leaves, mu_internal, data_path, model_name,
     os.makedirs(plot_dir, exist_ok=True)
     plt.savefig(f"{plot_dir}/{plot_name}", bbox_inches='tight')
 
-def save_embeddings(mu_leaves, mu_internal, all_ids, data_path, model_name):
+def save_embeddings(mu_leaves, mu_internal, all_ids, data_path, model_name, suffix="_embeddings.csv"):
     """
     Save the embeddings to a csv file.
     """
@@ -69,7 +69,7 @@ def save_embeddings(mu_leaves, mu_internal, all_ids, data_path, model_name):
     embeddings = pd.DataFrame(mu, columns=[f"dim{i}" for i in range(mu.shape[1])])
     embeddings.insert(0, "id", all_ids)
     # Save to csv
-    embeddings_name = os.path.splitext(model_name)[0] + "_embeddings.csv"
+    embeddings_name = os.path.splitext(model_name)[0] + suffix
     embeddings_dir = get_directory(data_path, "embeddings", data_subfolder=True)
     os.makedirs(embeddings_dir, exist_ok=True)
     embeddings.to_csv(f"{embeddings_dir}/{embeddings_name}", index=False)

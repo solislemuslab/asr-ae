@@ -31,7 +31,7 @@ alphabet = arvar.q == 21 ? :ardca_aa : ASR.Alphabet("ACDEFGHIKLMNPQRSTVWY")
 ar_model = AutoRegressiveModel(arnet; alphabet=alphabet) 
 
 # ASR strategy
-strategy = strategy = ASRMethod(;
+strategy = ASRMethod(;
     joint = false, # (default) - joint reconstruction not functional yet
     ML = true, # (default)
     verbosity = 2, # the default is 0. 
@@ -41,7 +41,8 @@ strategy = strategy = ASRMethod(;
 )
 # Run ASR
 opt_tree, reconstructed_sequences = infer_ancestral(
-	tree_file, msa_file, ar_model, strategy
+	tree_file, msa_file, ar_model, strategy;
+    #alignment_per_node=true, node_list = ["A35368", "A27193"], outfasta = "reconstructions/ardca/real/PF00144-rep/reconstructed"
 )
 
 # Write reconstructed sequences to a fasta file
