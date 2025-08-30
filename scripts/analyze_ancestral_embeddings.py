@@ -14,8 +14,8 @@ from utilities.utils import get_directory
 
 
 # Edit paths appropriately
-data_path = "msas/independent/processed/5000/COG2814-l100-s1-a0.5"
-tree_path = "trees/fast_trees/5000/COG2814.clean.tree"
+data_path = "msas/independent/processed/10000/pevae"
+tree_path = "trees/fast_trees/10000/pevae.clean.tree"
 model_name = "ding_layers500_ld2_wd0.001_epoch500_2025-07-17.pt"
 save = True
 
@@ -92,7 +92,7 @@ legend_elements = [
 plt.xlabel("$Z_1$")
 plt.ylabel("$Z_2$")
 cbar = plt.colorbar()
-cbar.set_label("distance to root")
+cbar.set_label("Distance to Root")
 #plt.legend(handles=legend_elements)
 if save:
     model = os.path.splitext(model_name)[0]

@@ -10,8 +10,8 @@ suppressPackageStartupMessages({
 #======= Edit the following code to run the script for the desired family/model ==========#
 manuscript_figure = TRUE 
 if (manuscript_figure) { 
-    data_path = "msas/real/processed/PF00144"
-    model = "ding_layers1000_ld20_wd0.005_epoch500_2025-08-14.pt"
+    data_path = "msas/independent/processed/10000/pevae"
+    model = "ding_layers500_ld2_wd0.001_epoch500_2025-07-17.pt"
 } else { # family/model will be specified by command line (see `run_pipeline.sh`)
     data_path <- commandArgs(trailingOnly = TRUE)[1]
     model <- commandArgs(trailingOnly = TRUE)[2]
@@ -211,12 +211,18 @@ vert_size <- c(
     rep(0.3, nancs) #0.6
 )
 
-# highlight some ancestors
+# highlight some ancestors and leaves
 # root_name <- paste0("A", as.integer(path_split(tree_dir)[[1]][3])+1)
-# hlight <- c("Root", "A35368")
-# hlight_index <- which(rownames(reduced_leaf_plus_recon_anc_embeds) %in% hlight)
-# vert_bord[hlight_index] = "black"
-# vert_size[hlight_index] = 1
+# hlight_ancs <- c("Root", "A35368")
+# hlight_ancs_index <- which(rownames(reduced_leaf_plus_recon_anc_embeds) %in% hlight_ancs)
+# vert_bord[hlight_ancs_index] = "black"
+# vert_size[hlight_ancs_index] = 1
+
+# hlight_leaves <- c("A0A1I1L7I8_9GAMM/29-374", "A0A0A8E0Q6_9XANT/43-397")
+# hlight_leaves_index <- which(rownames(reduced_leaf_plus_recon_anc_embeds) %in% hlight_leaves)
+# vert_bord[hlight_leaves_index] = "black"
+# vert_size[hlight_leaves_index] = 1
+
 
 # Actual plotting
 if (manuscript_figure) {
@@ -243,41 +249,48 @@ plot.network(net,
 
 # Label highlighted taxa
 # text(
-#     reduced_leaf_plus_recon_anc_embeds[hlight,],
-#     labels = hlight,
+#     reduced_leaf_plus_recon_anc_embeds[hlight_ancs,],
+#     labels = hlight_ancs,
 #     adj = c(0,1.75),
-#     cex = 1.3
+#     cex = 1
 # )
+# text(
+#     reduced_leaf_plus_recon_anc_embeds[hlight_leaves,],
+#     labels = str_split_i(hlight_leaves, "/", 1),
+#     adj = c(1.,0),
+#     cex = 0.5
+# )
+
 
 # add the legend
 if (errors_recorded) {
     legend("bottomleft",
         pch = 16,
-        cex = 1.65, 
-        #cex = .75,
-        title.cex = 1.65,
+        #cex = 1.65, 
+        cex = 1.25,
+        title.cex = 1.25,
         bty = "n",
         col = color_palette(colorbar_labels),
         legend = colorbar_labels,
         title = "ASR error\n(Hamming)",
-        inset = c(0.05, 0.05),
+        inset = c(0.06, 0.06),
         ncol = 2
     )
     legend("bottomleft",
         pch = 1,
-        cex = 1.65, 
+        cex = 1.25, 
         #cex = .75,
         bty = "n",
         col = "black",
         legend = "Tip",
-        inset = c(0.1, 0)
+        inset = c(0.08, 0.03)
     )
 } else {
     legend("bottomleft",
         pch = 16,
-        cex = 1.65, 
+        cex = 1., 
         #cex = .75,
-        title.cex = 1.65,
+        title.cex = 1.,
         border = "black",
         bty = "n",
         col = unique(vert_col),
@@ -319,7 +332,9 @@ if (sim) {
             y = expression("Z"[2])
         ) +
         theme(
-            legend.position = "bottom"
+            legend.position = "bottom",
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank()
         ) 
 
     if (manuscript_figure) {

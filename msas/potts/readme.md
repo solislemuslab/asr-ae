@@ -1,10 +1,12 @@
-To fit a Potts model, we used the Julia version of adabmDCA 2.0. The Julia package can be installed from the Github repository [https://github.com/spqb/adabmDCA.jl](adabmDCA.jl) and the wrapper scripts `execute.jl` and `adabmDCA.sh` by following the instructions in the README of the Github repository. 
+To fit a Potts model, we used the Julia implementation of adabmDCA 2.0, installed in Julia from the Github repository [https://github.com/spqb/adabmDCA.jl](adabmDCA.jl). The wrapper scripts to run the functionality from the package are located at `scripts/adabmDCA`.
 
-With the wrapper scripts installed in the directory `scripts/adabmDCA/`, we can train the DCA model (with a Boltzmann machine) on the pre-processed MSA of PF00565 located at `msas/real/processed/PF00565/seq_msa_char.fasta` using the following command:
+Train a DCA model to the pre-processed MSA of PF00565 with
 ```
 scripts/adabmDCA/adabmDCA.sh train -d msas/real/processed/PF00565/seq_msa_char.fasta -o msas/potts --nthreads 4 -l pf00565
 ```
-This program uses multi-threading in Julia (with the number of threads specified with the `nthreads` flag). The threads unfortunately sometimes get locked, causing the program to hang. If this happens to you, you can quit the program and then resume training from the most recent saved parameters and saved Markov chains (the program will save the current parameters and chains during training every 50 epochs) by running 
+This program uses multi-threading in Julia (with the number of threads specified with the `nthreads` flag). The threads unfortunately sometimes get locked due to issues in the code, causing the program to hang. If this happens, you can train with `--nthreads 1`, although this will be significantly slower. Note that the code can still get locked even with `--nthreads 1`--there is currently some issue with the `adabmDCA.jl` code that needs to be debugged. 
+
+You can resume training from the most recent saved parameters and saved Markov chains (the program will save the current parameters and chains during training every 50 epochs) by running 
 ```
 scripts/adabmDCA/adabmDCA.sh train -d msas/real/processed/PF00565/seq_msa_char.fasta -o msas/potts --nthreads 4 -l pf00565 -p msas/potts/pf00565_params.dat -c msas/potts/pf00565_chains.fasta
 ```
