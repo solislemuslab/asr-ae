@@ -331,7 +331,7 @@ def main():
     ### Get reconstructed ancestral sequences from different approaches ####
     # Run Fitch
     print("Running Fitch...")
-    recon_fitch_dict = run_fitch(processed_msa_path, tree_path)
+    _, recon_fitch_dict = run_fitch(processed_msa_path, tree_path)
     # Run IQTree
     iqtree_dir = get_directory(data_path, "reconstructions/iqtree")
     os.makedirs(iqtree_dir, exist_ok=True)

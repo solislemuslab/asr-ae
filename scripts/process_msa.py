@@ -67,8 +67,6 @@ def get_euk_seqs(msa_file_path, metadata_file_path):
 def get_seqs(msa_file_path, sim_type):
     """
     Collect the leaf sequences from the MSA file into a dictionary 
-
-    This needs to get fixed to deal with the fact that the format output by SeqGen is currently not being parsed correctly by SeqIO
     """
     seq_dict = {} # sequence id -> sequence
     format = "fasta"
@@ -157,7 +155,7 @@ def main():
         processed_directory = f"msas/{sim_type}/processed/{num_seqs}/{fam_name}"
     else:
         sim_type = "real"
-        processed_directory = f"msas/real/processed/{fam_name}_new"
+        processed_directory = f"msas/real/processed/{fam_name}"
     if not path.exists(processed_directory):
         makedirs(processed_directory)
     
@@ -195,6 +193,8 @@ def main():
     # note that pos_not_sparse indexes positions in the sequences after the gaps from the query sequence have already been removed
     if args.real:
         pos_not_sparse = is_not_query_gap[pos_not_sparse]
+
+    # Remove duplicates?
 
     # Step 5: get sequence weights
     seq_weight = weight_seqs(seq_ary_int)

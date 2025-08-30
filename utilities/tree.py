@@ -58,10 +58,12 @@ def get_depths(tree_path, tree_format=1):
     return internal_depths
 
 
-def run_fitch(msa_path, tree_path):
+def run_fitch(msa_path, tree_path, verbose=False):
     """
     Run Fitch algorithm to infer ancestral sequences. 
-    Returns dictionary mapping internal node names to strings (reconstructed sequences)
+    Returns tuple 
+        - First element: List of possible states for each site at the root of tree  (list of sets of characters)
+        - Second element: Dictionary mapping internal node names to reconstructed sequences (strings)
     """
 
     def _fitch1(profile_seq1, profile_seq2):
@@ -106,7 +108,7 @@ def run_fitch(msa_path, tree_path):
     for (i, prof) in enumerate(profile_seqs[tree.name]):
         prof = list(prof)
         chosen = prof[0]
-        if len(prof) > 1:
+        if verbose and len(prof) > 1 :
             print(f"Ambiguous state at root position {i}: {prof}. Choosing {chosen}")
         root_reconstruction.append(chosen)
     # traverse in preorder
@@ -117,7 +119,7 @@ def run_fitch(msa_path, tree_path):
             continue
         parent = node.up
         recon_seqs[node.name] = _fitch2(profile_seqs[node.name], recon_seqs[parent.name])
-    return recon_seqs
+    return profile_seqs[tree.name], recon_seqs
 
 def run_iqtree(msa_path, tree_path, iqtree_dir, 
                model="LG+G", optimize_branch_lengths=False, redo=False):
