@@ -8,7 +8,7 @@ suppressPackageStartupMessages({
 })
 
 #======= Edit the following code to run the script for the desired family/model ==========#
-manuscript_figure = TRUE 
+manuscript_figure = FALSE
 if (manuscript_figure) { 
     data_path = "msas/independent/processed/10000/pevae"
     model = "ding_layers500_ld2_wd0.001_epoch500_2025-07-17.pt"

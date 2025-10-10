@@ -97,7 +97,7 @@ def get_iqtree_ancseqs(iqtree_dir: str, aa_index: dict[str, int],
     IQTree does not reconstruct the sequence at the root node."""
     iq_df = pd.read_table(f'{iqtree_dir}/results.state', header=8)
     iq_df = iq_df.sort_values(by=["Node", "Site"])
-    iq_df.set_index("Node", inplace=True) 
+    iq_df.set_index("Node", inplace=True, drop=False) 
     seq_length = iq_df["Site"].max()
     
     # Return most likely amino acid
