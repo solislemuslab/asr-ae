@@ -92,6 +92,7 @@ def main():
     lr = training_config["learning_rate"]
     wd = training_config["weight_decay"]
     latent_dim = training_config["latent_dim"]
+    beta = training_config["beta"]
     validate = training_config["validate"]
     iwae_num_samples = training_config["iwae_num_samples"]
     verbose = training_config["verbose"]
@@ -105,7 +106,11 @@ def main():
     aa_embed_str = f"aaembed{dim_aa_embed}_" if not one_hot else ""
     trans_str = "trans-" if use_transformer else ""
     ding_str = "ding" if ding else "model"
-    model_configs=f"{trans_str}{ding_str}_{weight_str}{aa_embed_str}layers{layers_str}_ld{latent_dim}_wd{wd}_epoch{num_epochs}"
+    beta_str = f"beta{beta}" if beta != 1 else ""
+    model_configs=(
+        f"{trans_str}{ding_str}{weight_str}{aa_embed_str}{beta_str}_"
+        f"layers{layers_str}_ld{latent_dim}_wd{wd}_epoch{num_epochs}"
+    )
     model_name = f"{model_configs}_{today}.pt"
     model_dir = get_directory(data_path, "saved_models")
     os.makedirs(model_dir, exist_ok=True)
@@ -132,14 +137,17 @@ def main():
     if use_transformer:
         model = TVAE(nl=nl, nc=nc, 
                      dim_latent_vars=latent_dim,
-                     num_hidden_units=num_hidden_units).to(device)
+                     num_hidden_units=num_hidden_units,
+                     beta=beta).to(device)
     elif one_hot:
         model = VAE(nl=nl, nc=nc, dim_latent_vars=latent_dim,
-                    num_hidden_units=num_hidden_units, ding=ding).to(device)
+                    num_hidden_units=num_hidden_units, ding=ding,
+                    beta=beta).to(device)
     else:
         model = EmbedVAE(nl=nl, nc=nc, dim_aa_embed=dim_aa_embed,
                         dim_latent_vars=latent_dim,
-                        num_hidden_units=num_hidden_units).to(device)
+                        num_hidden_units=num_hidden_units,
+                        beta=beta).to(device)
 
     # optimizer
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=wd)

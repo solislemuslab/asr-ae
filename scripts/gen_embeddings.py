@@ -89,7 +89,12 @@ def main():
     plot = config["generate"]["plot"]
     model_gapped_data_not = config["generate"]["model_gapped_data_not"]
     # Get model hyperparameters from name
-    is_trans, ld, num_hidden_units, dim_aa_embed, one_hot = parse_model_name(model_name)
+    (is_trans,
+        ld,
+        num_hidden_units,
+        dim_aa_embed,
+        one_hot
+     ) = parse_model_name(model_name)
     # load leaf sequence data
     leaf_data, nl, nc = load_data(data_path, one_hot=one_hot)
     leaf_onehot, leaf_ids = leaf_data.msa, leaf_data.seq_keys

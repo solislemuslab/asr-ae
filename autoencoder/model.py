@@ -14,7 +14,8 @@ import torch.nn.functional as F
 class VAE(nn.Module):
     def __init__(self, nl, nc=21,
                  dim_latent_vars=10,
-                 num_hidden_units=[100], ding=False):
+                 num_hidden_units=[100], ding=False,
+                 beta=1.0):
         """
         - nl: length of sequences in the MSA
         - nc: number of amino acid types (default is 21, which includes the gap character)
@@ -48,6 +49,9 @@ class VAE(nn.Module):
 
         # num of hidden neurons in encoder and decoder networks
         self.num_hidden_units = num_hidden_units
+
+        # beta-VAE scaling for KL term
+        self.beta = beta
 
         # activation function
         self.activation = F.tanh if ding else F.relu
@@ -133,7 +137,7 @@ class VAE(nn.Module):
         weighted_kl = kl*weight
 
         # compute elbo
-        weighted_elbo = weighted_log_PxGz - weighted_kl
+        weighted_elbo = weighted_log_PxGz - self.beta * weighted_kl
 
         # return averages
         weighted_ave_elbo = torch.sum(weighted_elbo)
@@ -186,7 +190,8 @@ class VAE(nn.Module):
 
 
 class EmbedVAE(nn.Module):
-    def __init__(self, nl, nc=21, dim_aa_embed=5, dim_latent_vars=10, num_hidden_units=[100]):
+    def __init__(self, nl, nc=21, dim_aa_embed=5, dim_latent_vars=10,
+                 num_hidden_units=[100], beta=1.0):
         """
         This model accepts batches of sequences encoded as vectors of integer indices.
         The first thing the encoder does is embed each amino acid in the sequence and then concatenate the embeddings to represent the sequence
@@ -209,6 +214,9 @@ class EmbedVAE(nn.Module):
 
         # num of hidden neurons in encoder and decoder networks
         self.num_hidden_units = num_hidden_units
+
+        # beta-VAE scaling for KL term
+        self.beta = beta
 
         # encoder
         self.aa_embed = nn.Embedding(nc, dim_aa_embed)
@@ -294,7 +302,7 @@ class EmbedVAE(nn.Module):
         weighted_kl = kl*weight
 
         # compute elbo
-        weighted_elbo = weighted_log_PxGz - weighted_kl
+        weighted_elbo = weighted_log_PxGz - self.beta * weighted_kl
 
         # return averages
         weighted_ave_elbo = torch.sum(weighted_elbo)
@@ -346,7 +354,8 @@ class EmbedVAE(nn.Module):
 
 
 class LVAE(nn.Module):
-    def __init__(self, nl, nc=21, dim_latent_vars=10, num_hidden_units=[256, 256]):
+    def __init__(self, nl, nc=21, dim_latent_vars=10,
+                 num_hidden_units=[256, 256], beta=1.0):
         """
         Our default is that the latent embeddings are dimension 10 and there are
         256 neurons in each of the hidden layers of the encoder and decoder
@@ -367,6 +376,9 @@ class LVAE(nn.Module):
 
         # num of hidden neurons in encoder and decoder networks
         self.num_hidden_units = num_hidden_units
+
+        # beta-VAE scaling for KL term
+        self.beta = beta
 
         # encoder
         self.encoder_lstm_mu = nn.LSTM(
@@ -431,7 +443,7 @@ class LVAE(nn.Module):
         weighted_kl = kl*weight
 
         # compute elbo
-        weighted_elbo = weighted_log_PxGz - weighted_kl
+        weighted_elbo = weighted_log_PxGz - self.beta * weighted_kl
 
         # return averages
         weighted_ave_elbo = torch.sum(weighted_elbo)
@@ -494,7 +506,8 @@ class TVAE(nn.Module):
             embed_dim=8,
             num_layers=1,
             dim_latent_vars=10,
-            num_hidden_units=[256, 256]
+            num_hidden_units=[256, 256],
+            beta=1.0
     ):
         super(TVAE, self).__init__()
 
@@ -510,6 +523,9 @@ class TVAE(nn.Module):
         self.dim_latent_vars = dim_latent_vars
         # num of hidden neurons in encoder and decoder networks
         self.num_hidden_units = num_hidden_units
+
+        # beta-VAE scaling for KL term
+        self.beta = beta
 
         # encoder
         # transformer layers
@@ -615,7 +631,7 @@ class TVAE(nn.Module):
         weighted_kl = kl*weight
 
         # compute elbo
-        weighted_elbo = weighted_log_PxGz - weighted_kl
+        weighted_elbo = weighted_log_PxGz - self.beta * weighted_kl
 
         # return averages
         weighted_ave_elbo = torch.sum(weighted_elbo)

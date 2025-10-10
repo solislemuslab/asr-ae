@@ -1,4 +1,7 @@
-## Pipeline
+## Reproducing analyses from paper
+
+
+## Pipeline for benchmarking on simulated data
 
 This is the entire pipeline for executing and benchmarking our method on simulated data.
 
