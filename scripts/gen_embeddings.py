@@ -111,6 +111,8 @@ def main():
     model = load_model(model_path, nl=nl, nc=nc, ding_model=ding_model,
                        num_hidden_units=num_hidden_units, nlatent=ld,
                        one_hot=one_hot, dim_aa_embed=dim_aa_embed, trans=is_trans)  
+    model.eval()
+    
     # get embeddings 
     with torch.no_grad():
         mu_leaves, _ = model.encoder(leaf_onehot)
