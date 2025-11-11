@@ -350,7 +350,8 @@ if (sim) {
             path=plot_dir,
             unit = "px",
             width = 1200,
-            height = 1200
+            height = 1200,
+            bg = "white"
             )
     } 
 }
