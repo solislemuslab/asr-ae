@@ -11,19 +11,19 @@
 # Docker
 container
 
-# config files
-config2.json
-
 # OS
 **/*.icloud
 **/*.DS_Store
 
 #Other
-notebooks/
-**/*.tar.gz
+notebooks/analyze_model_potts.ipynb
+notebooks/potts_nophylo_checks.ipynb
+reconstruct_anc_pf00565.ipynb
+train.ipynb
 
 #Figrues
 figures/*
 
 # Misc
+**/*.tar.gz
 other_data_sources.md

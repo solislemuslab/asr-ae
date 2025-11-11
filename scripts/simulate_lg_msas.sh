@@ -67,9 +67,10 @@ if [ -n "$single_tree" ]; then
         n_seq="5000"
     elif [[ "$single_tree" =~ /1250/ ]]; then
         n_seq="1250"
+    elif [[ "$single_tree" =~ /10000/ ]]; then
+        n_seq="10000"
     else
-        echo "Could not determine n_seq (5000 or 1250) from tree file path."
-        exit 1
+        n_seq=""
     fi
     output_dir="msas/independent/raw/$n_seq"
     if [ ! -d "$output_dir" ]; then
