@@ -1,19 +1,29 @@
 # R stuff
 **/*.RData
 **/*.Rhistory
+
 # vscode
 .vscode/
+
 # cache
 **/__pycache__/
+
 # Docker
 container
+
 # config files
 config2.json
+
 # OS
 **/*.icloud
 **/*.DS_Store
+
 #Other
 notebooks/
 **/*.tar.gz
+
 #Figrues
 figures/*
+
+# Misc
+other_data_sources.md

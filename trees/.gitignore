@@ -1,3 +1,5 @@
 fast_trees/*/*fully_trim.tree
 fast_trees/10000/
 **/*clusters.txt
+trees/inferred_real_trees/pf00565*
+trees/inferred_real_trees/pf02033*
