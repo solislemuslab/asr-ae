@@ -1,9 +1,21 @@
+#=
+simulate_potts_msas.jl
+
+This script simulates evolution by Markov sampling from a fitted Potts model (parameters saved at `msas/potts/pf00565_params_intindex.dat`)
+along each of the phylogenetic trees located at trees/fast_trees/*/*.clean.tree
+
+The output MSAs are saved inside msas/potts/raw
+Usage:
+\$ julia --project=. scripts/simulate_potts_msas.jl
+=#
+
 using Random
 using Glob
 using UnPack
 using TreeTools
 using PottsEvolver
 using BioSequenceMappings
+
 ###### Function definitions ######
 """
 Label nodes of a tree according to a preorder traversal
@@ -15,6 +27,8 @@ function label_nodes!(tree)
         counter += 1
     end
 end
+
+
 ############### Main script ########################
 # Factor by which we scale the branch lengths of the trees
 scale=[1., 2.]

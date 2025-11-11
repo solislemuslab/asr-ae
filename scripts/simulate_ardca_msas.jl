@@ -1,6 +1,18 @@
-"""
-Simulate MSAs along phylogenetic trees using an ArDCA model fitted to a real MSA.
-"""
+#=
+simulate_ardca_msas.jl
+
+This script first fits an autoregressive model (ArDCA) to the (pre-processed) MSA, assumed to be saved at
+msas/real/processed/PF00565/seq_msa_char.fasta
+
+It then simulates evolution under the model from De Leonardis et al. 2025 with this fitted ArDCA model
+along each of the phylogenetic trees located at trees/fast_trees/*/*.clean.tree
+
+The output MSAs are saved inside msas/ardca/raw
+Usage:
+\$ julia --project=. scripts/simulate_ardca_msas.jl
+=#
+
+
 using JLD2
 using Glob
 using UnPack

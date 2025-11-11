@@ -1,19 +1,6 @@
-# Hailey's Scripts README # 
+A phylogenetic tree for PF00144 was inferred from the pre-processed MSAs at `msas/real/processed/PF00144_og/seq_msa_char.fasta` using IQTree 2 \citep{Minh2020}. Because no prior information was available regarding the appropriate evolutionary model, we enabled automatic model selection using the `-m MFP` option, which evaluates a range of candidate substitution models and selects the best-fitting model based on the lowest Bayesian Information Criterion (BIC).
 
-## IQ-Tree Scripts ##
-
-IQ-Tree Scripts for PF00565, PF00067, PF00041 can be found in `iqtree\IQ-TREE_Ding_Data_April24.R`
-
-  - These scripts were executed using the `tmux` command to run on the WID server
-  
-  - These trees are being constructed based on the processed MSAs from Evan, located at `msas/real/processed/pfam_id/seq_msa_char_pf*.fasta`. This is what is fed to IQTree
-  
-  - Because of no a priori information given regarding the evolutionary model, we use the `-MFP` command to let IQ-Tree find the best-fitting evolutionary model for each of the 3 datasets, respectively using lowest-BIC criterion.
-  
-  - Due to computational time / complexity, we use the "Ultrafast bootstrap" option with 1000 replicates (`-bb 1000`), which uses a pseudolikelihood approach to optimizing the tree rather than full likelihood (note: this approach has been shown to be less reliable than the regular bootstrap using full likelihood, but is too computationally complex to complete given the data size).  
-  
-  - As of May 21st, 2024, only the tree for PF00565 was finished running 
-  
-  - The tree single tree file for P00565 can be found in `trees\inferred_real_trees\pf00565`
-  
-
+In particular, we run
+```
+iqtree/bin/iqtree2 -s msas/real/processed/PF00144_og/seq_msa_char.fasta -m MFP -bb 1000
+```
