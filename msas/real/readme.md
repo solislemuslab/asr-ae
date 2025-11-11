@@ -1,6 +1,6 @@
-For PFAM protein family PF00565 (Staphylococcal nuclease homologues), which was also analyzed by [Ding](https://www.nature.com/articles/s41467-019-13633-0), we downloaded the raw "full" MSA (v. 21) to `msas/real/PF00565.stk`
+For PFAM protein family PF00565 (Staphylococcal nuclease homologues), which was also analyzed by [Ding](https://www.nature.com/articles/s41467-019-13633-0), we downloaded the raw "full" MSA (v. 21) to `msas/real/raw/PF00565.stk`
 
-For PFAM protein family PF00144 (beta-lactamase), which was analyzed by [Detlefsen](https://www.nature.com/articles/s41467-022-29443-w), we download `https://github.com/MachineLearningLifeScience/meaningful-protein-representations/blob/master/tape/PF00144_full.txt`, which we assume was obtained from the full alignment of the family from PFAM, to `msas/real/PF00144.fasta`
+For PFAM protein family PF00144 (beta-lactamase), which was analyzed by [Detlefsen](https://www.nature.com/articles/s41467-022-29443-w), we download `https://github.com/MachineLearningLifeScience/meaningful-protein-representations/blob/master/tape/PF00144_full.txt`, which we assume was obtained from the full alignment of the family from PFAM, to `msas/real/raw/PF00144.fasta`
 
 To generate the files in the directory `msas/real/processed/PF00565`, we run 
 ``` 
