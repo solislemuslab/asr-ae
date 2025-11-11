@@ -75,17 +75,20 @@ python scripts/process_msa.py msas/independent/raw/1250/COG28-l100-s1-a0.5.fa
 This command will generate a directory in `msas/independent/processed/1250` called `COG28-l100-s1-a0.5`. In this directory, you will find all the Python objects (as `.pkl` files) that represent the processed MSA for the purposes of the VAE, as well as a fasta file of the processed MSA. As opposed to the raw MSA generated in step 1, this processed MSA does not include the ancestral sequences.
 
 
+*NB: `run_pipeline.sh` is a wrapper to run all of steps 3-6 below. Just set the specifications in `config.json` and run `run_pipeline.sh config.json` and it will do all four steps (training the VAE, generating embeddings, reconstructing ancestral embeddings, and decoding back to sequences and evaluating)*
+
+
 3. The next step is to train the VAE! Check out the file `config.json`. This file contains configuration details for the training. You can manually edit the details of this file. When you have specified all the configs you want, including the path to the folder with the saved data files that we just generated, `msas/independent/processed/1250/COG28-l100-s1-a0.5`,  simply run
 ```
 python autoencoder/train.py config.json
 ```
-The value of test and training loss, as well as test reconstruction accuracy, after every epoch will get printed to standard output. If `plot_results` is true, a plot of the learning curve will be saved in `plots/independent/1250/COG28-l100-s1-aNone` after training completes. If `save_model` is true, the model will get saved in `saved_models/independent/1250/COG28-l100-s1-aNone`
+The value of test and training loss, as well as test reconstruction accuracy, after every epoch will get printed to standard output. If `plot_results` is true, a plot of the learning curve will be saved in `plots/independent/1250/COG28-l100-s1-a0.5` after training completes. If `save_model` is true, the model will get saved in `saved_models/independent/1250/COG28-l100-s1-a0.5`
 
 4. The next step is to generate embeddings of all the sequences from this model (including the ancestral ones). Again, the file `config.json` has the relevant configs (under the heading `generate`) that you can manually edit. Make sure that `model_name` is the name of the model you just trained. Then simply run 
 ```
 python embeddings/gen_embeddings.py config.json
 ```
-This will write the embeddings as a CSV file to the folder `embeddings/data/independent/1250/COG28-l100-s1-aNone`. It also plots `plots/independent/1250/COG28-l100-s1-aNone` the embeddings (or a reduced dimensional version of them with PCA) in 2d space.
+This will write the embeddings as a CSV file to the folder `embeddings/data/independent/1250/COG28-l100-s1-a0.5`. It also saves a plot of the embeddings (or a reduced dimensional version of them with PCA) in 2d space to `plots/independent/1250/COG28-l100-s1-a0.5`.
 
 5. Now that we have embedding of the leaf sequences, we want to use a Brownian motion model to infer embeddings at the internal nodes. Note that in the previous step, we generated embeddings for the ancestral sequences as well because we know them in this simulated setting, but in practice, we would only have embeddings of the leaf sequences and we'd have to use these to estimate the embeddings of internal nodes. In other words, we want to reconstruct "ancestral embeddings". For this purpose, we use the R package **Rphylopars**, which implements scalable multivariate phylogenetic comparative analysis and in particular allows us to fit multivariate phylogenetic Brownian motion. To obtain ancestral reconstruction of embeddings, run 
 
@@ -106,7 +109,6 @@ python embeddings/decode_recon_embeds.py embeddings/config_decode.json
 will do this and evaluate the reconstructed ancestral sequences against the true ancestral sequences, calculating the accuracy for each ancestral sequence and printing average Hamming accuracy over all ancestral sequences to standard output. It will do this also for a few other baseline methods of ancestral sequence reconstruction (including the extreme baseline of just predicting the consensus amino acid from the MSA at each position for each ancestor). It will also produce a plot with a LOESS smooth of the scatter plot of the ancestor's depth in the tree (distance to nearest leaf) versus the Hamming distance of the sequence reconstruction for each of the methods.
 
 
-*NB: `run_pipeline.sh` is a wrapper to run all of steps 3-6 below. Just set the specifications in `config.json` and run `run_pipeline.sh config.json` and it will do all four steps (training the VAE, generating embeddings, reconstructing ancestral embeddings, and decoding back to sequences and evaluating)*
 
 
 ## Real protein families
