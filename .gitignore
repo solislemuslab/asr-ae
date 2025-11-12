@@ -17,7 +17,7 @@ container
 
 #Other
 notebooks/analyze_model_potts.ipynb
-notebooks/potts_nophylo_checks.ipynb
+notebooks/potts_nophylo_check.ipynb
 reconstruct_anc_pf00565.ipynb
 train.ipynb
 
