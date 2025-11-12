@@ -24,6 +24,9 @@ train.ipynb
 #Figrues
 figures/*
 
+#Manuscript
+*.pdf
+
 # Misc
 **/*.tar.gz
 other_data_sources.md
