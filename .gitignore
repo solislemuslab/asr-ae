@@ -25,7 +25,8 @@ train.ipynb
 figures/*
 
 #Manuscript
-*.pdf
+bmb_submission/
+manuscript.pdf
 
 # Misc
 **/*.tar.gz

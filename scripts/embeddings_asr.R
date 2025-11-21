@@ -10,7 +10,7 @@ suppressPackageStartupMessages({
 #======= Edit the following code to run the script for the desired family/model ==========#
 manuscript_figure = FALSE
 if (manuscript_figure) { 
-    data_path = "msas/independent/processed/10000/pevae"
+    data_path = "msas/independent/processed/5000/COG2814-l100-s1-a0.5"
     model = "ding_layers500_ld2_wd0.001_epoch500_2025-07-17.pt"
 } else { # family/model will be specified by command line (see `run_pipeline.sh`)
     data_path <- commandArgs(trailingOnly = TRUE)[1]
@@ -41,7 +41,7 @@ if (!dir.exists(plot_dir)) dir_create(plot_dir, recurse = TRUE)
 
 ## Read in family tree #####
 if (sim) {
-    tree_dir <- path("trees", "fast_trees", n_seq)
+    tree_dir <- if (family == "pevae") path("trees", n_seq) else path("trees", "fast_trees", n_seq)
     tree_file <- paste0(family, ".clean.tree")
 } else if (msa_id == "PF00565_og") {
     tree_dir <- path("trees", "inferred_real_trees")
@@ -237,8 +237,8 @@ plot.network(net,
     vertex.col = vert_col,
     vertex.border = vert_bord,
     vertex.cex = vert_size,
-        edge.lwd = .3,
-    edge.col = scales::alpha("black", .2),
+    edge.lwd = .3,
+    edge.col = scales::alpha("black", 1),
     usearrows = FALSE,
     displaylabels = F,
     #label.cex = 1,
@@ -340,7 +340,7 @@ if (sim) {
     if (manuscript_figure) {
         ggsave(
             "internal_embedding_estimation.pdf", 
-            path=path("figures", msa_id, model),
+            path=plot_dir,
             width = 6,
             height = 6
             )
