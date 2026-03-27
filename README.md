@@ -43,10 +43,6 @@ and
 ```
 bash scripts/simulate_lg_msas.sh -a 0.5 -t trees/fast_trees/5000/COG2814.clean.tree 
 ``` 
-We simulated independent evolution on the 10,000-tip tree with no rate heterogeneity with:
-```
-bash scripts/simulate_lg_msas.sh -t trees/10000/pevae.clean.tree 
-```
 
 To evolve an MSA with epistasis or co-evolution requires an existing MSA to which to fit a generative model. For this purpose, we use a pre-processed MSA of Staphylococcal nuclease homologs, located at `msas/real/processed/PF00565/seq_msa_char.fasta`. 
 
