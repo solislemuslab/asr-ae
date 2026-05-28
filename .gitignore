@@ -31,3 +31,8 @@ manuscript.pdf
 # Misc
 **/*.tar.gz
 other_data_sources.md
+config.json
+
+# Claude local
+.claude/CLAUDE.local.md
+.claude/settings.local.json

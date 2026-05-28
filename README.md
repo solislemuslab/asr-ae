@@ -12,9 +12,9 @@ With conda installed, run
 ```
 conda env create -f environment.yml
 ```
-This will create a new conda environment called `torch`. Activate this environment with
+This will create a new conda environment called `asr-ae`. Activate this environment with
 ```
-conda activate torch
+conda activate asr-ae
 ```
 
 ### R
@@ -70,11 +70,11 @@ python scripts/process_msa.py msas/independent/raw/1250/COG28-l100-s1-a0.5.fa
 ```
 This command will generate a directory in `msas/independent/processed/1250` called `COG28-l100-s1-a0.5`. In this directory, you will find all the Python objects (as `.pkl` files) that represent the processed MSA for the purposes of the VAE, as well as a fasta file of the processed MSA. As opposed to the raw MSA generated in step 1, this processed MSA does not include the ancestral sequences.
 
+### Running the method and bechmarking
 
 *NB: `run_pipeline.sh` is a wrapper to run all of steps 3-6 below. Just set the specifications in `config.json` and run `run_pipeline.sh config.json` and it will do all four steps (training the VAE, generating embeddings, reconstructing ancestral embeddings, and decoding back to sequences and evaluating)*
 
-
-3. The next step is to train the VAE! Check out the file `config.json`. This file contains configuration details for the training. You can manually edit the details of this file. When you have specified all the configs you want, including the path to the folder with the saved data files that we just generated, `msas/independent/processed/1250/COG28-l100-s1-a0.5`,  simply run
+3. The next step is to train the VAE! First, copy `config.example.json` to `config.json` and edit it. This file contains configuration details for the training. When you have specified all the configs you want, including the path to the folder with the saved data files that we just generated, `msas/independent/processed/1250/COG28-l100-s1-a0.5`,  simply run
 ```
 python autoencoder/train.py config.json
 ```
@@ -94,7 +94,6 @@ Rscript embeddings/embeddings_asr.R msas/independent/processed/1250/COG28-l100-s
 
 The script will write a csv of ancestral embeddings into the same folder as the embeddings of the sequences at the tips from step 4, and it will also produce a plot that shows the phylogenetic tree ploted as a network with the coordinates of the nodes given by the (first two dimensions of the) embeddings (for tree tips, coordinates are directly from the VAE encoder and for the internal nodes, coordinates are the estimated "reconstructions" from the Brownian motion model). 
 
-
 If we simulated the evolution, which we did in this case, it will also produces a plot that shows arrows connecting the estimated ancestral embeddings to the true ancestral embeddings that we got in step 4.
 
 
@@ -103,6 +102,8 @@ If we simulated the evolution, which we did in this case, it will also produces 
 python embeddings/decode_recon_embeds.py embeddings/config_decode.json 
 ```
 will do this and evaluate the reconstructed ancestral sequences against the true ancestral sequences, calculating the accuracy for each ancestral sequence and printing average Hamming accuracy over all ancestral sequences to standard output. It will do this also for a few other baseline methods of ancestral sequence reconstruction (including the extreme baseline of just predicting the consensus amino acid from the MSA at each position for each ancestor). It will also produce a plot with a LOESS smooth of the scatter plot of the ancestor's depth in the tree (distance to nearest leaf) versus the Hamming distance of the sequence reconstruction for each of the methods.
+
+
 
 
 
