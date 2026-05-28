@@ -1,6 +1,8 @@
-For PFAM protein family PF00565 (Staphylococcal nuclease homologues), which was also analyzed by [Ding](https://www.nature.com/articles/s41467-019-13633-0), we downloaded the raw "full" MSA (v. 21) to `msas/real/raw/PF00565.stk`
+The PFAM protein family PF00565 (Staphylococcal nuclease homologues) saved as `raw/PF00565.stk`, is the raw "full" MSA  directly downloaded from PFAM (v. 21).
 
-For PFAM protein family PF00144 (beta-lactamase), which was analyzed by [Detlefsen](https://www.nature.com/articles/s41467-022-29443-w), we download `https://github.com/MachineLearningLifeScience/meaningful-protein-representations/blob/master/tape/PF00144_full.txt`, which we assume was obtained from the full alignment of the family from PFAM, to `msas/real/raw/PF00144.fasta`
+The PFAM protein family PF00144 (beta-lactamase) saved as `raw/PF00144.fa` is taken from `https://github.com/MachineLearningLifeScience/meaningful-protein-representations/blob/master/tape/PF00144_full.txt`.
+
+The PFAM protein family PF00072 saved as `raw/PF00072.fa` is the alignment saved as `aln/1jbeA.aln` in `http://bioinf.cs.ucl.ac.uk/downloads/PSICOV/suppdata/`, which was published with the [PSICOV paper](https://academic.oup.com/bioinformatics/article/28/2/184/198108)
 
 To generate the files in the directory `msas/real/processed/PF00565`, we run 
 ``` 
@@ -8,4 +10,9 @@ python scripts/process_msa.py msas/real/raw/PF00565.stk --real --query SND1_HUMA
 ```
 Note that specifically for this family (PF00565), the pre-processing script filters out any sequence that is not from a Eukaryote, i.e. any sequence that's not listed in `msas/real/PF00565_eukaryotes.tsv`
 
-To generate the files in the directory `msas/real/processed/PF00144_og`, we had to run a previous version of the pre-processing script with query sequence "A0A010Q9K6_9PEZI/15-292"
+To generate files in the directory `msas/real/processed/PF00072`, we run 
+``` 
+python scripts/process_msa.py msas/real/raw/PF00072.fa --real --query Seq190
+```
+
+To generate the files in the directory `msas/real/processed/PF00144_og`, we ran a previous version of the pre-processing script with query sequence "A0A010Q9K6_9PEZI/15-292"
