@@ -150,7 +150,6 @@ function parse_commandline()
 end
 
 args = parse_commandline()
-Threads.nthreads() = args["nthreads"]
 println("used threads: ", Threads.nthreads())
 
 if args["model"] == "bmDCA"
