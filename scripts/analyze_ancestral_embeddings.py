@@ -15,7 +15,7 @@ from utilities.utils import get_directory
 
 # Edit paths appropriately
 data_path = "msas/independent/processed/10000/pevae"
-tree_path = "trees/fast_trees/10000/pevae.clean.tree"
+tree_path = "trees/10000/pevae.clean.tree"
 model_name = "ding_layers500_ld2_wd0.001_epoch500_2025-07-17.pt"
 save = True
 
@@ -63,6 +63,10 @@ for leaf in spec_leaves:
 
 ## Plot 
 plt.figure(figsize=(6, 4))
+# Plot all embeddings in the background
+plt.plot(embed_data.loc[ancestors,"dim0"], embed_data.loc[ancestors,"dim1"], 'r.', alpha = 0.05, markersize = 2, label = 'ancestral')
+plt.plot(embed_data.loc[leaves,"dim0"], embed_data.loc[leaves,"dim1"], 'b.', alpha = 0.05, markersize = 2, label = 'leaf')
+
 # Plot special leaves and their ancestors
 for k in range(len(spec_leaves)):
     leaf_name = spec_leaves[k]
@@ -74,13 +78,9 @@ for k in range(len(spec_leaves)):
 
     plt.plot(data.loc[leaf_name,'mu1'], data.loc[leaf_name,'mu2'], '+r', markersize=20, markeredgewidth=2)
     #plt.text(data.loc[leaf_name, 'mu1'], data.loc[leaf_name, 'mu2'], leaf_name, color='red', fontsize=8, ha='center', va='center', fontweight='bold')
-    plt.scatter(data.loc[:,'mu1'], data.loc[:,'mu2'], c = data.loc[:, 'depth'], s=50, cmap=plt.get_cmap('viridis'))
+    plt.scatter(data.loc[:,'mu1'], data.loc[:,'mu2'], c = data.loc[:, 'depth'], s=100, cmap=plt.get_cmap('viridis'))
     plt.plot( data.loc[:, 'mu1'], data.loc[:, 'mu2'], color='gray', linestyle='-', linewidth=1.5)
     
-
-# Plot all other embeddings in the background
-plt.plot(embed_data.loc[ancestors,"dim0"], embed_data.loc[ancestors,"dim1"], 'r.', alpha = 0.1, markersize = 1, label = 'ancestral')
-plt.plot(embed_data.loc[leaves,"dim0"], embed_data.loc[leaves,"dim1"], 'b.', alpha = 0.1, markersize = 1, label = 'leaf')
 # Custom legend handles with higher alpha
 legend_elements = [
     Line2D([0], [0], marker='o', color='none', markerfacecolor='red', label='ancestral',

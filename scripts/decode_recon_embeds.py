@@ -1,8 +1,9 @@
 import sys
 import os
 import json
+import re
+import warnings
 import argparse
-from typing import List
 import numpy as np
 from numpy.typing import NDArray
 import matplotlib.pyplot as plt
@@ -83,7 +84,7 @@ def get_profile_leaves(data_path: str, n_anc: int, return_probs: bool=False) -> 
 
 
 def get_iqtree_ancseqs(iqtree_dir: str, aa_index: dict[str, int], 
-                       anc_id: List[str], return_probs: bool=False, index_aa=None) -> np.ndarray:
+                       anc_id: list[str], return_probs: bool=False, index_aa=None) -> np.ndarray:
     """
     Note that for some reason, IQTree does not reconstruct the sequence at the root node. Not sure why...
     
@@ -128,8 +129,8 @@ def get_iqtree_ancseqs(iqtree_dir: str, aa_index: dict[str, int],
         dists.append(dist)
     return np.array(dists)
 
-def get_finch_ancseqs(recon_fitch_dict: dict[str, List[str]], aa_index: dict[str, int], 
-                      anc_id: List[str]) -> NDArray[np.integer]:
+def get_finch_ancseqs(recon_fitch_dict: dict[str, list[str]], aa_index: dict[str, int], 
+                      anc_id: list[str]) -> NDArray[np.integer]:
     finch_seqs = []
     for id in anc_id:
         assert id in recon_fitch_dict, f"Reconstruction for Node {id} not found in Fitch output"
@@ -137,20 +138,32 @@ def get_finch_ancseqs(recon_fitch_dict: dict[str, List[str]], aa_index: dict[str
         finch_seqs.append(recon_seq)
     return np.array(finch_seqs)
 
-def get_ardca_ancseqs(ardca_dir: str, aa_index: dict[str, int], 
-                      anc_id: List[str]) -> NDArray[np.integer]:
+def get_ardca_ancseqs(ardca_dir: str, aa_index: dict[str, int],
+                      anc_id: list[str]) -> NDArray[np.integer]:
     fasta_path = os.path.join(ardca_dir, "reconstructed.fasta")
     recon_seqs_dict = {}
-    with open(fasta_path, 'r') as msa:
-        for record in SeqIO.parse(msa, "fasta"):
-            recon_seqs_dict[record.id] = str(record.seq)
-    # order true ancestral sequences according to the order of the reconstructed embeddings
-    recon_seqs = [recon_seqs_dict[id] for id in anc_id]
-    # convert to integers for comparison with reconstructed sequences
-    recon_seqs_int = [[aa_index[aa] for aa in seq] for seq in recon_seqs]
+    for record in SeqIO.parse(fasta_path, "fasta"):
+        recon_seqs_dict[record.id] = str(record.seq)
+    recon_seqs_int = [[aa_index[aa] for aa in recon_seqs_dict[id]] for id in anc_id]
     return np.array(recon_seqs_int)
 
-def np_to_str(seq_ary: NDArray[np.integer] , index_aa: dict[int, str] ) -> List[str]:
+def get_draupnir_ancseqs(draupnir_dir: str, aa_index: dict[str, int],
+                         anc_id: list[str]) -> NDArray[np.integer]:
+    fasta_path = os.path.join(draupnir_dir, "reconstructed.fasta")
+    recon_seqs_dict = {}
+    for record in SeqIO.parse(fasta_path, "fasta"):
+        match = re.search(r"I(\d+)", record.id)
+        if not match:
+            warnings.warn(f"{record.id} doesn't have expected format 'I<number>'")
+            continue
+        recon_seqs_dict["A" + match.group(1)] = str(record.seq)
+    missing = set(anc_id) - recon_seqs_dict.keys()
+    if missing:
+        raise ValueError(f"Ancestral IDs not found in Draupnir output: {missing}")
+    recon_seqs_int = [[aa_index[aa] for aa in recon_seqs_dict[id]] for id in anc_id]
+    return np.array(recon_seqs_int)
+
+def np_to_str(seq_ary: NDArray[np.integer] , index_aa: dict[int, str] ) -> list[str]:
     """
     Converts representation of reconstructed seqeunces from numpy array of integers to list of strings.
     """
@@ -174,7 +187,7 @@ def evaluate_seqs(est_seqs: NDArray[np.integer], real_seqs: NDArray[np.integer])
     print(f"total: {total}")
     print(f"Percentage correct: {np.round(100*correct/total, 2)}")
 
-def plot_error_vs_depth(est_seqs: NDArray[np.integer], real_seqs: NDArray[np.integer], depths: List[int]) -> List[float]:
+def plot_error_vs_depth(est_seqs: NDArray[np.integer], real_seqs: NDArray[np.integer], depths: list[int]) -> list[float]:
     """
     Plot the Hamming reconstruction error as a function of the depth in the tree.
 
@@ -211,7 +224,7 @@ def plot_error_vs_depth(est_seqs: NDArray[np.integer], real_seqs: NDArray[np.int
     return ham_errors
 
 def plot_all_errors(all_est_seqs_dict: NDArray[np.integer], real_seqs: NDArray[np.integer], 
-                    depths: List[int], output: str=None) -> None:
+                    depths: list[int], output: str=None) -> None:
     """
     Plot the errors for all the sequences in all_est_seqs_dict, saving the plot to output.
     """

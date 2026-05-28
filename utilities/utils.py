@@ -53,8 +53,9 @@ def get_real_internals(
     exclude_root: bool = True
 ) -> Tuple[NDArray[np.int_], List[str]]:
     """
-    Retrieves the internal sequences from the MSA file
-    Returns tuple of integer encoded MSA (numpy array) and list of ids 
+    Retrieve the internal sequences from the MSA file
+    
+    Returns tuple of integer-encoded MSA (numpy array) and list of ids 
     """
     format = "fasta"
     real_seqs_dict = {}

@@ -1,20 +1,60 @@
 #=
 simulate_potts_msas.jl
 
-This script simulates evolution by Markov sampling from a fitted Potts model (parameters saved at `msas/potts/pf00565_params_intindex.dat`)
-along each of the phylogenetic trees located at trees/fast_trees/*/*.clean.tree
+Simulates evolution by Markov sampling from a fitted Potts model along phylogenetic trees.
+Output MSAs are saved inside msas/potts/raw.
 
-The output MSAs are saved inside msas/potts/raw
 Usage:
-\$ julia --project=. scripts/simulate_potts_msas.jl
+\$ julia --project=. scripts/simulate_potts_msas.jl --family pf00565
+\$ julia --project=. scripts/simulate_potts_msas.jl --family pf00072 --scale 1.0 --tree trees/fast_trees/1250/some.clean.tree
 =#
 
+using ArgParse
 using Random
 using Glob
 using UnPack
 using TreeTools
 using PottsEvolver
 using BioSequenceMappings
+
+###### Argument parsing ######
+function parse_commandline()
+    s = ArgParseSettings()
+    @add_arg_table s begin
+        "--family", "-f"
+            arg_type = String
+            required = true
+            help = "Identifier (e.g. pf00565, pf00072) of protein family to which Potts model was fit. Parameters must exist at msas/potts/<family>_params_intindex.dat"
+        "--scale", "-s"
+            arg_type = Float64
+            default = nothing
+            help = "Branch length scaling factor. If not specified, simulates at both 1.0 and 2.0."
+        "--tree", "-t"
+            arg_type = String
+            default = nothing
+            help = "Specific tree file to simulate on. If not specified, uses all trees in trees/fast_trees."
+    end
+    return parse_args(s)
+end
+
+args = parse_commandline()
+
+family = args["family"]
+params_file = "msas/potts/$(family)_params_intindex.dat"
+if !isfile(params_file)
+    error("Parameters file not found: $params_file")
+end
+
+scales = isnothing(args["scale"]) ? [1.0, 2.0] : [args["scale"]]
+
+if !isnothing(args["tree"])
+    if !isfile(args["tree"])
+        error("Specified tree file does not exist: $(args["tree"])")
+    end
+    tree_files = [args["tree"]]
+else
+    tree_files = glob("*/*.clean.tree", "trees/fast_trees")
+end
 
 ###### Function definitions ######
 """
@@ -28,16 +68,12 @@ function label_nodes!(tree)
     end
 end
 
+family_upper = uppercase(family)
 
 ############### Main script ########################
-# Factor by which we scale the branch lengths of the trees
-scale=[1., 2.]
-# Get the potts model object
-potts = read_graph("msas/potts/pf00565_params_intindex.dat")
-# Get tree files that we will simulate MSAs along
-tree_files = glob("*/*.clean.tree", "trees/fast_trees")
-# Iterate over trees
-for s in scale
+potts = read_graph(params_file)
+
+for s in scales
     for tree_file in tree_files
         num_seq = parse(Int, splitpath(tree_file)[3])
         msa_id = split(basename(tree_file), ".")[1]
@@ -64,6 +100,6 @@ for s in scale
         # Write the MSA to file
         output_dir = "msas/potts/raw/$num_seq"
         mkpath(output_dir)
-        write(joinpath(output_dir, "$msa_id-s$s-pottsPF00565.fa"), all_sequences) #Method from BioSequencesMappings package
+        write(joinpath(output_dir, "$msa_id-s$s-potts$family_upper.fa"), all_sequences)
     end
 end

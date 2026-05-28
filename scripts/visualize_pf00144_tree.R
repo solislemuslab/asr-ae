@@ -4,7 +4,7 @@ library(phytools)
 library(stringr)
 
 data_path = "msas/real/processed/PF00144"
-labeled_seq_file = "msas/real/raw/PF00144_full_length_sequences_labeled.fasta"
+labeled_seq_file = "msas/real/raw/PF00144_full_length_sequences_labeled.fa"
 model = "ding_layers1000_ld2_wd0.0_epoch500_2025-08-12.pt"
 
 # name and path wrangling

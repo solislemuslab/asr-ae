@@ -9,6 +9,7 @@ suppressPackageStartupMessages({
 
 #======= Edit the following code to run the script for the desired family/model ==========#
 manuscript_figure = FALSE
+print_embedding_info = TRUE
 if (manuscript_figure) { 
     data_path = "msas/independent/processed/5000/COG2814-l100-s1-a0.5"
     model = "ding_layers500_ld2_wd0.001_epoch500_2025-07-17.pt"
@@ -135,6 +136,42 @@ if (msa_id == "PF00565_og") {
     )
 }
 
+## Compute distances between true and reconstructed ancestral embeddings (full dimension)
+if (sim && print_embedding_info) {
+    dim_cols <- str_subset(colnames(recon_anc_embeds), "^dim")
+    true_cols <- paste0(dim_cols, "_true")
+    recon_cols <- paste0(dim_cols, "_recon")
+
+    anc_distances <- embeds |>
+        filter(vert_type == "internal") |>
+        select(id, all_of(dim_cols)) |>
+        inner_join(
+            recon_anc_embeds |> select(id, all_of(dim_cols)),
+            by = "id",
+            suffix = c("_true", "_recon")
+        ) |>
+        mutate(
+            euclidean_dist = sqrt(rowSums((pick(all_of(true_cols)) - pick(all_of(recon_cols)))^2)),
+            norm_true = sqrt(rowSums(pick(all_of(true_cols))^2)),
+            relative_euclidean_dist = euclidean_dist / norm_true,
+            cosine_sim = rowSums(pick(all_of(true_cols)) * pick(all_of(recon_cols))) /
+                (norm_true * sqrt(rowSums(pick(all_of(recon_cols))^2))),
+            error_dot_true = rowSums(
+                (pick(all_of(true_cols)) - pick(all_of(recon_cols))) * pick(all_of(true_cols))
+            ),
+            cos_error_true = error_dot_true / (euclidean_dist * norm_true)
+        ) |>
+        select(id, euclidean_dist, norm_true, relative_euclidean_dist, cosine_sim, error_dot_true, cos_error_true)
+    far_from_origin <- anc_distances |> filter(norm_true > quantile(norm_true, 0.8))
+    cat("Mean Euclidean distance (true vs BM-reconstructed):", mean(anc_distances$euclidean_dist), "\n")
+    cat("Mean relative Euclidean distance (true vs BM-reconstructed):", mean(anc_distances$relative_euclidean_dist), "\n")
+    cat("Mean relative Euclidean distance (true vs BM-reconstructed) (||z|| >> ):", mean(far_from_origin$relative_euclidean_dist, na.rm = TRUE),
+        sprintf("(n = %d)\n", nrow(far_from_origin)))
+    #cat("Mean cosine similarity (true vs BM-reconstructed):", mean(anc_distances$cosine_sim), "\n")
+    cat("Mean cos(angle) between error and true embedding (all):", mean(anc_distances$cos_error_true, na.rm = TRUE), "\n")    
+    cat("Mean cos(angle) between error and true embedding (||z|| >> ):", mean(far_from_origin$cos_error_true, na.rm = TRUE),
+        sprintf("(n = %d)\n", nrow(far_from_origin)))
+}
 
 # If we have already read in existing ancestral embeddings, then we likely also have their ASR Hamming errors recorded
 errors_recorded = ("ham_errors" %in% colnames(recon_anc_embeds))
@@ -208,7 +245,7 @@ if (errors_recorded) {
 
 vert_size <- c(
     rep(0.3, ntips), #0.6
-    rep(0.3, nancs) #0.6
+    rep(0.5, nancs) #0.6
 )
 
 # highlight some ancestors and leaves
@@ -265,32 +302,21 @@ plot.network(net,
 # add the legend
 if (errors_recorded) {
     legend("bottomleft",
-        pch = 16,
-        #cex = 1.65, 
-        cex = 1.25,
-        title.cex = 1.25,
+        pch = 20,
+        cex = 2,
+        title.cex = 1.65,
         bty = "n",
         col = color_palette(colorbar_labels),
         legend = colorbar_labels,
-        title = "ASR error\n(Hamming)",
-        inset = c(0.06, 0.06),
+        title = "ASR error",
+        inset = c(0.03, 0.03),
         ncol = 2
-    )
-    legend("bottomleft",
-        pch = 1,
-        cex = 1.25, 
-        #cex = .75,
-        bty = "n",
-        col = "black",
-        legend = "Tip",
-        inset = c(0.08, 0.03)
     )
 } else {
     legend("bottomleft",
-        pch = 16,
-        cex = 1., 
-        #cex = .75,
-        title.cex = 1.,
+        pch = 20,
+        cex = 2,
+        title.cex = 1.65,
         border = "black",
         bty = "n",
         col = unique(vert_col),
@@ -323,7 +349,7 @@ if (sim) {
             #linewidth = 1
             ) +
         #{if (errors_recorded) scale_color_viridis_c()} +
-        theme_minimal(base_size = 16) +
+        theme_minimal(base_size = 22) +
         labs(
             #title = paste0("Embeddings of ancestral sequences for ", msa_id, ",\n", model),
             #subtitle = "Arrow starts at estimated embeddings based on Brownian motion model\nand ends at the embedding of the actual sequence",

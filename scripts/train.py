@@ -100,15 +100,15 @@ def main():
     plot_results = training_config["plot_results"]  
     
     # create model path
-    today = date.today()
+    model_str = "ding" if ding else "model"
+    trans_str = "-trans" if use_transformer else ""
+    weight_str = "-weighted" if weigh_seqs else ""
+    aa_embed_str = f"-aaembed{dim_aa_embed}" if not one_hot else ""
+    beta_str = f"-beta{beta}" if beta != 1 else ""
     layers_str = "-".join([str(l) for l in num_hidden_units])
-    weight_str = "weighted_" if weigh_seqs else ""
-    aa_embed_str = f"aaembed{dim_aa_embed}_" if not one_hot else ""
-    trans_str = "trans-" if use_transformer else ""
-    ding_str = "ding" if ding else "model"
-    beta_str = f"beta{beta}" if beta != 1 else ""
+    today = date.today()
     model_configs=(
-        f"{trans_str}{ding_str}{weight_str}{aa_embed_str}{beta_str}_"
+        f"{model_str}{trans_str}{weight_str}{aa_embed_str}{beta_str}_"
         f"layers{layers_str}_ld{latent_dim}_wd{wd}_epoch{num_epochs}"
     )
     model_name = f"{model_configs}_{today}.pt"
