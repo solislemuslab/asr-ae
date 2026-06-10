@@ -1,4 +1,4 @@
-To train a Potts modes, we used the Julia implementation of adabmDCA 2.0, i.e. the Julia package [`adabmDCA.jl`](https://github.com/evangorstein/adabmDCA.jl), which is contained in our Julia environment. The wrapper scripts to run the functionality from the package have also been downloaded in `scripts/adabmDCA` (and slightly edited).
+To train a Potts model, we used the Julia implementation of adabmDCA 2.0, i.e. the Julia package [`adabmDCA.jl`](https://github.com/evangorstein/adabmDCA.jl), which is contained in our Julia environment. The wrapper scripts to run the functionality from the package have also been downloaded in `scripts/adabmDCA` (and slightly edited).
 
 We fit a DCA model to the pre-processed MSA of PF00565 with
 ```
