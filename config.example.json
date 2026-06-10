@@ -3,6 +3,7 @@
     "msa_path": "msas/potts/raw/5000/COG438-s1.0-pottsPF00565.fa",
     "tree_path": "trees/fast_trees/5000/COG438.clean.tree",
     "training": {
+        "use_all_data": false,
         "rerun": false,
         "weigh_seqs": false,
         "use_transformer": false,
