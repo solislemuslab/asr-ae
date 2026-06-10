@@ -93,6 +93,7 @@ def main():
     wd = training_config["weight_decay"]
     latent_dim = training_config["latent_dim"]
     beta = training_config["beta"]
+    use_all_data = training_config.get("use_all_data", False)
     validate = training_config["validate"]
     iwae_num_samples = training_config["iwae_num_samples"]
     verbose = training_config["verbose"]
@@ -104,11 +105,12 @@ def main():
     trans_str = "-trans" if use_transformer else ""
     weight_str = "-weighted" if weigh_seqs else ""
     aa_embed_str = f"-aaembed{dim_aa_embed}" if not one_hot else ""
+    alldata_str = "-alldata" if use_all_data else ""
     beta_str = f"-beta{beta}" if beta != 1 else ""
     layers_str = "-".join([str(l) for l in num_hidden_units])
     today = date.today()
     model_configs=(
-        f"{model_str}{trans_str}{weight_str}{aa_embed_str}{beta_str}_"
+        f"{model_str}{trans_str}{weight_str}{aa_embed_str}{alldata_str}{beta_str}_"
         f"layers{layers_str}_ld{latent_dim}_wd{wd}_epoch{num_epochs}"
     )
     model_name = f"{model_configs}_{today}.pt"
@@ -153,13 +155,20 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
 
     # initialize the data loader
-    train_idx, valid_idx = train_test_split(range(len(data)), test_size=0.1, random_state=42)
-    train_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(train_idx))
-    valid_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(valid_idx))
-    with open(f"{model_dir}/valid_idx.pkl", 'wb') as file_handle:
-        pickle.dump(valid_idx, file_handle)
+    if use_all_data:
+        train_loader = DataLoader(data, batch_size=batch_size, shuffle=True)
+        valid_loader = None
+    else:
+        # Fixed seed so all models for a given family share the same split (single valid_idx.pkl)
+        train_idx, valid_idx = train_test_split(range(len(data)), test_size=0.1, random_state=42)
+        train_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(train_idx))
+        valid_loader = DataLoader(data, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(valid_idx))
+        with open(f"{model_dir}/valid_idx.pkl", 'wb') as file_handle:
+            pickle.dump(valid_idx, file_handle)
 
     # training the model
+    if use_all_data:
+        validate = False
     # TODO: Implement early stopping based on either val_accs or val_log_pxgzs
     train_elbos, val_elbos, val_log_pxgzs, val_iwae_elbos, val_accs = [], [], [], [], []
     for epoch in range(num_epochs):

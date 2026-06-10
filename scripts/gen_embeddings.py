@@ -118,12 +118,15 @@ def main():
         mu_leaves, _ = model.encoder(leaf_onehot)
         mu_internal, _ = model.encoder(internal_onehot)
     mu_leaves, mu_internal = mu_leaves.cpu(), mu_internal.cpu()
-    # get indices of validation set
-    with open(f"{model_dir}/valid_idx.pkl", 'rb') as file_handle:
-        valid_idx = pickle.load(file_handle)
+    # get indices of validation set (only relevant if model was trained with held-out data)
+    valid_idx = None
+    if "-alldata" not in model_name:
+        valid_idx_path = f"{model_dir}/valid_idx.pkl"
+        with open(valid_idx_path, 'rb') as file_handle:
+            valid_idx = pickle.load(file_handle)
     # plot embeddings
     if plot:
-        plot_embeddings(mu_leaves, mu_internal, data_path, model_name, 
+        plot_embeddings(mu_leaves, mu_internal, data_path, model_name,
                         valid_idx)
     # save embeddings
     all_ids = leaf_ids + internal_ids

@@ -9,10 +9,10 @@ suppressPackageStartupMessages({
 
 #======= Edit the following code to run the script for the desired family/model ==========#
 manuscript_figure = FALSE
-print_embedding_info = TRUE
+print_embedding_info = FALSE
 if (manuscript_figure) { 
-    data_path = "msas/independent/processed/5000/COG2814-l100-s1-a0.5"
-    model = "ding_layers500_ld2_wd0.001_epoch500_2025-07-17.pt"
+    data_path = "msas/independent/processed/10000/pevae"
+    model = "ding-alldata_layers500_ld20_wd0.005_epoch500_2026-06-08.pt"
 } else { # family/model will be specified by command line (see `run_pipeline.sh`)
     data_path <- commandArgs(trailingOnly = TRUE)[1]
     model <- commandArgs(trailingOnly = TRUE)[2]
@@ -309,7 +309,7 @@ if (errors_recorded) {
         col = color_palette(colorbar_labels),
         legend = colorbar_labels,
         title = "ASR error",
-        inset = c(0.03, 0.03),
+        inset = c(0.0, .7),
         ncol = 2
     )
 } else {

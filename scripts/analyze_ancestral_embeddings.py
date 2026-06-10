@@ -14,9 +14,9 @@ from utilities.utils import get_directory
 
 
 # Edit paths appropriately
-data_path = "msas/independent/processed/10000/pevae"
-tree_path = "trees/10000/pevae.clean.tree"
-model_name = "ding_layers500_ld2_wd0.001_epoch500_2025-07-17.pt"
+data_path = "msas/independent/processed/1250/COG28-l100-s1-a0.5"
+tree_path = "trees/fast_trees/1250/COG28.clean.tree"
+model_name = "ding-alldata_layers500_ld2_wd0.005_epoch500_2026-06-08.pt"
 save = True
 
 # read embeddings
